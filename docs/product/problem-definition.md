@@ -1,0 +1,86 @@
+# Problem Definition: CapSense
+
+| Owner | Status | Date | ADO | Inputs |
+|---|---|---|---|---|
+| `product-owner` | **Signed off 2026-10-21 (G2)** | 2026-10-21 | PBI #16 (AC-1…AC-6); Build PBIs B1–B11 under Epic #29 (provisional, A-08) | `brief/brief.md`, `brief/api-spec.md`, `research/02-discovery-summary.md` (F-xx, BM-xx, GAP-xx; signed off G1), `delivery/raid-log.md` |
+
+## 1. Problem (AC-1)
+
+| ID | Problem | Evidence |
+|---|---|---|
+| P-01 | Spending insight is hard to find and slow to reach: no chart on landing, tracker not discovered, 4 steps to one category | F-06 [V]; F-07 [I]; F-09 [V / I] |
+| P-02 | Category drill-down sticks on the first category; transaction list loses the user's place on refresh/return | F-02 [V]; F-03 [V] |
+| P-03 | Insight is backward-only; overspend is found at month end | F-10 [I]; BM-06 [R]; BM-08 [V] |
+| P-04 | No dark or system theme (most-requested: 12 reviews) | F-05 [V] |
+| P-05 | Trust erodes when features are unreliable or vanish; users value speed and "No AI" | F-08 [I]; F-12 [V / I] |
+| P-06 | Recategorisation and merchant view/export are wanted but the API is read-only with no merchant filter | F-01 [V]; F-04 [V]; GAP-01 [V]; GAP-02 [V] |
+
+## 2. Users and contexts (AC-2)
+
+| ID | User | Context | Evidence |
+|---|---|---|---|
+| U-01 | Capitec retail customer, quick check | Phone, one hand, between tasks | A-05 |
+| U-02 | Same customer, deeper review | Larger screen; period comparison, filter and sort before month end; no search or merchant lookup (NG-02; I-10 closed) | Brief "responsive" [Verified]; A-05 |
+| U-03 | Capitec assessor (submission reviewer) | Clones repo, builds via Docker, reads README, judges front-end quality | Brief MR-01–MR-05, evaluation note [Verified] |
+
+## 3. Goals (AC-3)
+
+| ID | Goal | Solves | Build PBIs (A-08) |
+|---|---|---|---|
+| G-01 | Summary, period comparison, categories, trend and goals on the landing view, no navigation required (Muzi 2026-10-22; still 0 interactions, SM-04) | P-01 | B4–B7, B9 |
+| G-02 | One interaction category → transactions; selection, filters, sort and page survive Back and refresh (via URL); scroll restored on Back, not after hard refresh | P-01, P-02 | B3, B6, B8 |
+| G-03 | Goals show pacing: projected month-end vs budget per A-06; status from API `status` (unlisted values per A-09) | P-03 | B3, B9 |
+| G-04 | Capitec-branded UI following system light/dark; accessible colours; loading, error, empty and populated states; keyboard and screen-reader usable | P-04, P-05, I-06, MR-01 | B4, B6, B10 |
+| G-05 | All 7 endpoints mocked exactly to spec, with internally consistent data | MR-01, I-05, I-09 | B1–B3 |
+| G-06 | Fast, deterministic, no AI; PII kept out of URLs, logs and storage | P-05, R-02 | B11 |
+| G-07 | Clean-clone build, run and test via Dockerfile and README | MR-02, MR-03 | B1 |
+
+## 4. Non-goals (primary scope)
+
+| ID | Excluded | Reason |
+|---|---|---|
+| NG-01 | Saving recategorisation, "Needs review" queue, category rules | No write endpoint (I-02); post-primary labelled extension only |
+| NG-02 | Merchant filter/view, text search, export | No `merchant` or search param (GAP-02 [V]; I-03); I-10 closed: `merchant` param is a labelled API extension candidate, post-primary (I-02) |
+| NG-03 | "Left to spend", balance, income, money-in / net view | No income/balance/debit data (I-04) |
+| NG-04 | Creating/editing goals or budgets; push or external notifications (in-app goal status stays, G-03) | No `POST`/`PUT` on `/goals` (I-02); no push channel |
+| NG-05 | Weekly/daily trend charts; native app; API spec changes | Monthly trends only (GAP-04 [V]); spec fixed (api-spec.md); brief asks for responsive web [Verified] |
+| NG-06 | Login, auth, multi-customer switching, real backend | Not in spec; front-end role (MR-05); IDOR is a server concern (R-02) |
+| NG-07 | AI/LLM insights, chatbot, sending customer data to any model | P-05 "No AI" |
+| NG-08 | Won't (Muzi 2026-10-22): search, notifications, chat/contact, logout, link to Capitec's real help page, keyboard shortcuts | Owner decision (Muzi 2026-10-22); related: search NG-02, push NG-04, no auth so no logout NG-06, real Capitec link implies endorsement (`brand-sources.md` T-02) |
+
+## 5. Constraints (AC-4)
+
+| ID | Constraint | Source |
+|---|---|---|
+| C-01 | API read-only (7 `GET`), used exactly as specified; extensions labelled, only after primary scope | api-spec.md; I-02 |
+| C-02 | Work complete by 2026-10-28; 2026-10-29 buffer only | sprint-plan.md; A-01 |
+| C-03 | Capitec branding, targeted improvements only; assets unofficial; colour never the only cue | `design/brand-sources.md` B-01, B-02 [Reported, draft]; D-01; GAP-11 [V]; I-06 |
+| C-04 | MR-01 production-grade · MR-02 Dockerfile · MR-03 README (build, run, test) · MR-04 GitHub link · MR-05 front-end | brief.md |
+| C-05 | Mock data must not repeat spec sample inconsistencies | brief.md; I-05, I-09 |
+| C-06 | Display conventions (ZAR, % units, timezone, `1y`, enums, icons) unconfirmed | A-09 |
+
+## 6. Success measures (AC-5)
+
+| ID | Goal | Threshold | Verification (on submitted repo) |
+|---|---|---|---|
+| SM-01 | G-07 | Build, run and test succeed on attempt 1 from README only, 0 extra steps; test command exits 0, 100% pass | Fresh clone, Docker only; follow README; app loads; run test command |
+| SM-02 | G-05 | 7/7 endpoints; 100% spec fields with spec types; all params honoured (`period` ×4, `months` ≤ 24 (min 1 [Inference]; spec: default 12, max 24), `limit` ≤ 100, `sortBy` ×4, `category`, dates) | Exercise each endpoint contract via the app's data layer (method per I-07, G3); diff against api-spec.md |
+| SM-03 | G-05 | 0 mismatches: category % sum = 100 ± 0.1; summary total = categories total; Σ category `transactionCount` = summary `transactionCount` (spec 53 vs 47, I-09); cross-endpoint totals agree for same range | Compare responses for each `period` |
+| SM-04 | G-01 | 5/5 insight blocks on landing; 0 interactions to first insight; 0 horizontal scroll at 320–1920 px (A-07) | Open app; resize across widths |
+| SM-05 | G-02 | ≤ 1 interaction category → filtered list; drill-down adds exactly 1 history entry, filter/sort/page changes, in-app Refresh (FR-39) and rail section links (FR-41) add 0 (Muzi 2026-10-22); Back restores selection, filters, sort, page and same first visible row (F-03); refresh restores filters, sort, page from URL at scroll top, 0 extra stored state; 10/10 runs | Per run: open landing; select category (count interactions, history +1); change filter, sort, page 2, press Refresh, use a rail link (history +0); scroll; open detail, Back (state + row kept); refresh (URL state kept, top); check storage empty ×10 |
+| SM-06 | G-03 | 100% of goals show projection per A-06 and status = API `status` (`on_track`, `warning`; unlisted values open, A-09) | Recompute from `/goals` response; compare UI |
+| SM-07 | G-04 | Follows OS theme 2/2 modes; text ≥ 4.5:1, graphics ≥ 3:1 in both | Toggle OS theme; contrast check |
+| SM-08 | G-04 | 0 critical/serious automated a11y violations per view; 100% controls keyboard-operable; 4/4 states correct for 100% of data views | Automated scan; keyboard-only walkthrough; trigger each state (mechanism per I-07, G3) |
+| SM-09 | G-06 | 0 requests to non-app origins; 0 PII (name, email) in URLs, console or browser storage | Network, console and storage inspection during walkthrough |
+| SM-10 | G-06 | Landing largest content ≤ 2.5 s on throttled mobile profile (A-07) | Lab audit, 3 runs, median; device/network/CPU profile not yet defined: open item A-07, set in `nfr.md` at G3 |
+| SM-11 | C-01, C-02 | 0 unlabelled non-spec endpoints/fields; final commit ≤ 2026-10-28 | Diff mock routes vs spec; `git log` |
+
+## 7. Open decisions
+
+| ID | Decision | Owner | Ref |
+|---|---|---|---|
+| OD-01 | Merchant filter: decided 2026-10-21, non-goal for primary scope (NG-02); `merchant` param = labelled extension candidate | Muzi | I-10 closed |
+
+Post-G2 errata 2026-10-21: N3, N10–N13, SM-05 (history decision), G-02
+
+Post-G2 errata 2026-10-22 (Muzi 2026-10-22): G-01 wording; SM-05 Refresh and rail links +0 history; NG-08 Won't list

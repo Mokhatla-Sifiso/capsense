@@ -1,0 +1,176 @@
+# Design Tokens: CapSense
+
+| Owner · Date · ADO | Status | Inputs | Keys |
+|---|---|---|---|
+| `functional-analyst` · 2026-10-21 · PBI #25 (AC-2, AC-3, AC-4) | **Rev 5, 2026-10-23** (G5 re-run row 19 / B11): §1–§6 re-baselined to the master design `Main.dc.html` (`t` object l.320–332 = every L/D colour; style strings l.365–603 = type, radii, sizes, spacing). Tag **Muzi 2026-10-23** = final visual design, relayed by coordinator 2026-10-23; Muzi confirms at G5 sign-off. Rev 4 2026-10-23 (canvas v28) · Rev 3 2026-10-22 ("approve all") · Rev 2 2026-10-21 (D-01, I-06). **Reference table** (exempt from 1-page limit, Muzi 2026-10-21) | Master `Main.dc.html` (canvas); `design/capitec-design-language.md`; `design/assets/capitec-logo.svg`; `brief/api-spec.md` §3, §5, §7; NFR-A2, NFR-S1; ADR-004, ADR-007; FR-01, FR-03, FR-06, FR-07, FR-21, FR-23, FR-27, FR-30; `quality/gate-checks/G5.md` (re-run 2026-10-23) | CSS variables per theme (ADR-007) · all §1–§4 values **Muzi 2026-10-23** (master) unless marked · **Kept** = earlier value, not in master · **PROPOSED** = FA default until Muzi confirms · **Open** = see `screen-spec.md` §5 DS-19 · L = light, D = dark · **Ratios** = WCAG 2.x, **python script 2026-10-23** (values supplied by coordinator; Reported) · **QA hand** = G5 re-run hand calc, ±0.02 · **Not scripted** = not in the 2026-10-23 script set, QA to run before G6 |
+
+## 1. Colour tokens (AC-2, AC-4)
+
+| Token | Master key | Light | Dark | Usage | Contrast L | Contrast D | Threshold |
+|---|---|---|---|---|---|---|---|
+| `--frame` | `frame` | `#FFFFFF` | `#0F1216` | Frame behind rail + top bar (L/XL); rail; top bar at S/M | = `--card`: text 11.37 · muted 5.74 | Text 16.77 · muted 8.59 | Text 4.5 |
+| `--window` | `window` | `#F4F6FA` | `#12161C` | Content window (L/XL, radius 32); page background at S/M | Text 10.51 · muted 5.31 · primary 5.70 · ring 4.14 | Text 16.21 · muted 8.30 · bar 3.83 | Text 4.5 |
+| `--card` | `card` | `#FFFFFF` | `#1A1F27` | Cards, dialogs, period segment group, "Custom range" button (default), error panel, greeting tooltip, goal ring hole, S theme row | Text 11.37 · muted 5.74 | Text 14.78 · muted 7.57 | Text 4.5 |
+| `--row` | `rowBg` | `#F7F7F7` | `#222833` | Category rows (C-06), share-ring hole, trend detail strip (C-07) | Text 10.62 · muted 5.36 · success-text 6.66 | Text 13.22 · muted 6.77 | Text 4.5 |
+| `--soft` | `soft` | `#EEF2F9` | `#252B35` | Square icon buttons (Refresh, Help, dialog close), L/XL "Refresh" button, theme control track, rail link glyph tile, About-dialog glyph tile, category total tag, static "Dates:" chip | `--heading` on soft 9.44 | `--heading` on soft 7.27 | Text 4.5 |
+| `--foreground` | `text` | `#3A3A3A` | `#F2F2F2` | Body text, **h1, h2, h3**, greeting, values, amounts, wordmark "Cap", rail links, square-button icons, unselected presets | Card 11.37 · window 10.51 · row 10.62 | Card 14.78 | Text 4.5 |
+| `--muted-foreground` | `muted` | `#666666` | `#A9B0BA` | Captions, meta, date line, table headers, gridline values, unselected month ticks, greeting tooltip text, unselected theme icons, rail label, disabled button text, goal "used" | Card 5.74 · window 5.31 · row 5.36 | Card 7.57 · window 8.30 · row 6.77 | Text 4.5 |
+| `--heading` | `heading` | `#0033A0` | `#9DB8FF` | Accent only: wordmark "Sense", rail link glyphs, About-dialog glyphs, category total tag text. **Not used for h1–h3** | On soft 9.44 · on card 10.60 | On soft 7.27 | Text 4.5 |
+| `--border` | `line` | `#EDEDED` | `#2A303A` | Dividers, table row lines, dashed gridlines, M lockup divider, goal divider, greeting tooltip border, disabled button border, top-bar bottom edge (S/M); **D only:** 1 px edge on cards, period group, theme row | Exempt (decorative) | Exempt | Exempt |
+| `--primary` | `primary` | `#2259D0` | `#7EA6F7` | Primary button fill (Apply, Next), outline-button border + text (Retry, Previous, Dates, Cancel), link buttons ("Clear filters", "Retry", "Show data table"), "Custom range" text and active fill, **selected theme option fill**, selected category row outline, goal ring (on track, unlisted) | Card 6.16 · window 5.70 | Card 6.84 | Text 4.5 · UI 3 |
+| `--primary-foreground` | `primaryFg` | `#FFFFFF` | `#0B1220` | Text and icons on `--primary` (incl. selected theme icon); D selected preset text | 6.16 | 7.74 | Text 4.5 |
+| `--ring` | `ring` | `#2F70EF` | `#7EA6F7` | Focus outline (§4 `--focus`). **Never white text on `#2F70EF`** | Card 4.48 · window 4.14 | Card 6.84 | UI 3 (SC 1.4.11, 2.4.7) |
+| `--input` | `input` | `#767676` | `#7D8794` | Boundary of selects, date fields, remove-filter chip | Card 4.54 | Card 4.54 | UI 3 |
+| `--track` | `track` | `#E6E9F0` | `#2C323C` | Goal ring and share ring track | Fill vs track: primary 5.07 · warning-ring 4.13 · category 3.42–3.47 (script 2026-10-23, N48) | Primary 5.33 · warning-ring 7.72 · category 3.06–3.10 (script 2026-10-23, N48 closed) | UI 3 |
+| `--spend` | `hero` | `#0033A0` | `#1E3F96` | Spent hero fill (C-05); "About this demo" rail card (C-12); glyph colour inside white hero tile and arrow dot | n/a | n/a | n/a |
+| `--spend-fg` | `heroFg` | `#FFFFFF` | `#FFFFFF` | Text on `--spend`; fill of arrow dot and hero glyph tile | 10.60 | 9.52 | Text 4.5 |
+| `--spend-muted` | `heroMuted` | `#C9D6F2` | `#C9D6F2` | Hero label "Spent · …", stat labels, stat change lines | 7.26 | 6.52 | Text 4.5 |
+| `--spend-subtle` | style l.33 | `#D6E0F5` | `#D6E0F5` | About card body text | 8.00 | 7.18 | Text 4.5 |
+| `--spend-line` | `heroLine` | `#2B52B3` | `#3A5BB0` | Stats-row dividers inside the hero | Exempt (decorative) | Exempt | Exempt |
+| `--spend-blob-1` · `--spend-blob-2` | `blob1` · `blob2` | `#0A3DAA` · `#1448B5` | `#2449A3` · `#2A52B0` | Decorative hero circles, `aria-hidden` (§4 sizes) | Exempt | Exempt | Exempt |
+| `--on-spend-button-bg` · `-fg` | style l.463 | `#FFFFFF` · `#0033A0` | `#FFFFFF` · `#0033A0` | "Learn more" button on About card | Text 10.60 · button vs `--spend` 10.60 | Text 10.60 · button vs `--spend` 9.52 | Text 4.5 · UI 3 |
+| `--bar` | `barSoft` | `#6E8FE0` | `#5C73A3` | Unselected trend capsules (C-07) | Card 3.15 | Card 3.50 · window 3.83 | UI 3 |
+| `--bar-selected` | `barOn` | `#0033A0` | `#7EA6F7` | Selected capsule; selected month pill fill | Card 10.60 | Card 6.84 | UI 3 |
+| `--bar-selected-fg` | style l.399 | `#FFFFFF` | `#0B1220` | Selected month pill text | 10.60 | 7.74 | Text 4.5 |
+| `--tooltip-bg` · `--tooltip-fg` | `tipBg` · `tipFg` | `#0033A0` · `#FFFFFF` | `#F2F2F2` · `#0B1220` | **Trend value bubble only** (C-07). Greeting tooltip uses `--card` / `--border` / `--muted-foreground` (§6) | 10.60 | 16.72 | Text 4.5 |
+| `--selected` | `sel` | `#E8EFFD` | `#243049` | Selected category row fill, with 2 px `--primary` outline (C-06) | Text 9.86 · outline vs `--row` 5.75 · vs card 6.16 · muted 4.97 (QA hand) | Text 11.77 · outline vs `--row` 6.12 · muted 6.02 (QA hand) | Text 4.5 · UI 3 |
+| `--skeleton` | `skel` | `#E9EDF3` | `#252B35` | Loading placeholders incl. name skeleton | Exempt | Exempt | Exempt |
+| `--success-text` | `succ` | `#166534` | `#4ADE80` | "On track" words **and** `CheckCircle` glyph (one colour) | Row 6.66 | 9.50 | Text 4.5 |
+| `--warning-text` | `warn` | `#92400E` | `#FBBF24` | "Close to limit" words and `Warning` glyph; inline warning strip text | Card 7.09 | 9.91 | Text 4.5 |
+| `--warning-ring` | `warnRing` | `#B45309` | `#FBBF24` | Goal ring fill when `status` `warning` (C-11) | vs track 4.13 · vs card 5.02 | vs track 7.72 | UI 3 |
+| `--warning-surface` | style l.586 | `#FBF0E1` | `#2A2416` | Inline warning strip ("Couldn't load page 2…", "Couldn't refresh goals…") | `--warning-text` on it 6.30 | 9.23 | Text 4.5 |
+| `--danger-text` | `danger` | `#B91C1C` | `#FCA5A5` | Error panel text + `WarningCircle`, field errors, profile error line, "Over budget by R x" line + glyph | Card 6.47 | 8.72 | Text 4.5 |
+| `--danger-border` | `dangerLine` | `#F3C7C7` | `#5B2A2A` | 1 px border of block error panels | Exempt (text carries meaning) | Exempt | Exempt |
+| `--chip-glyph` | style l.346, l.517 | `#FFFFFF` | `#FFFFFF` | White glyph on category tile / chip; 2 px ring around the Top-category chip on the hero | On `--category-*` 4.16–4.21 | Same | UI 3 |
+| `--logo-patch` | style l.455–456 | none | `#FFFFFF` | Patch behind the logo, dark only (FR-30) | n/a | n/a | n/a |
+| `--scrim` | style l.591 | `rgba(58,58,58,0.5)` | Same | Modal backdrop | 50 % allowed: modal convention, not a glass surface (Muzi 2026-10-23 (G5 sign-off) D3; N30 closed) | Same | n/a |
+| `--shadow` | `shadow` | §4 `--shadow-card` | `none` | Cards, hero, period group, "Custom range" button, S theme row | n/a | n/a | n/a |
+| Retired (Rev 5) | n/a | n/a | n/a | `--link` (links use `--primary`); `--card-border` (D edge = `--border`); `--success`, `--warning` glyph tokens (glyph = `-text` token); `--danger` ring (master has no danger ring; ring follows `status`); `--background`, `--brand-accent*`, profile pill styles (earlier) | n/a | n/a | n/a |
+
+## 2. Category palette (AC-3; I-06 closure; values Kept, = master `CAT` l.345)
+
+Rule (DS-06): mark colour = API `color` / `categoryColor` multiplied toward black until relative luminance = 0.20; one value serves both themes; invalid or missing hex → `--category-neutral`; API hex never painted directly. Colour is never the only cue: every tile, chip and ring sits next to its visible name, with a white Phosphor fill glyph (FR-27).
+
+| Token | API colour | API on white | Derived (L and D) | White glyph on mark (= mark vs L card) | vs L row `#F7F7F7` | vs D card `#1A1F27` · D row `#222833` (script range, 6 marks) | Usage |
+|---|---|---|---|---|---|---|---|
+| `--category-groceries` | `#FF6B6B` | 2.78 | `#CC5656` | 4.16–4.21 (script range) | 3.89 (hand, Kept) | Card 3.93–3.98 · row 3.51–3.56 · D window Not scripted | Category tile (C-06), chip (C-05, C-09), share-ring fill (C-06) |
+| `--category-entertainment` | `#4ECDC4` | 1.93 | `#348983` | Same | 3.88 (hand) | Same range | Same |
+| `--category-transportation` | `#45B7D1` | 2.35 | `#328699` | Same | 3.92 (hand) | Same range | Same |
+| `--category-dining` | `#F7DC6F` | 1.36 | `#8A7B3E` | Same | 3.93 (hand) | Same range | Same |
+| `--category-shopping` | `#BB8FCE` | 2.65 | `#926FA0` | Same | 3.92 (hand) | Same range | Same |
+| `--category-utilities` | `#85C1E9` | 1.94 | `#59819B` | Same | 3.89 (hand) | Same range | Same |
+| `--category-neutral` | n/a | n/a | `#768190` (Kept; not in master) | 3.95 (hand, Not scripted) | 3.69 (hand) | Not scripted | Fallback mark |
+
+| Check | Result |
+|---|---|
+| API colours (I-06) | 6/6 fail 3:1 on white (lowest Dining 1.36) |
+| Glyph on mark | White on all 6 marks 4.16–4.21 (script) ≥ 3 |
+| Top-category chip on hero (C-05) | Chip carries a 2 px `--chip-glyph` ring (l.517): edge vs `--spend` 10.60 L / 9.52 D; closes the SC 1.4.11 question |
+| Mark vs mark | All pairs ≈ 1.0 by design; each row/chip carries its name |
+
+## 3. Typography (AC-2)
+
+| Token | Value (size / line height, weight) | Usage |
+|---|---|---|
+| `--font-sans` | Nunito Sans 400 / 600 / 700, self-hosted woff2 in build (NFR-S1; canvas Google Fonts is canvas-only, QA N40) · fallback `Arial, Helvetica, sans-serif` (master) | All UI |
+| `--font-numeric` | `tabular-nums` | All amounts, counts, %, table values |
+| Amount spacing | Every space inside a formatted amount is U+00A0, never re-spaced (FR-03) (Muzi 2026-10-23) | All amounts |
+| `--text-greeting` | L/XL 32 · M 28 · S 24 / 1.2, 700, letter-spacing −0.4 px | Greeting (FR-37) |
+| `--text-h1` | M/L/XL 22 · S 20 / 1.3, 700 | "Spending insights" |
+| `--text-h2` | M/L/XL 20 · S 18 / 1.35, 700 | Region headings, dialog titles |
+| `--text-h3` | 16 / 1.35, 700 | Goal category, S "Theme" label |
+| `--text-kpi-spent` | M/L/XL 46 · S 36 / 1.05, 700, letter-spacing −1 px | Spent value |
+| `--text-kpi` | M/L/XL 24 · S 18 / 1.2, 700 | Hero stat values |
+| `--text-hero-label` | 16, 600 · change line M/L/XL 15 · S 14, 600 · stat sub 13 / 1.35, 400 | Hero label, change line, stat change lines |
+| `--text-base` | 16 / 1.5, 400; buttons 16, 600; category name, row title, amounts 16, 700 | Body, controls, empty states, rows |
+| `--text-control` | 15, 600 (selected preset 700) · `selectSm` 14, 600 | Presets, full-width selects, link buttons, rail links, total tag (700), cell text (400) |
+| `--text-sm` | 14 / 1.4, 400 · labels and table headers 14, 600 · strong meta 14, 700 | Captions, meta, date line, error lines |
+| `--text-xs` | 13 / 1.4: greeting tooltip 400 · goal status + pace 700 · rail label 600 | Small text |
+| `--text-axis` | Gridline values 11, 400 · month ticks 12, 600 (selected 700) · bubble label 12, 600 · bubble value 15, 700 | Trends (C-07) |
+| `--text-ring` | Share ring % 11, 700 · goal % L/XL/M 18 · S 17, 700 · "used" 11, 400 · goal spent 17, 700 | Ring centres, goal line |
+| `--text-wordmark` | L/XL 26 · M 22 · S 20 / 1, 700, letter-spacing −0.4 px; "Cap" `--foreground` + "Sense" `--heading` | Wordmark (rail, top-bar lockup) |
+| Text spacing | Layout survives SC 1.4.12 overrides | All text |
+
+## 4. Spacing, radius, surface, size, focus, motion (AC-2)
+
+| Token | Value | Usage |
+|---|---|---|
+| Spacing values | 2 · 4 · 6 · 8 · 10 · 12 · 14 · 16 · 18 · 20 · 22 · 24 · 26 · 28 · 32 · 40 px (replaces the Rev 4 4-px scale) | Padding, gaps |
+| `--gutter` | S 16 · M 24 · L 32 · XL 40 px | Window sides; window top S 20, else gutter; bottom gutter + 16 |
+| `--card-padding` | S 16 · M 20 · L 24 · XL 28 px · hero S 22 × 20, ≥ M 28 / 28 / 24 (top / sides / bottom) | Cards, hero |
+| `--gap-grid` | S 12 · M 16 · L 24 · XL 24 px | Between regions and columns |
+| `--gap-card` | S 14 · ≥ M 18 px · category rows 10 · goals 18 · hero blocks S 18, ≥ M 26 | Inside cards |
+| Top bar padding | S 14 / 16 / 18 · M 18 / 24 / 22 · L/XL 32 / 24 / 24 / 8 px (top / right / bottom / left) | Top bar |
+| `--rail-width` | L 236 · XL 256 px; padding 32 / 16 / 20; section gap 40 | Rail (C-12) |
+| Window offset | L/XL right 16, bottom 16 px | Content window inside frame |
+| `--layout-columns` | L 1.55 fr : 1 fr · XL 1.7 fr : 1 fr (main : side) · S/M 1 column | Region grid |
+| `--content-max` | 1760 px (Kept; not in master) | XL frame |
+| `--radius-window` | 32 | Content window (L/XL) |
+| `--radius-hero` | 28 | Spent hero, hero skeleton |
+| `--radius-card` | 24 | Cards, dialogs, custom-range note panel |
+| `--radius-panel` | 20 | About card, error panel, S theme row, goal skeleton |
+| `--radius-row` | 18 | Category rows and skeletons |
+| `--radius-icon-button` | 14 | Square buttons (Refresh, Help, Close), L/XL "Refresh" button, theme control track, rail links, date inputs, inline warning strip, trend detail strip |
+| `--radius-sm` | 12 · 10 · 8 · 6 | 12: months select, rail glyph tile, trend bubble, month pill · 10: theme option, total tag, greeting tooltip, About-dialog glyph · 8: logo patch · 6: skeleton lines, greeting focus area |
+| `--radius-hero-glyph` | 16 | White wallet tile on hero |
+| `--radius-pill` | 999 | Buttons, period group + presets, full-width selects, remove-filter chip, static "Dates:" chip |
+| `--radius-circle` | 50 % | Category chips, rings, arrow dot, hero circles |
+| `--shadow-card` | L `0 1px 2px rgba(16,24,40,0.04), 0 8px 24px rgba(16,24,40,0.06)` · D none + 1 px `--border` | Cards, hero, period group, "Custom range" button. No glass, blur or badges |
+| `--shadow-dialog` | `0 30px 30px -15px rgba(58,58,58,0.4)` | Dialogs |
+| `--shadow-tooltip` | `0 8px 16px -8px rgba(58,58,58,0.25)` | Greeting tooltip |
+| Control height | Buttons, full-width selects: S/M 48 · L/XL 44 · presets M 44, L/XL 36 · months select S/M 48, L/XL 40 · remove-filter chip S/M 44, L/XL 40 · link buttons 44 (small link S/M 44, L/XL 24) · rail link 48 · date input 48 | Controls |
+| Icon button size | Square buttons 44 × 44 · theme option S/M 44, L/XL 36 | Top bar, dialogs |
+| Glyph tiles | Rail glyph 40 · hero glyph 48 · About card glyph 36 · About-dialog glyph 32 · arrow dot 22 · Top-category chip 28 (S 24) · transaction chip 40 | Glyph containers |
+| `--logo-height` | Rail 16 · top bar M 18 · S 12 px | Capitec logo |
+| Category row | Min height 68 (S 64); tile width 56 (S 44); share ring 44 (hole 34), hidden at S | C-06 |
+| `--size-goal-ring` | L/XL/M 84 (hole 66) · S 76 (hole 60) | C-11 |
+| `--size-capsule` | M/L/XL 26 · S 22 wide; plot height 200 (S 180); axis width 44 (S 0); hit target = full column cell | C-07 |
+| Hero circles | Blob 1 300 px; blob 2 120 px, hidden at S | C-05 |
+| Greeting tooltip | Padding 6 × 10; S max width 260, wraps; ≥ M one line | C-01 |
+| Dialog | Max width 460; padding S 20, ≥ M 28 | C-04, C-15 |
+| `--target-min` | 24 × 24 (Kept) | All pointer targets (SC 2.5.8) |
+| `--target-touch` | ≥ 44 × 44 at S/M (Kept; master meets it per control heights above) | Touch widths |
+| `--focus` | 2 px solid `--ring` (`#2F70EF` L · `#7EA6F7` D), 2 px offset; on `--spend` surfaces (About card "Learn more") 2 px `#FFFFFF` (10.60 L · 9.52 D) (Muzi 2026-10-23, relayed; QA B4) | Every focusable element incl. greeting and focus-target h2 (SC 2.4.7, 1.4.11). Offset 2 px everywhere (master v33 greeting + h2) |
+| Selected states | Theme option: `--primary` fill + `--primary-foreground` icon · period preset: L `--spend` `#0033A0` + `#FFFFFF`, D `--primary` `#7EA6F7` + `--primary-foreground`, 700, `CheckCircle` 14 px · category row: 2 px `--primary` outline + `--selected` fill; other rows unchanged (no fading) · month: `--bar-selected` capsule + pill + bubble | C-02, C-03, C-06, C-07 |
+| `--duration` | 150 ms; 0 under reduced motion (Kept; master has no transitions) | Transitions; Refresh spin off under reduced motion |
+
+## 5. Trademark rules applied
+
+| # | Rule |
+|---|---|
+| T-01 | Official Capitec logo `design/assets/capitec-logo.svg`, unaltered, never recoloured; heights per §4 `--logo-height`; dark → on `--logo-patch`. Product name = "CapSense" wordmark per §3 `--text-wordmark` (Muzi 2026-10-23) |
+| T-03 | Red (`#E63934`) appears only in the logo; no interlocking-shape motif |
+| DS-04 | Errors and over-budget use `--danger-text`, never brand red |
+
+## 6. Text-on-colour pairings (ratios = §1)
+
+| Element | Text | Background | Ratio L · D |
+|---|---|---|---|
+| Spent value, change line, stat values (C-05) | `--spend-fg` | `--spend` | 10.60 · 9.52 |
+| Hero label, stat labels, stat change lines (C-05) | `--spend-muted` | `--spend` | 7.26 · 6.52 |
+| About card title / body / button (C-12) | `--spend-fg` / `--spend-subtle` / `--on-spend-button-fg` on `--on-spend-button-bg` | `--spend` | 10.60 / 8.00 / 10.60 · 9.52 / 7.18 / 10.60 |
+| Greeting tooltip (C-01) | `--muted-foreground`, 1 px `--border` | `--card` | 5.74 · 7.57 |
+| Trend value bubble (C-07) | `--tooltip-fg` | `--tooltip-bg` | 10.60 · 16.72 |
+| Selected month pill (C-07) | `--bar-selected-fg` | `--bar-selected` | 10.60 · 7.74 |
+| Category row text (C-06) | `--foreground` / `--muted-foreground` | `--row` | 10.62 / 5.36 · 13.22 / 6.77 |
+| Selected category row (C-06) | `--foreground` / `--muted-foreground`; 2 px `--primary` outline | `--selected` | 9.86 / 4.97 · 11.77 / 6.02 (muted values QA hand); outline vs `--row` 5.75 · 6.12 |
+| Category total tag (C-06), rail and dialog glyphs | `--heading` | `--soft` | 9.44 · 7.27 |
+| Goal status line (C-11) | `--success-text` / `--warning-text` (words + glyph, no badge, no border) | `--card` | 6.66 (row) / 7.09 · 9.50 / 9.91 |
+| Over budget line, errors | `--danger-text` | `--card` | 6.47 · 8.72 |
+| Inline warning strip | `--warning-text` | `--warning-surface` | 6.30 · 9.23 |
+| Selected preset | L `#FFFFFF` / D `--primary-foreground` | L `--spend` / D `--primary` | 10.60 · 7.74 |
+| Selected theme option, primary buttons | `--primary-foreground` | `--primary` | 6.16 · 7.74 |
+| Rail and top-bar text (C-12, C-13) | `--foreground` / `--muted-foreground` | `--frame` | 11.37 / 5.74 · 16.77 / 8.59 |
+| Category glyph | `--chip-glyph` | `--category-*` | 4.16–4.21 (UI 3) |
+| Forbidden | White text on `#2F70EF` | n/a | 4.48 (fails 4.5) |
+
+## 7. RAID status (for SM)
+
+| Ref | Status | Item |
+|---|---|---|
+| DS-01–DS-08 | As Rev 4 | Colours per §1; logo T-01; Nunito Sans; red only in logo; DS-06 derived category shades (§2) |
+| I-06 | Closed (stands) | §2 + visible names/glyphs; D surface ratios to re-script |
+| G5 B11 / N37 | Fix applied (Rev 5) | §1–§6 = master `t` object + style strings; QA re-run row 19 |
+| DS-19 | **Closed** (Muzi 2026-10-23 (G5 sign-off); see `screen-spec.md` §5) | Closed v33: focus offset 2 px; script ratios for D frame/window/row text, D bubble, warning strip, `--spend-subtle`, selected row text + outline, D category marks on card/row. Closed at sign-off: `--scrim` 50 % (D3, N30); category fill vs `--track` (N48). Still Not scripted (QA, before G6): category marks vs D window, `--category-neutral` (all), muted on `--selected` (QA hand only), success-text on card (row value used) |
+
+Post-G5-run-1 errata 2026-10-21 · Post-G5 errata 2026-10-22 · Muzi 2026-10-22 ("approve all") · Muzi 2026-10-23 canvas v28 (Rev 4) · **Muzi 2026-10-23 master re-baseline (Rev 5): §1–§7** · Rev 5.1 2026-10-23 (canvas v33): focus offset 2 px; script ratios added (coordinator, python WCAG 2026-10-23)

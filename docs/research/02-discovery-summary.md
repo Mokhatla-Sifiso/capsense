@@ -1,0 +1,72 @@
+# 02 Discovery Summary
+
+| Item | Value |
+|---|---|
+| Owner · Date · PBI | `business-analyst` · 2026-10-21 · ADO #14 (G1 Discovery); rework for G1 QA-B1, QA-N1–N9 |
+| Archive | `01-competitor-teardown.md` (full evidence, unchanged) |
+| Tags · API? | **V** Verified (primary source) · **R** Reported (secondary) · **I** Inference · API? = read-only spec supports it: yes / yes (derived) / partial / no / n/a |
+| B-IDs | B1–B11 are the provisional build PBIs in Azure DevOps under Epic #29, provisional until G6 (RAID A-08) |
+
+## Frictions (500 most recent ZA iOS reviews, 2024-06 to 2026-10: 53 insight-related, 7 about tracking; Google Play not sampled; signals, not statistics)
+
+| ID | Finding | Tag | Src | Implication | API? |
+|---|---|---|---|---|---|
+| F-01 (+BM-02) | Capitec auto-categorises spend and says recategorising "learns" (Src 2, blog Jul 2022), but users can't find it or it doesn't save (2024-12, 2025-01) | V | 2, 3 | B8: no category edit in scope; extension only after primary tasks | no (GAP-01) |
+| F-02 | Category drill-down stays on the first category picked (2026-05) | V | 3 | B6, B8: category filter held in URL, list filtered in place | yes |
+| F-03 | Statement refreshes and jumps to the top while scrolling (2026-04) | V | 3 | B3, B8: stable query keys; scroll and offset kept on return | yes |
+| F-04 | No view by merchant; no export filtered to money in or out only, over 12 to 36 months, for tax (2026-09) | V | 3 | I-10 closed: non-goal; extension candidate | partial (GAP-02) |
+| F-05 | No dark or system theme: most requested, 12 reviews (2024-10 to 2026-08) | V | 3 | B4: follow system light/dark | yes |
+| F-06 | Tracker hard to find: a user asked for a feature that exists (2024-08) | V | 3 | B4, B5: insights on the landing view | yes |
+| F-07 | No chart on the Track landing page (unsourced: one 2020 review found via search, outside sample; URL not recorded) | I | 01 F7 | B5, B6: re-source before relying on it alone | yes |
+| F-08 | Features disappear after updates, which hurts trust (2026 pattern; not counted, no quote kept) | I | 01 F8 | B5 to B9: surface every endpoint; drop nothing | yes |
+| F-09 (+BM-01) | Track route: account → Track → Money in/out → category → detail (V); that is 4 steps, account chosen first (I) | V / I | 1 | B4, B5: flatter route; breakdown on first view | yes |
+| F-10 | Insights look backward only: no pacing; totals shown without context | I | 01 §2.3, 14 | B9: projected month-end from `currentSpent`, `daysRemaining` (A-06); B5: plain-language deltas from `comparedToPrevious` | yes (derived) |
+| F-11 | Money in and out are separate modes; no net view | I | 01 §2.3 | B5: do not promise a net view | no (GAP-03) |
+| F-12 | Praised: "Quick, responsive. No AI." (one 5★ review, 2026-08) (V); speed and simplicity are the theme to keep (I) | V / I | 3 | B11: fast; deterministic insights; no customer data to any model | yes |
+
+## Benchmarks
+
+| ID | Product · finding | Tag | Src | Implication | API? |
+|---|---|---|---|---|---|
+| BM-03 | Capitec Live Better round-ups (small automatic savings), per a user review | R | 3 | none: no savings data in spec | no |
+| BM-04 | Capitec 2014 Budget Tool: monthly budget per category; current status unknown | R | 4 | B9 | yes |
+| BM-05 (+BM-10) | Capitec budget alerts not found (listed for FNB, Vault22); Vault22 named as the app Capitec users add for tracking | R | 5 | B9: status shown in-app (no push); B5: insights reachable at once | partial |
+| BM-06 | FNB nav» Money: per-category budgets, alerts at 50/70/90%, ~60 categories | R | 6, 7 | B9: thresholds while spending | yes |
+| BM-07 | Discovery Vitality Money: 166+ categories, limits, rewards (Discovery's own press release) | V | 8 | B6, B9: positive framing (I); few categories (I) | yes |
+| BM-08 | Monzo Trends: "left to spend" = balance − scheduled payments | V | 9, 10 | B9: spend pacing only | no (GAP-03) |
+| BM-09 | Copilot: "To Review" inbox, bulk review, rule preview before save | V | 11–13 | B8: display only | no (GAP-01) |
+
+## API gaps and data issues (spec is fixed)
+
+| ID | Finding | Tag | Src | Implication | API? |
+|---|---|---|---|---|---|
+| GAP-01 | Read-only: no PATCH for category, no POST/PUT for goals | V | 14 | B2, B8, B9: no write UI | no |
+| GAP-02 | `/transactions` has no `merchant` parameter and no text search | V | 14 | I-10 closed: non-goal; extension candidate | no |
+| GAP-03 | No income, balance or upcoming debit orders | V | 14 | B5, B9 | no |
+| GAP-04 | Trends are monthly only; weekly/daily must come from `/transactions` (max 100 per page) | V | 14 | B3, B7 | partial |
+| GAP-05 | Offset pagination (sample total 1,250) (V); new rows while scrolling may shift pages (I) | V / I | 14 | B3, B8 | yes |
+| GAP-06 | `profile.totalSpent` R15,420.50 ≠ 6-month trends sum R24,223.15 | V | 14 | B2: consistent mock data (RAID I-05) | yes |
+| GAP-07 | Trends end 2024-06; categories cover 2024-08-16 to 2024-09-16; both total R4,250.75 | V | 14 | B2 (RAID I-05) | yes |
+| GAP-08 | Categories not sorted by amount (Utilities R458.70 after Shopping R450.80) | V | 14 | B2, B6: sort in client | yes |
+| GAP-09 | `customerId` in path with no auth described: IDOR risk on a real service | I | 14 | B1: noted in README; B11 (RAID R-02) | n/a |
+| GAP-10 | `/profile` returns name and email (PII) (V); POPIA relevance (I) | V / I | 14 | B11: keep PII out of logs, analytics, URLs | yes |
+| GAP-11 | All 6 API category colours fail WCAG 3:1 non-text contrast on white (1.36 to 2.78); Groceries red clashes with warning (I) | V (computed) | 14, 15 | B6, B10: labels or borders, or darker tint | partial |
+| GAP-12 | Category `transactionCount` values sum to 53 (15+8+12+9+6+3), but summary `transactionCount` is 47 | V (computed) | 14 | B2: mock data must reconcile (RAID I-09, with I-05) | yes |
+
+## Sources
+
+| Src | URL |
+|---|---|
+| 1, 2 | https://www.capitecbank.co.za/were-here-to-help/how-to/how-to-track-your-spending/ · https://www.capitecbank.co.za/blog/articles/best-way-to-bank/what-if-there-was-a-simpler-way-to-budget/ |
+| 3 | https://apps.apple.com/za/app/capitec-bank/id1217842108 · RSS: https://itunes.apple.com/za/rss/customerreviews/id=1217842108/sortBy=mostRecent/json (pages 1–10; review-level IDs not kept in 01) |
+| 4 | https://www.news24.com/business/capitec-launches-money-management-tool-20141128 |
+| 5 | https://codecash.co.za/track-spending-on-sa-banking-apps-complete-guide/ |
+| 6, 7 | https://businesstech.co.za/news/banking/250773/fnb-launches-new-nav-money-tool/ · https://sundayworld.co.za/news/fnbs-smart-budgeting-reveals-top-spend-from-customers/ |
+| 8 | https://discovery-holdings-ltd.mynewsdesk.com/pressreleases/discovery-bank-launches-vitality-money-financial-analyser-3139761 |
+| 9, 10 | https://monzo.com/help/budgeting-overdrafts-savings/trends-spending-and-balance-web · https://monzo.com/blog/balance-in-trends |
+| 11–13 | https://help.copilot.money/en/articles/11157550-quick-start-guide · https://help.copilot.money/en/articles/11780342-copilot-money-for-web · https://changelog.copilot.money/log/transaction-category-rules |
+| 14 | `docs/brief/api-spec.md` (internal, provided by Capitec) |
+| 15 | https://www.w3.org/WAI/WCAG21/Understanding/non-text-contrast.html |
+| 01 | `docs/research/01-competitor-teardown.md` (internal archive; used where no external URL was recorded) |
+
+Post-G1 errata 2026-10-21: N11, N12 (non-blocking), I-10

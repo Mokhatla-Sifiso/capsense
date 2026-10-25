@@ -1,0 +1,95 @@
+# Test Strategy: CapSense
+
+| Owner · Date · ADO | Status | Inputs | Keys |
+|---|---|---|---|
+| `qa-tester` · 2026-10-21 · PBI #27 (AC-1, AC-3) | **Rev 4, 2026-10-22: FR-37–FR-41, Phosphor Fill icons, self-hosted Nunito Sans, re-derived tokens, no badges, logo, document scroll, G5 coverage (Muzi 2026-10-22); §7 added.** Rev 3: A-21 closed. Rev 2: Muzi bundle (I-15). Draft, not signed off | `charter.md`; `ways-of-working.md` §4–§5; `brief.md` MR-01–MR-05; `problem-definition.md` SM-01–SM-11; BR-01–BR-38; FR-01–FR-41; `data-quality.md` DQ-01–DQ-17; ADR-001/002/003/005/006 (002/003/005 rev. 3); `nfr.md`; `design/screen-spec.md`, `tokens.md` (G5 run 2) | TC-xx in `test-cases.md` · Owner: **Muzi writes tests (B1–B11, #32); QA designs TCs and verifies** · **Q-xx** = test-design question; status per `test-cases.md` §4 (Q-07 open by design; A-21 closed) |
+
+## 1. Test levels (AC-1; tooling per ADR-005)
+
+| Level | Tool | Scope | Owner | CI gate (B1, every PR) |
+|---|---|---|---|---|
+| Unit | Vitest | Formatters (CUR/PCT/CNT/DATE), period mapping, projection (FR-22), greeting bands in SAST (FR-37), Zod schemas, seed determinism and clock-module scope (TC-104), token contrast (NFR-A2) | Muzi / QA | `test:unit` 0 fails; line coverage ≥ 80 % on `src/` with component (NFR-Q1) |
+| Component | Vitest + Testing Library + MSW 3 (Node) | Client components × loading/error/empty/populated; request params sent; edge cases from FR "Edge cases" column; Refresh in-flight, partial failure, "Updated HH:MM" (FR-39); "Data as of" (FR-38) | Muzi / QA | `test:component` 0 fails; shared coverage gate above |
+| Contract | Vitest calling the 7 route handlers + spec Zod schemas (ADR-005 rev. 3) | Spec fields/types/params/defaults/clamps (FR-34); every DQ-xx (FR-35); ADR-003 rev. 3 extensions (unknown enum → default, clamp, malformed date → 400, unknown customer → 404); harness incl. `edge` | Muzi / QA | `test:contract` 0 fails; 7/7 endpoints |
+| E2E | Playwright (Chromium, Gecko, WebKit; NFR-B1) on the production build | Async Server Components, flows, URL state, history (push on drill-down, replace otherwise; FR-18), breakpoints (NFR-R1), `x-mock-scenario` `error`/`empty`/`slow`/`edge` on first render and client requests; greeting hydration (FR-37), Refresh, About dialog, rail links, document-only scroll (FR-39–FR-41) | Muzi / QA | `test:e2e` 0 fails on 3 engines |
+| A11y | `@axe-core/playwright` + manual §6 | Every screen × state × theme × 320/1280 px; WCAG 2.2 AA | QA | axe 0 serious/critical (NFR-A1) |
+| Perf | Lighthouse CLI (default mobile) + `size-limit` | NFR-P1 on Docker image, median of 3; NFR-P2 initial JS | Muzi | `size-limit` ≤ 250 KB gz in CI; Lighthouse CI job against the Docker image (ADR-005 rev. 3) |
+| Security | Playwright + header test + `npm audit` + pin-age script | NFR-S1 headers, NFR-S2 privacy, NFR-S3 deps, FR-31 origins incl. 0 Google Fonts requests (self-hosted Nunito Sans woff2) | Muzi / QA | 0 high/critical; header test passes on container |
+
+## 2. Entry / exit criteria
+
+| Level | Entry | Exit |
+|---|---|---|
+| Design review (G5) | Frames on Figma or in-house canvas (R-06); `figma-handoff.md` maps frames → spec → FR → TC | 320/768/1280/1920 × light + dark per screen and every SS state (I-20; Muzi 2026-10-22); tokens = TC-093 values; Phosphor Fill only; no badges; logo on white patch in dark |
+| Unit | B1 CI green; formatter conventions confirmed or PROPOSED default used (A-09) | 100 % pass; coverage ≥ 80 %; TCs traced in test name (`TC-xx`) |
+| Component | Seed + MSW fixtures (spec samples) in repo (B2); schemas (B3) | All 4 states per data view pass (SM-08); every FR edge case listed in `test-cases.md` automated or flagged N |
+| Contract | Route handlers for 7/7 endpoints (B2); non-numeric/non-integer params → spec default (A-21(b) closed) | 7/7 endpoints schema-valid; DQ-01–DQ-17 pass; 0 non-spec fields (SM-11) |
+| E2E | Production build runs locally with `MOCK_SCENARIOS=true`; landing renders | 3 engines × 5 widths pass; SM-05 flow 10/10 (`--repeat-each=10`); 0 flaky retries in last run |
+| A11y | E2E suite green; G5 signed off (QA run 2 PASS) | axe 0 serious/critical; Lighthouse a11y ≥ 95; §6 manual checklist 100 % pass or bug raised |
+| Perf | Docker image builds (#34) | LCP ≤ 2.5 s, CLS ≤ 0.1, TBT ≤ 200 ms (median of 3); JS ≤ 250 KB gz |
+| Security | Docker image runs; full walkthrough script exists (TC-103) | Headers exact per NFR-S1; 0 PII in URL/console/storage; 0 non-app origins; 0 high/critical advisories |
+
+## 3. Environments
+
+| Env | Run | Config | Used for |
+|---|---|---|---|
+| Local | `npm run dev` / `npm test` / `npm run test:e2e` | `MOCK_TODAY=2024-09-16`; `MOCK_SCENARIOS=true` for e2e only | Unit, component, contract, e2e, manual a11y + SR pass |
+| CI | GitHub Actions (B1), every PR to `main` | Same as local; Playwright 3 engines; `MOCK_SCENARIOS=true` on e2e job only | All automated gates in §1, incl. Lighthouse job on the built Docker image |
+| Docker | `docker build` / `docker run` per README (#34, #35) | Production image; `MOCK_SCENARIOS` **off**; `MOCK_TODAY` default | SM-01 clean clone, Lighthouse (CI + pre-release), headers (NFR-S1), harness-off check (TC-111), real-Safari smoke |
+
+## 4. Test data
+
+| Item | Rule |
+|---|---|
+| Seed | One deterministic seed module (ADR-003) for handlers, RSC prefetch and MSW. E2E expected values = seed outputs proven by contract TCs; exact seed figures fixed at B2 (Q-07) |
+| `MOCK_TODAY` | Default **2024-09-16**. Preset ranges, both ends inclusive: 7d 2024-09-10, 30d 2024-08-18, 90d 2024-06-19, 1y 2023-09-18 (365 days, A-21(a) closed) → 2024-09-16 (FR-04, DQ-16). Day 29–31 → month-end clamp; custom limit 366 days inclusive (FR-09). Goals `daysRemaining` 14, days elapsed 16 (DQ-09). Override only in TC-122 (contract) and TC-133 ("Data as of") |
+| Clock | Greeting (FR-37) and "Updated HH:MM" (FR-39) use a real instant in Africa/Johannesburg; tests fix it (unit: injected; component: fake timers; e2e: server hook **OPEN Q-12** + `page.clock`, browser `timezoneId` ≠ SAST) |
+| Spec fixtures | MSW handlers returning `api-spec.md` sample bodies verbatim (incl. 47 vs 53, I-09) for component TCs, so FR GWT values match exactly |
+| `x-mock-scenario` | `error` (500) / `empty` / `slow` (12 s) / `edge` (names ≥ 60 chars, amounts ≥ R 1 000 000, totals reconcile), honoured only with `MOCK_SCENARIOS=true`. Playwright `extraHTTPHeaders` covers first render (RSC prefetch reads `headers()`) and client requests; `page.route` injects it on one client request (e.g. page 2, TC-062) (ADR-003 rev. 3) |
+| PII sentinels | Assert "12345", "John Doe", "john.doe@email.com" absent from URLs, console, storage (FR-31) |
+
+## 5. Defect process (ways-of-working §5)
+
+| Step | Rule |
+|---|---|
+| Raise | ADO Bug. Title `<Component>: <actual> instead of <expected>`; Repro: preconditions, numbered steps, Expected, Actual, evidence (Playwright trace/screenshot) |
+| System Info | Browser + version · OS · viewport · commit SHA · `MOCK_TODAY` · scenario header |
+| Severity | 1 Critical: app/build/Docker fails, data wrong, PII leak · 2 High: Must BR broken, axe serious/critical · 3 Medium: Should BR or edge case · 4 Low: cosmetic |
+| Priority | 1 fix before ship (all Sev 1–2) · 2 fix before ship, not urgent · 3 optional |
+| Links | Parent PBI · FR-xx · TC-xx that found it · fixing PR (`Fixes AB#<id>`); Sev 1–2 on Expedite swimlane |
+| Closure | QA re-runs the TC on the fixing commit; regression = new Bug linked Related, never reopen |
+
+## 6. Manual NFR checklist (AC-3; run before #36 on Docker image, results in #32)
+
+| Area | Check | Pass when |
+|---|---|---|
+| A11y: SR pair | **VoiceOver + Safari (macOS)**, versions in System Info. Script: landing (greeting `p`, "Data as of") → rail link (1280) → period → category drill-down → sort → page 2 → goals → Refresh (2 announcements) → About this demo → theme → error + Retry | Every block, chart table and status announced with name/role/value; no silent update |
+| A11y SC 1.1.1, 1.3.1 | Icons decorative or labelled; headings, lists, table semantics for chart data (FR-11, FR-28) | Rotor lists headings per block; chart tables read row/column headers |
+| A11y SC 1.3.2, 2.4.3 | Reading and focus order = visual order at 320 and 1280 px; C-04 focus return to invoker | Summary tiles first (FR-05); no focus jumps |
+| A11y SC 1.4.1 | Greyscale both themes: category, status, change (FR-27) | Each identifiable by text/icon |
+| A11y SC 1.4.3, 1.4.11 | Spot-check contrast of tints, focus ring, chart segments, both themes (NFR-A2) | Text ≥ 4.5:1; graphics ≥ 3:1 |
+| A11y SC 1.4.4, 1.4.10, 1.4.12 | 200 % zoom at 1280; 320 px reflow; text-spacing bookmarklet | No loss of content or function; no horizontal scroll |
+| A11y SC 1.4.13 | Chart tooltip on hover/focus (FR-11) | Dismissible (Esc), hoverable, persistent |
+| A11y SC 2.1.1, 2.1.2, 2.4.7 | Keyboard-only full walkthrough (TC-094) | All functions operable; no trap; focus always visible |
+| A11y SC 2.4.11, 2.5.8 | Sticky rail/header vs focused control at 1280/1920 (TC-141); rail link → h2 focus (TC-140); target size at 320 px (FR-28) | Focus never hidden; rail never over `main`; targets ≥ 24 × 24 px or spaced |
+| A11y SC 2.3.3, 4.1.2 | Reduced motion: Refresh icon (TC-137); About dialog modal, trap, return focus (TC-138) | No spin; dialog named, Esc closes, focus returns |
+| A11y SC 2.5.3, 3.3.2, 4.1.2 | Visible labels = accessible names; date inputs labelled; theme state announced | Names contain visible text |
+| A11y SC 3.3.1, 4.1.3 | Invalid custom range (FR-09); loading/error/empty changes (FR-26) | Error text tied to field; status announced politely |
+| A11y SC 3.2.2, 1.3.4 | Arrowing presets never opens the dialog (TC-128, G5 B1); period/sort change does not move focus or context; portrait + landscape at 360/768 | Only target content updates |
+| Perf | Lighthouse 3 runs on Docker image (TC-107); throttled reload check of skeleton sizing | Median within NFR-P1; no visible layout jump |
+| Security | Response headers via `curl -I`; DevTools network/console/storage walkthrough (TC-103) | Exact NFR-S1 values; 0 PII; 0 non-app origins |
+| Responsive | Real phone or emulator at 320/360 + rotate; 768; 1280; 1920 (TC-100, TC-141) | No horizontal scroll; no clipped tiles; document is the only scroller |
+| Browser | Real Safari (macOS) smoke: landing, drill-down, theme, paging (NFR-B1) | All pass; bug raised otherwise |
+| Release | MR-04 → PBI #36 (TC-126): repo link opens signed out; `git log -1` date ≤ 2026-10-28 (SM-11) · MR-05 via ADRs (TC-127): README links ADR-001–007 | All true (bundle 2026-10-21) |
+
+## 7. Traceability: scope added 2026-10-22 (Muzi 2026-10-22)
+
+| FR | BR | TC | Levels | Priority | Open |
+|---|---|---|---|---|---|
+| FR-37 Greeting | BR-22 | TC-130, TC-131, TC-132 (+ TC-001, TC-003, TC-004) | U, C, E | P3 (Could) | Q-12, Q-13, Q-14; I-21 |
+| FR-38 Data as of | BR-37 | TC-133 | C | P2 | None |
+| FR-39 Refresh | BR-36 | TC-134, TC-135, TC-136, TC-137 | C, E | P2 | Q-12, Q-15 |
+| FR-40 About this demo | BR-37 | TC-138, TC-139 | E, A, M | P2 | Copy A-27 (no TC asserts copy) |
+| FR-41 Rail links | BR-38 | TC-140, TC-141 | E | P2 / P1 (TC-141 shell scroll) | None |
+| Cross-cutting | FR-06, FR-23, FR-24, FR-27, FR-30, FR-31, FR-32, FR-33 | TC-026, TC-081, TC-082, TC-093, TC-102, TC-103, TC-104, TC-107, TC-109, TC-112 | U, C, E, P, S, M | As TC | Token values pending `tokens.md` re-derive (I-18) |
+| **Result** | 5/5 new FR → 1 BR · 5/5 → ≥ 1 TC · 12/12 new TC → FR | | | | FR rows pending in `functional-requirements.md` (FA) |

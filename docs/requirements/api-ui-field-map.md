@@ -1,0 +1,141 @@
+# API-to-UI Field Map: CapSense
+
+**Post-G4 errata 2026-10-21: N2, N20, N22** (N2 one number convention; N20 date boundaries; N22 FR-33 → #34 Dockerfile, #35 README matches BR-34/35)
+
+**Post-G5-run-1 errata 2026-10-21** (bundle decisions relayed by coordinator; QA Q-01–Q-06, Q-09): profile Retry, preset dates, page replace, history rule, sort labels, `edge` scenario, invalid-input rules; SI-17–SI-20 status
+
+**Muzi 2026-10-22 ("approve all"):** profile pill + popover (FR-01), greeting first name (FR-37), neutral change cues (FR-06), Phosphor fill icons, no badges (FR-23), refresh (FR-39); §4 non-API values added. No new API fields
+
+**Functional requirements govern; this map is derived from FR-01–FR-41.**
+
+| Item | Value |
+|---|---|
+| Owner | `functional-analyst` |
+| Work item | ADO PBI #22 · Task "Build API-to-UI field map (AC-2)" |
+| AC-2 | The map uses only fields that exist in `docs/brief/api-spec.md` |
+| Status | **Rev 3, 2026-10-22** (Muzi "approve all" applied). Rev 2 2026-10-21 realigned to `functional-requirements.md` for G4 finding B3. QA re-check pending |
+| Inputs | `docs/brief/api-spec.md` (final), `docs/requirements/functional-requirements.md` (governing), `docs/quality/gate-checks/G4.md`, `docs/delivery/raid-log.md` |
+| Precedence | Where this map and an FR differ, the FR wins. **PROPOSED** = FR default pending Muzi (A-xx) |
+| Decisions applied (Muzi, 2026-10-21) | No "recorded" outcomes, no runtime logging (G4 B2, R-02); spec data inconsistencies → `requirements/data-quality.md` (DQ-xx) · mock "today" = `MOCK_TODAY`, default 2024-09-16 (ADR-003) · one period shared by §2, §3, §5 (ADR-002) · accessibility WCAG 2.2 AA (NFR-A1) · timeout 10 s (NFR-O1) · presets = ranges ending on `MOCK_TODAY`; custom range → summary "Available for preset periods only" · theme Light/Dark/System kept on device (FR-25) · breakpoints 320, 360, 768, 1280, 1920 (FR-29) · icons Phosphor fill weight (MIT), API `icon` → glyph per `design/screen-spec.md` §3a (Muzi 2026-10-22) · E2E harness header `x-mock-scenario` (`error` HTTP 500 / `empty` / `slow` / `edge`) only when `MOCK_SCENARIOS=true`; off by default and in Docker; non-spec, not a field (FR-34) |
+| PBI column | Build PBI as traced in the governing FR. **B2 Mock API (FR-34, FR-35) and B3 Data layer (FR-36) apply to every row** |
+| Format keys (FR-03, 06, 01/08, 13, 21) | **CUR** = profile `currency`, 2 dp, **PROPOSED** exact `Intl.NumberFormat("en-ZA")` currency output "R 1 250,30", zero "R 0,00", negative "-R 61,02" (FR-03, N2) · **PCT** = 1 dp, `Intl.NumberFormat("en-ZA")` percent output, e.g. "65,0%" (FR-07, FR-21; **PROPOSED**, N2) · **Dates** = **PROPOSED** (N20): `endDate` inclusive (whole day); days split at Africa/Johannesburg midnight; seed timestamps in UTC (`Z`) · **CHG** = "Up/Down x% on previous period", "No change on previous period" (FR-06) · **DATE** = "15 Jan 2023" (FR-01, FR-08) · **DATETIME** = "16 Sep 2024 16:30", **PROPOSED** South African time, 24 h (FR-13) · **CNT** = integer, thousands separator (FR-05) · **TIME** = "HH:MM", 24 h, Africa/Johannesburg fixed UTC+02:00 (FR-37, FR-39; Muzi 2026-10-22) |
+| Size note | Exceeds the 1-page standard: AC-2 requires one row per field (61 rows). Tables only |
+
+## 1. Response fields
+
+| Endpoint | Field (JSON path) | Type | UI element | Display/format rule | Build PBI | Edge case to handle |
+|---|---|---|---|---|---|---|
+| 1 Profile | `customerId` | string | Not displayed (FR-02, FR-31) | Never displayed, never in URL, console, storage or saved state | B4, B11 | ≠ requested `{customerId}` → header error state, no profile data shown (FR-02) |
+| 1 Profile | `name` | string | Greeting first name "Good morning, John" (FR-37) + full name in the greeting tooltip (FR-01); **no profile pill** at any width (Muzi 2026-10-23) | Greeting: first whitespace token of trimmed `name`; initial ("J." / "J") → full name · tooltip: full name as returned, first segment of "John Doe · Premium · Customer since 15 Jan 2023"; shown on hover/focus of the greeting (`role="tooltip"`, `aria-describedby`) | B4 | Empty/missing → greeting words only, no comma; tooltip without name segment (**PROPOSED** its " · " dropped) · > 40 chars → **PROPOSED** wraps in tooltip, not truncated (FR-01) · `/profile` loading → greeting words + 80 × 20 skeleton (FR-37), no tooltip · `/profile` fails → greeting words only, no tooltip, "Couldn't load profile · Retry" line under the date line, other blocks unaffected (FR-26) · refresh fails → name kept (FR-39) · never in title/URL/console/storage (FR-31) |
+| 1 Profile | `email` | string | Not displayed (FR-02) | **PROPOSED** never shown (A-13) | B4, B11 | Never in URL/console/storage (FR-31) |
+| 1 Profile | `joinDate` | string `YYYY-MM-DD` | Greeting tooltip, last segment (FR-01) (Muzi 2026-10-23; no pill, no popover) | "Customer since " + DATE, e.g. "Customer since 15 Jan 2023" | B4 | Invalid or future → segment hidden · all 3 tooltip fields missing → **PROPOSED** no tooltip, greeting not focusable (FR-01) |
+| 1 Profile | `accountType` | string | Greeting tooltip, after the full name (FR-01) (Muzi 2026-10-23; no pill, no badge) | Title-cased: `premium` → "Premium"; plain tooltip text, same style as the other segments | B4 | Missing → **PROPOSED** segment hidden · not `premium` → **PROPOSED** title-cased, same plain style (A-09) |
+| 1 Profile | `totalSpent` | number | Not displayed (FR-02) | **PROPOSED** not shown: period undefined (A-13, I-05) | B4, B11 | 0 or missing → no effect |
+| 1 Profile | `currency` | string (ISO 4217) | Not displayed; sets CUR for all amounts (FR-03) | All §2–§6 amounts use it | B3 | Missing → amounts show error state, never assume ZAR · ≠ ZAR → **PROPOSED** ISO code prefix, never convert (A-09) |
+| 2 Summary | `period` | string enum | Selected preset of period control (FR-04) | Label from §7 `dateRangePresets[].label` | B5 | Echo ≠ requested → echoed value's label is selected · custom range active → whole summary shows "Available for preset periods only", no figures (FR-05, FR-09) |
+| 2 Summary | `totalSpent` | number | Summary tile "Spent" (FR-05) | CUR, e.g. "R 4 250,75" | B5 | 0 → "R 0,00" · ≥ R 1 000 000 → no overflow at 320 px (FR-03) |
+| 2 Summary | `transactionCount` | integer | Summary tile "Transactions" (FR-05) | CNT, e.g. "47" | B5 | 0 → tile kept; average "—", spent "R 0,00", "No spending in this period" (E2E `empty`) · ≥ 10 000 → separator, no clipped text at 320 px |
+| 2 Summary | `averageTransaction` | number | Summary tile "Average" (FR-05) | CUR, e.g. "R 90,44" | B5 | Count 0 → "—" · ≠ total ÷ count → API value shown (seed prevents it, DQ-15) |
+| 2 Summary | `topCategory` | string | Summary tile "Top category" with icon from §7 (FR-05) | Name as returned | B5 | Null/empty → "—" · not in §7 → neutral icon · ≠ largest §3 category → API value shown (seed prevents it, DQ-07) |
+| 2 Summary | `comparedToPrevious` | object | Two change statements (FR-06) | n/a | B5 | Missing/null → both statements hidden, never "0%" · custom range active → hidden (FR-06) |
+| 2 Summary | `comparedToPrevious.spentChange` | number | Spend change statement + up/down icon (FR-06) | CHG, e.g. "Up 12,5% on previous period"; neutral cue: word + arrow in foreground colour, no warning/success token (FR-06, Muzi 2026-10-22); **PROPOSED** percent, 1 dp (A-09) | B5 | 0 → "No change on previous period" · missing → this statement hidden · 999.9 → as given, no overflow · never colour-only (FR-27) |
+| 2 Summary | `comparedToPrevious.transactionChange` | number | Count change statement + icon (FR-06) | CHG, e.g. "Down 3,2% on previous period"; arrow + word, neutral token | B5 | 0 → "No change on previous period" · missing → this statement hidden |
+| 3 Categories | `dateRange` | object | Caption of category breakdown (FR-08) | n/a | B6 | Missing → caption hidden, chart kept |
+| 3 Categories | `dateRange.startDate` | string `YYYY-MM-DD` | Caption start; §5 `startDate` for shared period and drill-down (FR-04, FR-08, FR-10) | DATE, "16 Aug 2024 – 16 Sep 2024" | B6, B8 | > `endDate` → block error state (FR-26) · invalid → caption hidden |
+| 3 Categories | `dateRange.endDate` | string `YYYY-MM-DD` | Caption end; §5 `endDate` for shared period and drill-down (FR-04, FR-08, FR-10) | DATE | B6, B8 | = `startDate` → single date · invalid → caption hidden |
+| 3 Categories | `totalAmount` | number | Breakdown total (FR-07) | CUR | B6 | 0 → empty state "No category spending in this period", no chart (E2E `empty`) · ≠ Σ`amount` → API value shown (seed prevents it, DQ-04) |
+| 3 Categories | `categories[]` | array | Category chart + list (FR-07) | **PROPOSED** largest `amount` first, ties by `name` A–Z (A-11) | B6 | `[]` → empty state, no chart · 1 item → full chart, "100%" · > 6 → all listed, **no "Other"** (A-16) · duplicate `name` → both rows shown |
+| 3 Categories | `categories[].name` | string | List/legend label; one activation drills down to transactions (FR-07, FR-10) | As returned; sent exactly (case-sensitive) as §5 `category` (A-11) | B6, B8 | Keyboard activation = pointer (FR-28) · 0 transactions → FR-20 |
+| 3 Categories | `categories[].amount` | number | List value, chart segment (FR-07) | CUR | B6 | 0 → row shown, no segment · negative → FR-03 "-R …" |
+| 3 Categories | `categories[].percentage` | number | List share (FR-07) | PCT | B6 | Σ ≠ 100 (sample 99.9) → as given, no rescale |
+| 3 Categories | `categories[].transactionCount` | integer | List "n transactions" (FR-07) | CNT, "15 transactions"; 1 → "1 transaction" | B6 | Σ ≠ §2 count → as given (FR-36); seed prevents it (DQ-03, I-09) |
+| 3 Categories | `categories[].color` | string hex | Segment and swatch (FR-07, FR-27) | **PROPOSED** adjusted tint per theme + label + border; never colour-only (A-16, I-06) | B6, B10 | Invalid → neutral colour |
+| 3 Categories | `categories[].icon` | string | Category chip and row icon (FR-07) | Phosphor fill glyph via fixed map, `design/screen-spec.md` §3a (Muzi 2026-10-22) | B6 | Unmapped → `Tag` (A-09) |
+| 4 Trends | `trends[]` | array | Monthly chart + screen-reader table (FR-11, FR-28) | Ordered by `month` ascending | B7 | `[]` → "No monthly spending to show" (E2E `empty`) · 1 month → single point/bar, no line · fewer than requested → returned only, no padding · missing month → **PROPOSED** gap, not zero (A-16) |
+| 4 Trends | `trends[].month` | string `YYYY-MM` | Axis label, table row (FR-11) | "Jan 24" format; year shown at year boundary | B7 | Invalid → point dropped |
+| 4 Trends | `trends[].totalSpent` | number | Point value; focus/hover detail; table (FR-11) | CUR | B7 | 0 → visible zero point · outlier → axis scales, no clipping |
+| 4 Trends | `trends[].transactionCount` | integer | Focus/hover detail; table (FR-11) | CNT | B7 | 0 → "0", average "—" |
+| 4 Trends | `trends[].averageTransaction` | number | Focus/hover detail; table (FR-11) | CUR | B7 | Count 0 → "—" |
+| 5 Transactions | `transactions[]` | array | Transaction list, page by page (FR-13, FR-17) | Returned order (per `sortBy`) | B8 | `[]` + filters → "No transactions match these filters" + "Clear filters"; `[]` no filters → "No transactions in this period" (FR-20, E2E `empty`) · `[]` but `total` > 0 → offset edge (FR-17) · no reload/reorder/jump while reading (FR-19) |
+| 5 Transactions | `transactions[].id` | string | Not displayed (row identity) | n/a | B8 | Duplicate across pages → shown once (FR-13) |
+| 5 Transactions | `transactions[].date` | string ISO 8601 UTC | Row date and time (FR-13) | DATETIME, "16 Sep 2024 16:30" | B8 | Near UTC midnight → date per display timezone · invalid → "—" |
+| 5 Transactions | `transactions[].merchant` | string | Row primary text (FR-13) | As returned; 1 line, truncated, full text in accessible name | B8 | Empty → `description` as primary · never a filter (NG-02) |
+| 5 Transactions | `transactions[].category` | string | Row category (FR-13) | As returned | B8 | Not in §7 → neutral style |
+| 5 Transactions | `transactions[].amount` | number | Row amount (FR-13) | CUR, "R 245,80" | B8 | Negative → "-R 61,02" form (FR-03) · wrong type → block error (FR-36) |
+| 5 Transactions | `transactions[].description` | string | Row secondary text (FR-13) | 1 line, truncated, full text in accessible name | B8 | Empty → line hidden |
+| 5 Transactions | `transactions[].paymentMethod` | string | Row meta text (FR-13) | As given (A-09) | B8 | Empty → line hidden |
+| 5 Transactions | `transactions[].icon` | string | Row icon (FR-13) | Phosphor fill glyph via fixed map, screen-spec §3a (Muzi 2026-10-22) | B8 | Unmapped → `Tag` |
+| 5 Transactions | `transactions[].categoryColor` | string hex | Row accent (FR-13, FR-27) | Never colour-only; category label present | B8 | ≠ §7 `color` → row value used (seed prevents it, DQ-14) |
+| 5 Transactions | `pagination` | object | Paging control (FR-17) | n/a | B8 | Missing → paging hidden, rows shown |
+| 5 Transactions | `pagination.total` | integer | "Showing 1–20 of 1 250" (FR-17) | CNT | B8 | 0 → FR-20 · changes between pages → new count shown, position kept |
+| 5 Transactions | `pagination.limit` | integer | Range in "Showing x–y" (FR-17) | n/a | B8 | ≠ requested → returned value used |
+| 5 Transactions | `pagination.offset` | integer | Range start in "Showing x–y" (FR-17) | x = `offset` + 1 | B8 | ≥ `total` → empty page with "Back to first page" · last partial page "Showing 1 241–1 250 of 1 250", Next disabled · page change fails → current page's rows kept, "Couldn't load this page" + Retry (FR-17, E2E `error`) |
+| 5 Transactions | `pagination.hasMore` | boolean | Enables Next (FR-17) | `false` → Next disabled | B8 | Contradicts `total`/`offset` → **PROPOSED** Next enabled only if both agree (A-16); seed keeps them consistent (DQ-12) |
+| 6 Goals | `goals[]` | array | Goal cards, returned order (FR-21) | n/a | B9 | `[]` → "No spending goals yet", no "Create goal" control (NG-04, E2E `empty`) · 20+ goals → all shown, no maximum · duplicate `id` → both shown |
+| 6 Goals | `goals[].id` | string | Not displayed (card identity) | n/a | B9 | Duplicate → both cards shown (FR-21) |
+| 6 Goals | `goals[].category` | string | Card title + icon from §7 (FR-21) | As returned | B9 | Not in §7 → neutral icon |
+| 6 Goals | `goals[].monthlyBudget` | number | "R 650,30 of R 1 000,00"; projection comparison (FR-21, FR-22) | CUR | B9 | 0 → bar hidden, "No budget set"; projection shown, no comparison |
+| 6 Goals | `goals[].currentSpent` | number | Spent amount; projection input; over-budget check (FR-21, FR-22, FR-24) | CUR; > budget → "Over budget by R 100,00" in text + icon; equal → not over | B9 | 0 → "Projected R 0,00" |
+| 6 Goals | `goals[].percentageUsed` | number | Progress bar + "65,0% used" (FR-21) | PCT; bar full above 100, text shows real value | B9 | ≠ `currentSpent` ÷ `monthlyBudget` → API value shown (seed prevents it, DQ-10) |
+| 6 Goals | `goals[].daysRemaining` | integer | "12 days left"; projection input (FR-21, FR-22) | 1 → "1 day left"; 0 → "Last day" · **PROPOSED** projected = `currentSpent` ÷ days elapsed × days in month (A-06); month = `MOCK_TODAY` month (ADR-003) | B9 | Negative → **PROPOSED** "—" (seed never returns it) · default `MOCK_TODAY` 2024-09-16 → seed `daysRemaining` 14 (DQ-09) · days elapsed 0 → "Too early to project" · > days in month → projection hidden |
+| 6 Goals | `goals[].status` | string enum | Status line: solid glyph + words, no badge, no pill border (FR-23, Muzi 2026-10-22) | As returned, never recalculated: `on_track` → `CheckCircle` + "On track", `warning` → `Warning` + "Close to limit" (**PROPOSED** words, A-09) | B9 | Unlisted → **PROPOSED** words only in muted text, no glyph, `_` → space, sentence case · missing → no status line · contradicts `percentageUsed` → API status shown |
+| 7 Filters | `categories[]` | array | Category filter options + "All categories", §7 order (FR-14); icon lookup (FR-05, FR-21) | n/a | B8 | `[]` or §7 fails → filter hidden, list still works |
+| 7 Filters | `categories[].name` | string | Filter option label; sent as §5 `category` (FR-14) | Exact name as returned (A-11) | B8 | One category at a time · restored name no longer in §7 → filter cleared, message (FR-18) |
+| 7 Filters | `categories[].color` | string hex | Option swatch; category colour lookup (FR-14, FR-21) | Never colour-only (FR-27) | B8, B9 | Invalid → neutral colour |
+| 7 Filters | `categories[].icon` | string | Option icon; icon for top category and goals (FR-05, FR-14, FR-21) | Phosphor fill glyph via fixed map, screen-spec §3a (Muzi 2026-10-22) | B5, B8, B9 | Unmapped → `Tag` · refresh fails → previous options kept (FR-39) |
+| 7 Filters | `dateRangePresets[]` | array | Period control options (FR-04) | Returned order | B5, B6 | `[]` or §7 fails → **PROPOSED** the 4 spec values with spec labels (A-16) · each N-day preset = N days inclusive ending on `MOCK_TODAY` (default 2024-09-16: `7d` 2024-09-10, `30d` 2024-08-18, `90d` 2024-06-19, `1y` 2023-09-18, A-21a, DQ-16); also sets §5 dates (ADR-002); preset change replaces the history entry (FR-18) |
+| 7 Filters | `dateRangePresets[].label` | string | Option label; default "Last 30 days" (FR-04) | **PROPOSED** as returned, no extra copy (A-09) | B5, B6 | — |
+| 7 Filters | `dateRangePresets[].value` | string | Sent as §2 and §3 `period`; §5 gets the resulting §3 `dateRange` (FR-04) | One of `7d`, `30d`, `90d`, `1y` | B5, B6 | Outside spec → option not shown |
+
+## 2. Query and path parameters
+
+| Endpoint | Param | Allowed values/limits from spec | UI control | Build PBI |
+|---|---|---|---|---|
+| All | `{customerId}` (path) | Not specified (sample `"12345"`) | None: never user-editable, never in address bar or saved state (FR-18, FR-31) | B3, B11 |
+| 2 Summary | `period` | `7d`, `30d`, `90d`, `1y`; default `30d` | Period control, default "Last 30 days"; one period shared with §3 and §5 (ADR-002); survives back/refresh (FR-04, FR-18); not sent while a custom range is active → summary shows "Available for preset periods only" (FR-09) | B5 |
+| 3 Categories | `period` | `7d`, `30d`, `90d`, `1y`; default `30d` | Same period control (FR-04); not sent while a custom range applies (FR-09, A-10) | B6 |
+| 3 Categories | `startDate` | `YYYY-MM-DD`, optional | Custom "From" date; control shows "Custom"; same range sent to §5 (FR-09, ADR-002) | B6, B8 |
+| 3 Categories | `endDate` | `YYYY-MM-DD`, optional | Custom "To" date (FR-09); From after To blocked: "Start date must be on or before end date"; one date, date after `MOCK_TODAY`, > 366 days → **PROPOSED** blocked (A-10) | B6, B8 |
+| 4 Trends | `months` | Number; default 12; max 24; min not stated | Months control **PROPOSED** 3, 6, 12, 24 only; out-of-range never sendable (FR-12, A-15) | B7 |
+| 5 Transactions | `limit` | Default 20; max 100 | None: **PROPOSED** fixed 20 (FR-17, A-16) | B8 |
+| 5 Transactions | `offset` | Default 0 | Previous / Next; page **replaces** rows (FR-17); reset to 0 on any filter, sort or category change (FR-10, FR-14–FR-17, FR-20); clamped to ≥ 0 by mock (FR-34) | B8 |
+| 5 Transactions | `category` | Optional; values not enumerated | Category filter from §7 (FR-14) or category drill-down (FR-10); "All categories" / "Clear filters" → not sent; "Clear filters" keeps the last preset's dates (FR-14, FR-20) | B6, B8 |
+| 5 Transactions | `startDate` | `YYYY-MM-DD`, optional | = §3 `dateRange.startDate` of the shared period (FR-04, FR-10); "From" in the list sets the shared custom range (FR-15) | B6, B8 |
+| 5 Transactions | `endDate` | `YYYY-MM-DD`, optional | = §3 `dateRange.endDate` of the shared period; "To" sets the shared custom range; same rules as FR-09: From after To, one date, after `MOCK_TODAY`, > 366 days → **PROPOSED** blocked (FR-15, A-10, G4 N8) | B6, B8 |
+| 5 Transactions | `sortBy` | `date_desc`, `date_asc`, `amount_desc`, `amount_asc`; default `date_desc` | Sort control, exactly 4 options **PROPOSED** "Newest first", "Oldest first", "Amount: high to low", "Amount: low to high" (FR-16); kept on "Clear filters" (FR-20); unknown value → `date_desc` (FR-34) | B8 |
+
+## 3. Spec issues
+
+| ID | Endpoint / field | Issue | Impact | Status |
+|---|---|---|---|---|
+| SI-01 | All amounts | ZAR display locale not specified: `R 1 250,30` (en-ZA) vs `R1,250.30` (research docs) | Every CUR field | Governed by FR-03 (**PROPOSED** en-ZA, A-09) |
+| SI-02 | 2 `comparedToPrevious.*` | Unit not stated (percent vs absolute); sign convention implied only | Chip copy and colour | Governed by FR-06 (**PROPOSED** percent, A-09) |
+| SI-03 | All dates | Display date format not specified | Every DATE field | Governed by FR-01, FR-08 (A-09) |
+| SI-04 | 5 `date` | UTC timestamps; display timezone not stated (e.g. SAST, UTC+2) | Day grouping, date filters | Governed by FR-13 (**PROPOSED** SA time, A-09) |
+| SI-05 | 1 `totalSpent` | Period not stated (lifetime?). R15,420.50 vs 6-month `/trends` sum R24,223.15 (I-05) | Which KPI it can label | Seed: DQ-01; not displayed (FR-02, A-13) |
+| SI-06 | 6 `daysRemaining` | No month/period field; anchor date unknown; daysRemaining 12 on both goals | Pacing (research §4) | Closed for anchor: `MOCK_TODAY` (ADR-003); count rule DQ-09 (**PROPOSED**, G4 N9); formula A-06 |
+| SI-07 | 4 `trends[]` | Default `months` = 12 but sample returns 6; trends end 2024-06 while categories end 2024-09-16, both R4,250.75 (I-05) | Mock data design | Seed: DQ-02, DQ-08 |
+| SI-08 | 6 `status`, 1 `accountType`, 5 `paymentMethod` | Enums not enumerated. Seen: `on_track`, `warning`; `premium`; `Credit Card`, `Debit Order`. Over-budget status (e.g. exceeded) unknown | Badge mapping, mock data | Governed by FR-01, FR-13, FR-23 (A-09); seed DQ-11 |
+| SI-09 | 1 `currency` | Only `ZAR` seen; only profile carries currency; other endpoints assume it | Formatting source | Governed by FR-03 (A-09) |
+| SI-10 | 3, 5 `amount` | Sign not specified (refunds/reversals negative?); no money-in data (I-04) | Totals, list styling | Governed by FR-03 (**PROPOSED** "-R 61,02", N2) |
+| SI-11 | 3 `totalAmount` | Sample Σ`amount` = 4,250.75 (consistent); behaviour when inconsistent not specified | Display rule | Seed: DQ-04 |
+| SI-12 | 3 `categories[]` | Not sorted by amount (Utilities after Shopping) | Client sort needed | Governed by FR-07 (A-11); DQ-06 |
+| SI-13 | 2 vs 3 counts | Summary `transactionCount` 47 vs Σ category counts 53 for same R4,250.75 total | Mock data consistency | Seed: DQ-03 (I-09) |
+| SI-14 | 3, 5, 7 `icon` | Icon set not named; names (`shopping-cart`, `film`, `zap`…) match open icon sets [Inference] | Icon mapping | Decided (Muzi 2026-10-22): Phosphor fill, fixed name map in `design/screen-spec.md` §3a; unmapped → `Tag` |
+| SI-15 | 1 `email` | Returned but no stated use; PII (R-02) | Show or suppress | Governed by FR-02 (**PROPOSED** never shown, A-13) |
+| SI-16 | 5 `category` param | Match rule (exact name, case) not stated; no category id exists | Filter correctness | Governed by FR-10, FR-14 (A-11) |
+| SI-17 | 7 `1y` / "Last year" | Rolling 12 months vs previous calendar year | Label copy | Rolling, inclusive range ending on `MOCK_TODAY`; `1y` = 365 days inclusive, start 2023-09-18 (DQ-16, A-21a) |
+| SI-18 | 3 `period` + `startDate`/`endDate` | Precedence when both sent; only one date sent; max range; startDate > endDate | Custom range validation | Governed by FR-09, FR-15: span ≤ 366 days inclusive (decided); one date / future date **PROPOSED** blocked (A-10); shared range (ADR-002) |
+| SI-19 | All | No error schema, status codes, auth or rate limits defined; sample data dated 2024 vs today 2026-10-21 | Error states (B10); period anchor for mock | Errors: FR-26, FR-36 (A-16); timeout 10 s (NFR-O1); mock: malformed date 400, unknown `customerId` 404, unknown enum → default, numbers clamped (FR-34, decided QA Q-01); E2E harness FR-34 · anchor: `MOCK_TODAY` default 2024-09-16 (ADR-003) |
+| SI-20 | 4 `months` | Minimum and behaviour above 24 (clamp vs error) not stated | Control limits | Closed: clamp to 1–24 (FR-34, decided QA Q-01) |
+
+## 4. Non-API display values (Muzi 2026-10-22; none is an API field, none is added to the spec)
+
+| Value | Source | UI element | Format | FR |
+|---|---|---|---|---|
+| Mock "today" | `MOCK_TODAY` (ADR-003), never device date | Date line "Data as of 16 Sep 2024"; "About this demo" "Monday, 16 September 2024" | DATE · long date | FR-38, FR-40 |
+| Render instant | Server render instant passed to the client; replaced only on load or Refresh | Greeting band | TIME bands 05:00–11:59 / 12:00–17:59 / 18:00–04:59 | FR-37 |
+| Last full success | Time the last block of a refresh set succeeded | "· Updated HH:MM"; partial "· n sections couldn't refresh" | TIME, absolute only | FR-38, FR-39 |
+| Theme choice | Device storage (only stored value) | Theme control | Light / Dark / System | FR-25 |
+
+Post-G5 sign-off errata 2026-10-21: preset dates per A-21a (row `dateRangePresets[]`, SI-17)
