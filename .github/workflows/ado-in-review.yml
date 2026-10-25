@@ -1,0 +1,35 @@
+name: ADO In Review trigger
+
+# Azure DevOps service hooks cannot send GitHub's repository_dispatch payload, so this polls the sprint:
+# any work item in the "In Review" column (taskboard for tasks, board for PBIs) with an open PR that
+# references AB#<id> gets a Claude review. The label ai-review:done prevents repeat reviews until new
+# commits arrive (see ai-review-reset.yml).
+on:
+  schedule:
+    - cron: "*/5 * * * *"
+  workflow_dispatch:
+
+concurrency:
+  group: ado-in-review
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+  pull-requests: write
+  actions: write
+
+jobs:
+  dispatch:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v7
+      - name: Find In Review work items and dispatch reviews
+        env:
+          ADO_PAT: ${{ secrets.ADO_PAT }}
+          ADO_ORG: ${{ vars.ADO_ORG }}
+          ADO_PROJECT: ${{ vars.ADO_PROJECT }}
+          ADO_TEAM: ${{ vars.ADO_TEAM }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_REPO: ${{ github.repository }}
+        run: python3 .github/scripts/ado_in_review.py

@@ -1,133 +1,133 @@
 # Design Handoff (canvas v34)
 
-| Owner | Source of truth | Status | Superseded |
-|---|---|---|---|
+| Owner                           | Source of truth                                                                                                                                                                                                                | Status                              | Superseded                                                                                                                            |
+| ------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ----------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------- |
 | `ui-designer` · Muzi 2026-10-23 | Canvas v34 https://claude.ai/artifact/3H8jtpL8whxV1GmfRr1sXK · master `Main.dc.html` (one component, props `bp` S/M/L/XL · `mode` light/dark · `scenario` populated/loading/error/empty/custom/edge; tokens in `renderVals()`) | Rebuilt for G5 B9 (Muzi 2026-10-23) | Figma `jvmhOq4HEYaZQvdTHhpdm4` (nodes `12:2`, `14:2`, `15:2`): superseded by the canvas (R-06, Figma MCP limit). Do not build from it |
 
 Screenshots = `shots/<name>.png` exported from canvas v34 (session scratchpad; not in repo, see DQ-07). `All screens` = the 10 Screens + Dark boards.
 
 ## 1. Boards (`canvas.json`)
 
-| Page | Board (`.dc.html`) | bp · mode · scenario | Width |
-|---|---|---|---|
-| Screens · Light | `Main` (prototype) · `XL1920` · `M768` · `S360` · `S320` | L · XL · M · S · S · light · populated | 1280 · 1920 · 768 · 360 · 320 |
-| Dark theme | `L1280Dark` · `S360Dark` · `M768Dark` · `XL1920Dark` · `S320Dark` | L · S · M · XL · S · dark · populated | 1280 · 360 · 768 · 1920 · 320 |
-| States | `StateLoading` · `StateError` · `StateEmpty` | S · light · loading / error / empty | 360 |
-| States | `StateCustom` | L · light · custom | 1280 |
-| States | `StateEdge360` · `StateEdge1280` | S · L · light · edge | 360 · 1280 |
-| States | `StateEdge360Dark` | S · dark · edge | 360 |
-| States | `StateMicro360` · `StateMicro1280` | S · L · light · micro (Still loading…, Loading page… (S) / Back to first page (L), No budget set, removed-category note) | 360 · 1280 |
-| Components | `Components` (component sheet: colour L/D, type, controls, focus, icons, status) | n/a | 1280 |
+| Page            | Board (`.dc.html`)                                                               | bp · mode · scenario                                                                                                     | Width                         |
+| --------------- | -------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------ | ----------------------------- |
+| Screens · Light | `Main` (prototype) · `XL1920` · `M768` · `S360` · `S320`                         | L · XL · M · S · S · light · populated                                                                                   | 1280 · 1920 · 768 · 360 · 320 |
+| Dark theme      | `L1280Dark` · `S360Dark` · `M768Dark` · `XL1920Dark` · `S320Dark`                | L · S · M · XL · S · dark · populated                                                                                    | 1280 · 360 · 768 · 1920 · 320 |
+| States          | `StateLoading` · `StateError` · `StateEmpty`                                     | S · light · loading / error / empty                                                                                      | 360                           |
+| States          | `StateCustom`                                                                    | L · light · custom                                                                                                       | 1280                          |
+| States          | `StateEdge360` · `StateEdge1280`                                                 | S · L · light · edge                                                                                                     | 360 · 1280                    |
+| States          | `StateEdge360Dark`                                                               | S · dark · edge                                                                                                          | 360                           |
+| States          | `StateMicro360` · `StateMicro1280`                                               | S · L · light · micro (Still loading…, Loading page… (S) / Back to first page (L), No budget set, removed-category note) | 360 · 1280                    |
+| Components      | `Components` (component sheet: colour L/D, type, controls, focus, icons, status) | n/a                                                                                                                      | 1280                          |
 
 ## 2. Components C-01–C-15 → boards → shots (15/15)
 
-| SS row | FR-IDs | Boards | Shots |
-|---|---|---|---|
-| C-01 Profile tooltip | FR-01, FR-02, FR-26, FR-37, FR-39 | All screens; `StateError` (profile error + Retry) | B4-06-topbar-1280-tooltip, B4-11-topbar-profile-error-1280 |
-| C-02 Theme radiogroup | FR-25 | Top bar `M768`/`Main`/`XL1920` (+ dark); last row `S360`/`S320`; `Components` | B4-06-topbar-1280-tooltip, B4-09-theme-row-360, B4-00-component-sheet |
-| C-03 Presets + Custom range | FR-04, FR-09, FR-18 | All screens (S: select; ≥ M: radiogroup + `Check`) | B5-01-period-bar-1280, B5-02-period-bar-360 |
-| C-04 Custom range dialog | FR-09, FR-15, FR-20 | `Main` (prototype), `StateCustom` | B6-05-custom-range-dialog-error, B5-06-hero-custom-range-1280 |
-| C-05 Spent hero | FR-03, FR-05, FR-06, FR-39 | All screens; `StateLoading`/`StateError`/`StateEmpty`/`StateCustom` | B5-03-hero-1280, B5-04-hero-360, B5-05-hero-1280-dark, B5-06-hero-custom-range-1280, B10-05-micro-360 (Still loading…) |
-| C-06 Category rows | FR-07, FR-08, FR-10, FR-27, FR-39 | All screens; state boards | B6-01-categories-1280, B6-02-categories-selected-1280, B6-03-categories-360, B6-04-categories-1920, B10-04-error-categories-1280 |
-| C-07 Trends capsule chart | FR-11, FR-12, FR-39 | `Main`/`L1280Dark` (side col), all screens; state boards | B7-01-trends-1280, B7-02-trends-select-march-1280, B7-03-trends-table-open-1280, B7-04-trends-360 |
-| C-08 Transactions toolbar | FR-14, FR-15, FR-16, FR-18, FR-20 | All screens | B8-01-transactions-1280, B8-03-transactions-filtered-1280, B8-07-transactions-loading-page-360 (removed-category note, `StateMicro*`) |
-| C-09 Transactions list/table | FR-13, FR-17, FR-19, FR-20, FR-39 | All screens; `StateEmpty`; `StateEdge*` (page fail) | B8-01-transactions-1280, B8-02-transactions-360, B8-04-transactions-no-match-1280, B8-06-transactions-page-fail-1280, B8-07-transactions-loading-page-360 (Loading page…) |
-| C-10 Pagination | FR-17 | All screens (`Main` live) | B8-05-transactions-page2-1280, B10-06-micro-1280 (Back to first page) |
-| C-11 Goals ring gauges | FR-21–FR-24, FR-39 | All screens; `StateEdge360`/`StateEdge1280` | B9-01-goals-1280, B9-02-goals-360, B9-03-goals-768, B9-04-goals-edge-360, B9-05-goals-no-budget-1280 (No budget set) |
-| C-12 Rail | FR-30, FR-41 | `Main`, `XL1920`, `L1280Dark`, `XL1920Dark` | B4-05-rail-1280, B4-01-layout-1280-light |
-| C-13 Greeting + date line | FR-37, FR-38 | All screens; `StateEdge*` ("1 section couldn't refresh") | B4-06-topbar-1280-tooltip, B4-07-topbar-360, B4-12-edge-1280 |
-| C-14 Refresh button | FR-39 | All screens (S/M square icon; L/XL labelled) | B4-08-topbar-1280-refreshing, B4-12-edge-1280 |
-| C-15 About this demo dialog | FR-40 | `Main` (Help, Learn more) | B4-10-about-dialog-1280 |
+| SS row                       | FR-IDs                            | Boards                                                                        | Shots                                                                                                                                                                     |
+| ---------------------------- | --------------------------------- | ----------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| C-01 Profile tooltip         | FR-01, FR-02, FR-26, FR-37, FR-39 | All screens; `StateError` (profile error + Retry)                             | B4-06-topbar-1280-tooltip, B4-11-topbar-profile-error-1280                                                                                                                |
+| C-02 Theme radiogroup        | FR-25                             | Top bar `M768`/`Main`/`XL1920` (+ dark); last row `S360`/`S320`; `Components` | B4-06-topbar-1280-tooltip, B4-09-theme-row-360, B4-00-component-sheet                                                                                                     |
+| C-03 Presets + Custom range  | FR-04, FR-09, FR-18               | All screens (S: select; ≥ M: radiogroup + `Check`)                            | B5-01-period-bar-1280, B5-02-period-bar-360                                                                                                                               |
+| C-04 Custom range dialog     | FR-09, FR-15, FR-20               | `Main` (prototype), `StateCustom`                                             | B6-05-custom-range-dialog-error, B5-06-hero-custom-range-1280                                                                                                             |
+| C-05 Spent hero              | FR-03, FR-05, FR-06, FR-39        | All screens; `StateLoading`/`StateError`/`StateEmpty`/`StateCustom`           | B5-03-hero-1280, B5-04-hero-360, B5-05-hero-1280-dark, B5-06-hero-custom-range-1280, B10-05-micro-360 (Still loading…)                                                    |
+| C-06 Category rows           | FR-07, FR-08, FR-10, FR-27, FR-39 | All screens; state boards                                                     | B6-01-categories-1280, B6-02-categories-selected-1280, B6-03-categories-360, B6-04-categories-1920, B10-04-error-categories-1280                                          |
+| C-07 Trends capsule chart    | FR-11, FR-12, FR-39               | `Main`/`L1280Dark` (side col), all screens; state boards                      | B7-01-trends-1280, B7-02-trends-select-march-1280, B7-03-trends-table-open-1280, B7-04-trends-360                                                                         |
+| C-08 Transactions toolbar    | FR-14, FR-15, FR-16, FR-18, FR-20 | All screens                                                                   | B8-01-transactions-1280, B8-03-transactions-filtered-1280, B8-07-transactions-loading-page-360 (removed-category note, `StateMicro*`)                                     |
+| C-09 Transactions list/table | FR-13, FR-17, FR-19, FR-20, FR-39 | All screens; `StateEmpty`; `StateEdge*` (page fail)                           | B8-01-transactions-1280, B8-02-transactions-360, B8-04-transactions-no-match-1280, B8-06-transactions-page-fail-1280, B8-07-transactions-loading-page-360 (Loading page…) |
+| C-10 Pagination              | FR-17                             | All screens (`Main` live)                                                     | B8-05-transactions-page2-1280, B10-06-micro-1280 (Back to first page)                                                                                                     |
+| C-11 Goals ring gauges       | FR-21–FR-24, FR-39                | All screens; `StateEdge360`/`StateEdge1280`                                   | B9-01-goals-1280, B9-02-goals-360, B9-03-goals-768, B9-04-goals-edge-360, B9-05-goals-no-budget-1280 (No budget set)                                                      |
+| C-12 Rail                    | FR-30, FR-41                      | `Main`, `XL1920`, `L1280Dark`, `XL1920Dark`                                   | B4-05-rail-1280, B4-01-layout-1280-light                                                                                                                                  |
+| C-13 Greeting + date line    | FR-37, FR-38                      | All screens; `StateEdge*` ("1 section couldn't refresh")                      | B4-06-topbar-1280-tooltip, B4-07-topbar-360, B4-12-edge-1280                                                                                                              |
+| C-14 Refresh button          | FR-39                             | All screens (S/M square icon; L/XL labelled)                                  | B4-08-topbar-1280-refreshing, B4-12-edge-1280                                                                                                                             |
+| C-15 About this demo dialog  | FR-40                             | `Main` (Help, Learn more)                                                     | B4-10-about-dialog-1280                                                                                                                                                   |
 
 ## 3. FR-01–FR-41 → boards → shots → TC (41/41)
 
-| FR | Boards | Shots | TC-IDs |
-|---|---|---|---|
-| FR-01 | All screens · `StateError` | B4-06, B4-11 | TC-001–TC-004 |
-| FR-02 | All screens (no `customerId`/`email`/`totalSpent` shown) | B4-06 | TC-005, TC-006 |
-| FR-03 | All screens | B5-03, B6-01, B8-01 | TC-007–TC-009 |
-| FR-04 | All screens | B5-01, B5-02 | TC-010–TC-017 |
-| FR-05 | All screens | B5-03, B5-04, B5-05 | TC-018–TC-023 |
-| FR-06 | All screens | B5-03 | TC-024–TC-026 |
-| FR-07 | All screens | B6-01, B6-03, B6-04 | TC-027–TC-030 |
-| FR-08 | All screens | B6-01 | TC-031, TC-032 |
-| FR-09 | `StateCustom`, `Main` | B5-06, B6-05 | TC-033–TC-037, TC-128 |
-| FR-10 | `Main` | B6-02, B8-03 | TC-038–TC-041, TC-129 |
-| FR-11 | All screens | B7-01, B7-02, B7-03, B7-04 | TC-042–TC-046 |
-| FR-12 | All screens | B7-01 | TC-047, TC-048 |
-| FR-13 | All screens | B8-01, B8-02 | TC-049–TC-051 |
-| FR-14 | All screens | B8-03 | TC-052–TC-054 |
-| FR-15 | All screens (Dates) · `StateCustom` | B8-01, B6-05 | TC-055, TC-056 |
-| FR-16 | All screens | B8-01 | TC-057, TC-058 |
-| FR-17 | All screens | B8-05 | TC-059–TC-063 |
-| FR-18 | `Main` (behaviour; in-session only on canvas) | B8-03 | TC-064–TC-068 |
-| FR-19 | `Main`, `StateEdge*` | B8-05, B8-06 | TC-069, TC-070 |
-| FR-20 | `Main`, `StateEmpty` | B8-03, B8-04, B10-03 | TC-071–TC-073 |
-| FR-21 | All screens | B9-01, B9-02, B9-03 | TC-074–TC-077 |
-| FR-22 | All screens · `StateEdge*` | B9-01, B9-04 | TC-078–TC-080 |
-| FR-23 | All screens | B9-01 | TC-081 |
-| FR-24 | `StateEdge360`, `StateEdge1280` | B9-04, B4-12 | TC-082 |
-| FR-25 | All screens · Dark page | B4-06, B4-09, B4-02, B4-13 | TC-083–TC-086 |
-| FR-26 | `StateLoading`, `StateError`, `StateEmpty`, `StateEdge*`, `StateMicro*` | B10-01, B10-02, B10-03, B10-04, B10-05, B10-06 | TC-004, TC-087–TC-091, TC-112 |
-| FR-27 | All screens (names, %, glyph + words) | B6-01, B9-01, B5-03 | TC-092, TC-093 |
-| FR-28 | `Components` (focus) · `Main` (table disclosure) · CL-01–CL-04 | B4-00, B7-03 | TC-094–TC-099, TC-141 |
-| FR-29 | 320/360/768/1280/1920 × light + dark | B4-01, B4-03, B4-04, B4-13, B6-04 | TC-100, TC-101, TC-141 |
-| FR-30 | All screens (logo; dark on white patch) | B4-05, B4-07 | TC-102 |
-| FR-31 | Non-visual (no PII on screen: B4-06) | B4-06 | TC-103–TC-106 |
-| FR-32 | Non-visual; skeletons sized as content (`StateLoading`) | B10-01 | TC-107, TC-108 |
-| FR-33 | Non-visual (README/Docker) | n/a | TC-109–TC-111 |
-| FR-34 | Scenario prop mirrors harness `error`/`empty`/`edge`; `slow` = "Still loading…" on `StateMicro*` | B10-02, B10-03, B4-12 | TC-113–TC-118 |
-| FR-35 | All screens (R 4 250,75 = hero = category total = Jun trend) | B4-12 | TC-119–TC-122 |
-| FR-36 | `StateError` (bad data → block error) | B10-02, B10-04 | TC-123–TC-125 |
-| FR-37 | All screens | B4-06, B4-07 | TC-004, TC-130–TC-132 |
-| FR-38 | All screens · `StateEdge*` | B4-06, B4-08, B4-12 | TC-133 |
-| FR-39 | All screens · `StateEdge*` | B4-08, B4-12 | TC-134–TC-137 |
-| FR-40 | `Main` | B4-10 | TC-138, TC-139 |
-| FR-41 | L/XL boards | B4-05, B4-01 | TC-140, TC-141 |
+| FR    | Boards                                                                                           | Shots                                          | TC-IDs                        |
+| ----- | ------------------------------------------------------------------------------------------------ | ---------------------------------------------- | ----------------------------- |
+| FR-01 | All screens · `StateError`                                                                       | B4-06, B4-11                                   | TC-001–TC-004                 |
+| FR-02 | All screens (no `customerId`/`email`/`totalSpent` shown)                                         | B4-06                                          | TC-005, TC-006                |
+| FR-03 | All screens                                                                                      | B5-03, B6-01, B8-01                            | TC-007–TC-009                 |
+| FR-04 | All screens                                                                                      | B5-01, B5-02                                   | TC-010–TC-017                 |
+| FR-05 | All screens                                                                                      | B5-03, B5-04, B5-05                            | TC-018–TC-023                 |
+| FR-06 | All screens                                                                                      | B5-03                                          | TC-024–TC-026                 |
+| FR-07 | All screens                                                                                      | B6-01, B6-03, B6-04                            | TC-027–TC-030                 |
+| FR-08 | All screens                                                                                      | B6-01                                          | TC-031, TC-032                |
+| FR-09 | `StateCustom`, `Main`                                                                            | B5-06, B6-05                                   | TC-033–TC-037, TC-128         |
+| FR-10 | `Main`                                                                                           | B6-02, B8-03                                   | TC-038–TC-041, TC-129         |
+| FR-11 | All screens                                                                                      | B7-01, B7-02, B7-03, B7-04                     | TC-042–TC-046                 |
+| FR-12 | All screens                                                                                      | B7-01                                          | TC-047, TC-048                |
+| FR-13 | All screens                                                                                      | B8-01, B8-02                                   | TC-049–TC-051                 |
+| FR-14 | All screens                                                                                      | B8-03                                          | TC-052–TC-054                 |
+| FR-15 | All screens (Dates) · `StateCustom`                                                              | B8-01, B6-05                                   | TC-055, TC-056                |
+| FR-16 | All screens                                                                                      | B8-01                                          | TC-057, TC-058                |
+| FR-17 | All screens                                                                                      | B8-05                                          | TC-059–TC-063                 |
+| FR-18 | `Main` (behaviour; in-session only on canvas)                                                    | B8-03                                          | TC-064–TC-068                 |
+| FR-19 | `Main`, `StateEdge*`                                                                             | B8-05, B8-06                                   | TC-069, TC-070                |
+| FR-20 | `Main`, `StateEmpty`                                                                             | B8-03, B8-04, B10-03                           | TC-071–TC-073                 |
+| FR-21 | All screens                                                                                      | B9-01, B9-02, B9-03                            | TC-074–TC-077                 |
+| FR-22 | All screens · `StateEdge*`                                                                       | B9-01, B9-04                                   | TC-078–TC-080                 |
+| FR-23 | All screens                                                                                      | B9-01                                          | TC-081                        |
+| FR-24 | `StateEdge360`, `StateEdge1280`                                                                  | B9-04, B4-12                                   | TC-082                        |
+| FR-25 | All screens · Dark page                                                                          | B4-06, B4-09, B4-02, B4-13                     | TC-083–TC-086                 |
+| FR-26 | `StateLoading`, `StateError`, `StateEmpty`, `StateEdge*`, `StateMicro*`                          | B10-01, B10-02, B10-03, B10-04, B10-05, B10-06 | TC-004, TC-087–TC-091, TC-112 |
+| FR-27 | All screens (names, %, glyph + words)                                                            | B6-01, B9-01, B5-03                            | TC-092, TC-093                |
+| FR-28 | `Components` (focus) · `Main` (table disclosure) · CL-01–CL-04                                   | B4-00, B7-03                                   | TC-094–TC-099, TC-141         |
+| FR-29 | 320/360/768/1280/1920 × light + dark                                                             | B4-01, B4-03, B4-04, B4-13, B6-04              | TC-100, TC-101, TC-141        |
+| FR-30 | All screens (logo; dark on white patch)                                                          | B4-05, B4-07                                   | TC-102                        |
+| FR-31 | Non-visual (no PII on screen: B4-06)                                                             | B4-06                                          | TC-103–TC-106                 |
+| FR-32 | Non-visual; skeletons sized as content (`StateLoading`)                                          | B10-01                                         | TC-107, TC-108                |
+| FR-33 | Non-visual (README/Docker)                                                                       | n/a                                            | TC-109–TC-111                 |
+| FR-34 | Scenario prop mirrors harness `error`/`empty`/`edge`; `slow` = "Still loading…" on `StateMicro*` | B10-02, B10-03, B4-12                          | TC-113–TC-118                 |
+| FR-35 | All screens (R 4 250,75 = hero = category total = Jun trend)                                     | B4-12                                          | TC-119–TC-122                 |
+| FR-36 | `StateError` (bad data → block error)                                                            | B10-02, B10-04                                 | TC-123–TC-125                 |
+| FR-37 | All screens                                                                                      | B4-06, B4-07                                   | TC-004, TC-130–TC-132         |
+| FR-38 | All screens · `StateEdge*`                                                                       | B4-06, B4-08, B4-12                            | TC-133                        |
+| FR-39 | All screens · `StateEdge*`                                                                       | B4-08, B4-12                                   | TC-134–TC-137                 |
+| FR-40 | `Main`                                                                                           | B4-10                                          | TC-138, TC-139                |
+| FR-41 | L/XL boards                                                                                      | B4-05, B4-01                                   | TC-140, TC-141                |
 
 Shot codes in §3 = prefix of the §2 file names (e.g. B4-06 = B4-06-topbar-1280-tooltip).
 
 ## 4. Design decisions (canvas v34, Muzi 2026-10-23)
 
-| ID | Decision | Basis |
-|---|---|---|
-| DD-01 | Nunito Sans 400/600/700 only | MC l.12; L-01 |
-| DD-02 | Text, links, filled buttons `#2259D0` (D `#7EA6F7`); heading + Spent navy `#0033A0` (D `#9DB8FF`); `#2F70EF` = focus ring only; trend capsules `#6E8FE0`, selected `#0033A0` (D `#5C73A3`/`#7EA6F7`) | MC l.322–330; Components colour block |
-| DD-03 | Red `#E63934` only inside the logo; red app-bar rule removed; errors `#B91C1C` (D `#FCA5A5`); logo on white patch in dark | T-01 erratum; MC l.20 |
-| DD-04 | Icons: Phosphor **Fill** (MIT), `aria-hidden`, meaning in text; lucide retired | SS §3a; Components icon row |
-| DD-05 | Controls: pills (radius 999), ≥ 44 px at S/M; Refresh/Help square icon buttons at S/M | DS-14; Components controls |
-| DD-06 | Cards radius 24 + soft shadow `0 1px 2px rgba(16,24,40,.04), 0 8px 24px rgba(16,24,40,.06)` (light); dark: no shadow, 1 px `#2A303A` border; content window `#F4F6FA` radius 32 at L/XL | MC l.331, l.440, l.486 |
-| DD-07 | Spent hero (C-05): one navy card (D `#1E3F96`), "Spent · <period>", amount, change in words + arrow dot, stats row Transactions / Average transaction / Top category (S: label/value rows); replaces 2 × 2 summary | SS C-05; B5-03 |
-| DD-08 | Categories (C-06): full-height colour tile + white glyph, name, count, amount, share ring at ≥ M (none at S); selected = `#E8EFFD` + 2 px `#2259D0`, `aria-pressed`; "R 4 250,75 total" | SS C-06; B6-02 |
-| DD-09 | Trends (C-07): capsule columns, value bubble above the selected month, month pill, strip "47 transactions · avg R 90,44", "Show data table"; 6 spec months, "12 months" selected + "Showing the 6 months available of the 12 requested." | SS C-07; FR-12 default 12 |
-| DD-10 | Goals (C-11): ring gauge 76 (S) / 84 px, `role="progressbar"`; fill `#2259D0`, amber `#B45309` (D `#FBBF24`) when warning; status glyph + words, no badge | SS C-11; MC l.330, l.413 |
-| DD-11 | Transactions (C-09): ≥ M 4 columns Merchant (chip + description) / Category · Payment / Date / Amount; S stacked list; 2 spec rows, "Showing 1–20 of 1 250" | B8-01 (deviation: SS 5 cols at L) |
-| DD-12 | Theme (C-02): `radiogroup` "Theme", `Sun`/`Moon`/`Monitor`; top bar at M/L/XL, last row at S; selected = primary fill + `primaryFg` | MC l.66, l.482 |
-| DD-13 | Labels: L/XL "Refresh" (in flight "Refreshing…"); S/M icon named "Refresh data"; rail card "Learn more"; "Help" | MC l.49, l.63, l.474 (deviation: FR-39) |
-| DD-14 | Greeting tooltip (C-01) replaces profile pill: name, account type, customer since; greeting focusable, Esc hides | FR-01 (Muzi 2026-10-23) |
-| DD-15 | Edge state: over budget (Entertainment 107 %, "Over budget by R 100,00"), "Too early to project" (Groceries 0 %), refresh failure ("Couldn't refresh goals. Showing earlier data." + date line "1 section couldn't refresh"), page failure ("Couldn't load page 2. Still showing page 1." + Retry) | B4-12, B9-04; FR-24, FR-39 |
-| DD-16 | Rail ≥ 1280: logo + "CapSense", "On this page" 4 links, navy "About this demo" card | SS C-12; B4-05 |
+| ID    | Decision                                                                                                                                                                                                                                                                                           | Basis                                   |
+| ----- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------- |
+| DD-01 | Nunito Sans 400/600/700 only                                                                                                                                                                                                                                                                       | MC l.12; L-01                           |
+| DD-02 | Text, links, filled buttons `#2259D0` (D `#7EA6F7`); heading + Spent navy `#0033A0` (D `#9DB8FF`); `#2F70EF` = focus ring only; trend capsules `#6E8FE0`, selected `#0033A0` (D `#5C73A3`/`#7EA6F7`)                                                                                               | MC l.322–330; Components colour block   |
+| DD-03 | Red `#E63934` only inside the logo; red app-bar rule removed; errors `#B91C1C` (D `#FCA5A5`); logo on white patch in dark                                                                                                                                                                          | T-01 erratum; MC l.20                   |
+| DD-04 | Icons: Phosphor **Fill** (MIT), `aria-hidden`, meaning in text; lucide retired                                                                                                                                                                                                                     | SS §3a; Components icon row             |
+| DD-05 | Controls: pills (radius 999), ≥ 44 px at S/M; Refresh/Help square icon buttons at S/M                                                                                                                                                                                                              | DS-14; Components controls              |
+| DD-06 | Cards radius 24 + soft shadow `0 1px 2px rgba(16,24,40,.04), 0 8px 24px rgba(16,24,40,.06)` (light); dark: no shadow, 1 px `#2A303A` border; content window `#F4F6FA` radius 32 at L/XL                                                                                                            | MC l.331, l.440, l.486                  |
+| DD-07 | Spent hero (C-05): one navy card (D `#1E3F96`), "Spent · <period>", amount, change in words + arrow dot, stats row Transactions / Average transaction / Top category (S: label/value rows); replaces 2 × 2 summary                                                                                 | SS C-05; B5-03                          |
+| DD-08 | Categories (C-06): full-height colour tile + white glyph, name, count, amount, share ring at ≥ M (none at S); selected = `#E8EFFD` + 2 px `#2259D0`, `aria-pressed`; "R 4 250,75 total"                                                                                                            | SS C-06; B6-02                          |
+| DD-09 | Trends (C-07): capsule columns, value bubble above the selected month, month pill, strip "47 transactions · avg R 90,44", "Show data table"; 6 spec months, "12 months" selected + "Showing the 6 months available of the 12 requested."                                                           | SS C-07; FR-12 default 12               |
+| DD-10 | Goals (C-11): ring gauge 76 (S) / 84 px, `role="progressbar"`; fill `#2259D0`, amber `#B45309` (D `#FBBF24`) when warning; status glyph + words, no badge                                                                                                                                          | SS C-11; MC l.330, l.413                |
+| DD-11 | Transactions (C-09): ≥ M 4 columns Merchant (chip + description) / Category · Payment / Date / Amount; S stacked list; 2 spec rows, "Showing 1–20 of 1 250"                                                                                                                                        | B8-01 (deviation: SS 5 cols at L)       |
+| DD-12 | Theme (C-02): `radiogroup` "Theme", `Sun`/`Moon`/`Monitor`; top bar at M/L/XL, last row at S; selected = primary fill + `primaryFg`                                                                                                                                                                | MC l.66, l.482                          |
+| DD-13 | Labels: L/XL "Refresh" (in flight "Refreshing…"); S/M icon named "Refresh data"; rail card "Learn more"; "Help"                                                                                                                                                                                    | MC l.49, l.63, l.474 (deviation: FR-39) |
+| DD-14 | Greeting tooltip (C-01) replaces profile pill: name, account type, customer since; greeting focusable, Esc hides                                                                                                                                                                                   | FR-01 (Muzi 2026-10-23)                 |
+| DD-15 | Edge state: over budget (Entertainment 107 %, "Over budget by R 100,00"), "Too early to project" (Groceries 0 %), refresh failure ("Couldn't refresh goals. Showing earlier data." + date line "1 section couldn't refresh"), page failure ("Couldn't load page 2. Still showing page 1." + Retry) | B4-12, B9-04; FR-24, FR-39              |
+| DD-16 | Rail ≥ 1280: logo + "CapSense", "On this page" 4 links, navy "About this demo" card                                                                                                                                                                                                                | SS C-12; B4-05                          |
 
 ## 5. Canvas limitations to honour in build
 
-| ID | Not live on canvas | Build must |
-|---|---|---|
-| CL-01 | `:focus-visible` ring (no rule in MC) | 2 px solid `#2F70EF` (D `#7EA6F7`), 2 px offset; white on navy (hero, About card). Shown on `Components` (B4-00) |
-| CL-02 | Arrow keys in radiogroups (each radio is a tab stop on canvas) | C-02/C-03: one tab stop, ←/→ move and select (TC-094) |
-| CL-03 | Dialog focus (C-04, C-15) | Initial focus, trap, Esc, return focus to opener; errors linked by `aria-describedby` (N39) |
-| CL-04 | Font from Google Fonts | Self-host Nunito Sans (TK §3, TC-107, N40) |
-| CL-05 | Breakpoints are a prop, rail always sticky, Esc only on focused greeting | Media queries + zoom/reflow (N29); sticky only if rail fits (N34); document-level Esc for tooltip (N36) |
+| ID    | Not live on canvas                                                       | Build must                                                                                                       |
+| ----- | ------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------- |
+| CL-01 | `:focus-visible` ring (no rule in MC)                                    | 2 px solid `#2F70EF` (D `#7EA6F7`), 2 px offset; white on navy (hero, About card). Shown on `Components` (B4-00) |
+| CL-02 | Arrow keys in radiogroups (each radio is a tab stop on canvas)           | C-02/C-03: one tab stop, ←/→ move and select (TC-094)                                                            |
+| CL-03 | Dialog focus (C-04, C-15)                                                | Initial focus, trap, Esc, return focus to opener; errors linked by `aria-describedby` (N39)                      |
+| CL-04 | Font from Google Fonts                                                   | Self-host Nunito Sans (TK §3, TC-107, N40)                                                                       |
+| CL-05 | Breakpoints are a prop, rail always sticky, Esc only on focused greeting | Media queries + zoom/reflow (N29); sticky only if rail fits (N34); document-level Esc for tooltip (N36)          |
 
 ## 6. Gaps and open questions
 
-| ID | Gap | Status |
-|---|---|---|
-| DQ-01 | FR-26 slow "Still loading…" | Closed 2026-10-23: designed on `StateMicro360/1280` (shots B10-05, B10-06) |
-| DQ-02 | C-09 "Loading page…" | Closed 2026-10-23: designed on `StateMicro360` (shots B8-07) |
-| DQ-03 | C-11 "No budget set" | Closed 2026-10-23: designed on `StateMicro360/1280` (shots B9-05) |
-| DQ-04 | C-10 "Back to first page" | Closed 2026-10-23: designed on `StateMicro1280` (shots B10-06) |
-| DQ-05 | C-08 removed-category note | Closed 2026-10-23: designed on `StateMicro360/1280` (shots B8-07, B10-06) |
-| DQ-06 | State boards light only (N32): dark states needed? | Muzi |
-| DQ-07 | Screenshots sit in session scratchpad; repo location? | Muzi |
-| UXQ-08 | Region heights not in SS: heights follow content | Open |
-| UXQ-10 | FR-22 31-day example vs 30-day Sep 2024; canvas "12 days left", "Projected R 2 755,56" (edge) per sample (N38) | Open, FA errata |
+| ID     | Gap                                                                                                            | Status                                                                     |
+| ------ | -------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------- |
+| DQ-01  | FR-26 slow "Still loading…"                                                                                    | Closed 2026-10-23: designed on `StateMicro360/1280` (shots B10-05, B10-06) |
+| DQ-02  | C-09 "Loading page…"                                                                                           | Closed 2026-10-23: designed on `StateMicro360` (shots B8-07)               |
+| DQ-03  | C-11 "No budget set"                                                                                           | Closed 2026-10-23: designed on `StateMicro360/1280` (shots B9-05)          |
+| DQ-04  | C-10 "Back to first page"                                                                                      | Closed 2026-10-23: designed on `StateMicro1280` (shots B10-06)             |
+| DQ-05  | C-08 removed-category note                                                                                     | Closed 2026-10-23: designed on `StateMicro360/1280` (shots B8-07, B10-06)  |
+| DQ-06  | State boards light only (N32): dark states needed?                                                             | Muzi                                                                       |
+| DQ-07  | Screenshots sit in session scratchpad; repo location?                                                          | Muzi                                                                       |
+| UXQ-08 | Region heights not in SS: heights follow content                                                               | Open                                                                       |
+| UXQ-10 | FR-22 31-day example vs 30-day Sep 2024; canvas "12 days left", "Projected R 2 755,56" (edge) per sample (N38) | Open, FA errata                                                            |
