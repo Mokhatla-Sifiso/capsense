@@ -1,0 +1,79 @@
+# Business Requirements: CapSense
+
+| Owner · Date · ADO | Inputs | Keys |
+|---|---|---|
+| `business-analyst` · 2026-10-21 · PBI #21 (AC-1 to AC-3) · **Rev 3 2026-10-22: BR-36 to BR-38 added, BR-01/BR-22 amended (Muzi 2026-10-22) · Rev 4 2026-10-23: BR-22 reworded (Muzi 2026-10-23); awaiting QA** | `brief/api-spec.md`; `research/02-discovery-summary.md` (G1); `product/problem-definition.md` (G2); `delivery/raid-log.md`; ADR-002, ADR-003, `architecture/nfr.md` (accepted) | Goal = G-xx (PD §3) · Evidence = F/BM/GAP (02) · B1–B11 provisional (A-08) · "pending A-xx" = open RAID assumption · "Muzi 2026-10-21" = decision given to G4 rework |
+
+Errata 2026-10-21 (post-G4 sign-off, G4 run 3): N22 BR-34 → #34, #35 and BR-35 → #35 (were B1); N13 BR-19 "return from another view" → "leaving the page and returning via Back" (FR-18); N6 (Muzi 2026-10-21) BR-22 stays Could, G-01; BR-31 Should → Must, G-04.
+
+Errata 2026-10-22 (Muzi 2026-10-22; I-17): BR-01 "with no navigation" → "with no navigation required" (meaning unchanged: 0 interactions to first insight, SM-04); BR-22 extended with greeting (FR-37); BR-36 to BR-38 added (FR-38 to FR-41). Open: A-23 to A-27.
+
+Errata 2026-10-23 (Muzi 2026-10-23; FR-01 amended by FA): BR-22 "sees their name and account type on every view" → "greeted by first name on every view; full name, account type and customer-since date available on demand from the greeting". Trace (FR-01, FR-37), goal, evidence and MoSCoW unchanged; A-23 to A-25 still open.
+
+## 1. Business requirements (AC-1, AC-3)
+
+| ID | Requirement (WHAT, never HOW) | Goal | Evidence | MoSCoW | Build PBI(s) |
+|---|---|---|---|---|---|
+| BR-01 | On first view, with no navigation required (Muzi 2026-10-22), the customer sees for the selected period: total spent, transaction count, average transaction and top category | G-01 | F-06, F-07, F-09 | Must | B5 |
+| BR-02 | For the selected period the customer sees the change in spend and in transaction count against the previous period, with direction stated in words (RULE-13) | G-01 | F-10 | Must | B5 |
+| BR-03 | The customer chooses one period, a preset (RULE-02 to RULE-04) or a custom range (BR-04); the same period applies to the summary, the category breakdown and the transactions (ADR-002; A-14 closed) | G-01 | F-09 | Must | B5, B6, B8 |
+| BR-04 | The customer can set a custom start and end date (RULE-05); it applies to the category breakdown and the transactions, and the summary shows "Available for preset periods only" (Muzi 2026-10-21) | G-01 | F-04 (longer ranges wanted) | Should | B5, B6, B8 |
+| BR-05 | On first view the customer sees spend by category for the period: name, amount, share %, transaction count per category, the total, ordered per RULE-11 | G-01 | F-09, GAP-08 | Must | B6 |
+| BR-06 | The category breakdown states the date range it covers | G-01 | GAP-07 | Should | B6 |
+| BR-07 | On first view the customer sees total spend per month over time; per month the transaction count and average are also available | G-01 | F-07, GAP-04 | Must | B7 |
+| BR-08 | The customer can change how many months the trend covers, within RULE-07 | G-01 | GAP-04 | Should | B7 |
+| BR-09 | On first view the customer sees every spending goal: category, monthly budget, amount spent, % used, days remaining and status | G-01, G-03 | BM-04, BM-06 | Must | B9 |
+| BR-10 | Each goal shows projected month-end spend against its budget (RULE-15) | G-03 | F-10, BM-06 | Must | B9 |
+| BR-11 | Each goal's status is shown in words, as returned by the API (RULE-14) | G-03 | BM-05, BM-06 | Must | B9 |
+| BR-12 | A goal whose spend exceeds its budget is shown as over budget, with the amount over (RULE-16) | G-03 | BM-06 | Should | B9 |
+| BR-13 | One interaction on a category in the breakdown shows the transactions for that category and period | G-02 | F-02, F-09 | Must | B6, B8 |
+| BR-14 | Choosing a different category replaces the previous category filter; the list never stays on the first category picked | G-02 | F-02 | Must | B6, B8 |
+| BR-15 | Each transaction shows date and time, merchant, category, amount, description and payment method (RULE-01, RULE-12) | G-02 | F-08, F-09 | Must | B8 |
+| BR-16 | The customer can filter transactions by one category (from the available-categories list) and by start and end date (RULE-05, RULE-11) | G-02 | F-02 | Must | B8 |
+| BR-17 | The customer can sort transactions by date or amount, ascending or descending (RULE-09) | G-02 | F-03 | Must | B8 |
+| BR-18 | The customer can move through all matching transactions page by page and sees how many match (RULE-08) | G-02 | GAP-05 | Must | B8 |
+| BR-19 | Selected category, filters, sort, page and scroll position are the same after back, forward, refresh and after leaving the page and returning via Back | G-02 | F-02, F-03 | Must | B3, B8 |
+| BR-20 | The transaction list does not reload, reorder or jump to the top while the customer is reading it | G-02 | F-03, GAP-05 | Must | B3, B8 |
+| BR-21 | The customer can clear all filters in one action; "no matching transactions" is distinct from "no transactions" | G-02, G-04 | F-02 | Should | B8 |
+| BR-22 | On every view the customer is greeted personally by first name with a greeting for the time of day; their full name, account type and customer-since date are available on demand from the greeting (FR-01, FR-37; Muzi 2026-10-22; Muzi 2026-10-23; time bands pending A-23, clock pending A-24, first-name rule pending A-25) | G-01 | F-08; greeting: none (owner decision, Muzi 2026-10-22) | Could | B4; Greeting PBI (backlog §2) |
+| BR-23 | Every field of the 7 endpoints is either shown or recorded as deliberately not shown; no endpoint is dropped (pending A-13 for `profile.totalSpent`, `email`) | G-05 | F-08 | Must | B2–B9 |
+| BR-24 | Mock data serves all 7 endpoints with every spec field, type and parameter honoured (RULE-02 to RULE-09) | G-05 | GAP-04, GAP-05 | Must | B2, B3 |
+| BR-25 | Mock data agrees across endpoints for the same range (RULE-19) | G-05 | GAP-06, GAP-07, GAP-12 | Must | B2 |
+| BR-26 | The interface follows the device's light or dark setting by default; the customer can override it with a manual toggle that is remembered on that device (Muzi 2026-10-21; ADR-002) | G-04 | F-05 | Must | B4 |
+| BR-27 | Category, status and change are never conveyed by colour alone; text contrast ≥ 4.5:1, graphics ≥ 3:1 in both themes | G-04 | GAP-11 | Must | B6, B10 |
+| BR-28 | Every data view shows a distinct loading, error, empty and populated state; a request unanswered after 10 s shows the error state with a retry (NFR-O1) | G-04 | F-08 | Must | B10 |
+| BR-29 | Every view meets WCAG 2.2 AA (NFR-A1); every function works by keyboard alone; chart content is available to screen-reader users | G-04 | GAP-11 | Must | B6, B7, B10 |
+| BR-30 | All views are usable at 320 to 1920 px wide with no horizontal scroll (NFR-R1; A-07 closed) | G-01, G-04 | F-09 | Must | B4 |
+| BR-31 | The interface carries Capitec branding with targeted improvements only (C-03; assets unofficial, D-01) | G-04 | F-09 (+BM-01) | Must | B4 |
+| BR-32 | Insights are calculated the same way every time; no customer data is sent to any AI model or non-app origin (RULE-20) | G-06 | F-12 | Must | B11 |
+| BR-33 | The landing view's largest content appears within 2.5 s on the Lighthouse default mobile profile, median of 3 runs (NFR-P1; A-07 closed) | G-06 | F-12 | Must | B11 |
+| BR-34 | An assessor can build, run and test from a clean clone using only the README and Dockerfile | G-07 | none (brief MR-02, MR-03) | Must | #34, #35 |
+| BR-35 | The README states the known limitation: `customerId` in the path with no authentication | G-06, G-07 | GAP-09 | Should | #35 |
+| BR-36 | The customer can refresh the data on demand in one action without losing their place: period, category, filters, sort, page and reading position stay as they were; no browser history entry is added (SM-05); a failed refresh shows an error with a retry (BR-28). Distinct from browser refresh (BR-19) (FR-39; Muzi 2026-10-22; failure behaviour pending A-26) | G-02, G-04 | F-03, F-08 | Should | Refresh PBI (backlog §2) |
+| BR-37 | The customer can see the date the data is current to ("Data as of 16 Sep 2024", `MOCK_TODAY`, RULE-04) and can open in-app "About this demo" information stating what the demo is and its limits: mocked data, fixed "today" 16 Sep 2024, read-only (RULE-17), no sign-in (NG-06), only the theme choice is stored on the device (BR-26, RULE-20) (FR-38, FR-40; Muzi 2026-10-22; copy pending A-27) | G-06 | F-08, GAP-09 | Should | Data-as-of PBI, About PBI (backlog §2) |
+| BR-38 | On wide screens the customer can jump to any section of the page in one action; no browser history entry is added (SM-05); the landing view still needs no navigation (BR-01) (FR-41; Muzi 2026-10-22; "wide" breakpoint per FR-41) | G-01 | F-06, F-09 | Should | Rail links PBI (backlog §2) |
+
+## 2. Business rules (AC-2)
+
+| ID | Rule | Source | Applies to |
+|---|---|---|---|
+| RULE-01 | All amounts are in the profile `currency`, `ZAR`. Display format and handling of any other value: pending A-09 | Spec §1 `currency`; C-06 | BR-01, 05, 07, 09, 15 |
+| RULE-02 | Period is one of `7d`, `30d`, `90d`, `1y`; nothing else is offered | Spec §2, §3, §7 | BR-03, 24 |
+| RULE-03 | With no period chosen, summary and categories use `30d` | Spec §2, §3 (default) | BR-01, 03, 05 |
+| RULE-04 | Period labels: "Last 7 days", "Last 30 days", "Last 90 days", "Last year" (`dateRangePresets`). "Today" is `MOCK_TODAY`, default 2024-09-16 (ADR-003; A-12 closed); each preset is a range ending on `MOCK_TODAY` (Muzi 2026-10-21). Meaning of `1y`: pending A-09 | Spec §7; ADR-003; A-09 | BR-03 |
+| RULE-05 | Custom dates use `YYYY-MM-DD` and are optional. Precedence over period, one date only, start after end, maximum range: pending A-10 | Spec §3, §5 | BR-04, 16 |
+| RULE-06 | Previous-period comparison uses `comparedToPrevious` as returned; unit (% assumed): pending A-09 | Spec §2; A-09 | BR-02 |
+| RULE-07 | Trend months: default 12, maximum 24. Minimum and behaviour above 24: pending A-15 | Spec §4; PD SM-02 | BR-07, 08 |
+| RULE-08 | Page size: default 20, maximum 100; first page offset 0 | Spec §5 | BR-18 |
+| RULE-09 | Sort is one of `date_desc`, `date_asc`, `amount_desc`, `amount_asc`; default `date_desc` | Spec §5 | BR-17 |
+| RULE-10 | Available categories (name, colour, icon) come from `/filters`. Icon set: pending A-09 | Spec §7; A-09 | BR-05, 16 |
+| RULE-11 | Categories are ordered by amount, not API order. Direction (largest first) and category-filter match rule (exact, case): pending A-11 | GAP-08 [V]; spec §5 | BR-05, 16 |
+| RULE-12 | Transaction times are UTC in the API; display timezone: pending A-09 | Spec §5; A-09 | BR-15 |
+| RULE-13 | A change is described as an increase, decrease or no change; never by colour alone | Spec §2; C-03 | BR-02, 27 |
+| RULE-14 | Goal status is the API `status`, never recalculated. Known: `on_track`, `warning`. Display wording and unlisted values: pending A-09 | Spec §6; PD G-03, SM-06 | BR-11 |
+| RULE-15 | Projected month-end = `currentSpent` ÷ days elapsed × days in month, counted in the month of `MOCK_TODAY` (ADR-003; A-12 closed). Formula itself: pending A-06 | A-06 (open); PD G-03 | BR-10 |
+| RULE-16 | Over budget = `currentSpent` > `monthlyBudget`. Matching API `status` value: pending A-09 | Spec §6; A-09 | BR-12 |
+| RULE-17 | Read-only: no recategorising, creating or editing goals or budgets, and no push alerts in primary scope | I-02 (decided); NG-01, NG-04 | BR-09, 15 |
+| RULE-18 | Out of scope: merchant filter or view, text search, export, income, balance, net or "left to spend". Extensions are labelled and come only after primary scope | I-10 (closed); I-02; NG-02, NG-03; C-01 | BR-16, 23, 24 |
+| RULE-19 | Mock data: category % sum = 100 ± 0.1; summary total = category total; Σ category `transactionCount` = summary count; cross-endpoint totals agree; spec sample inconsistencies not repeated | PD SM-03, C-05 | BR-24, 25 |
+| RULE-20 | Name and email never appear in URLs, logs, console or browser storage; 0 requests to non-app origins; no AI or LLM | PD G-06, SM-09, NG-07 | BR-32 |

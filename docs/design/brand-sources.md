@@ -1,0 +1,59 @@
+# Brand Sources: Capitec (public evidence)
+
+| Item | Value |
+|---|---|
+| Owner | `functional-analyst` |
+| Work item | ADO PBI #25 · Task "Gather and cite public Capitec brand sources (AC-1)" · Dependency D-01 |
+| Status | **Draft, 2026-10-21.** Not QA-verified. Tokens not approved (Muzi approves D-01) |
+| Tags | **Verified** = official Capitec source read first-hand · **Reported** = third party · **Inference** = FA reasoning |
+| Access limit | `capitecbank.co.za` returned a bot-protection challenge / HTTP 403 on 2026-10-21. It was **not bypassed**. No official brand guideline, CSS or font file could be read, so **no colour or font is Verified** |
+
+## 1. Evidence
+
+| # | Area | Finding | Method | Tag | Source |
+|---|---|---|---|---|---|
+| B-01 | Primary colour (red) | `#E63934` | Read `fill` of icon shape `Fill-3` in the logo SVG hosted on Wikimedia (file lists capitecbank.co.za as source) | Reported | https://upload.wikimedia.org/wikipedia/commons/0/08/Capitec_Bank_SA_logo.svg |
+| B-02 | Primary colour (dark blue) | `#00486D` | Same SVG, `fill` of shape `Fill-5` | Reported | https://upload.wikimedia.org/wikipedia/commons/0/08/Capitec_Bank_SA_logo.svg |
+| B-03 | Wordmark colour | `#000000` in SVG; `#3B3532` (dark grey) on logo database | SVG `fill` of `Fill-1`; database auto-extraction from logo image | Reported | Same SVG · https://whatthelogo.com/logo/capitecbank/109346 |
+| B-04 | Colour cross-check | `#EB423E` (red), `#004973` (dark blue), `#0084BB` (bright blue, secondary candidate), `#3B3532` | Third-party automatic extraction from a logo image; differs slightly from B-01/B-02 | Reported | https://whatthelogo.com/logo/capitecbank/109346 |
+| B-05 | Secondary palette | No official secondary palette found. `#0084BB` (B-04) is the only candidate | n/a | UNKNOWN: needs decision | — |
+| B-06 | Contrast on white (WCAG) | `#E63934` 4.20:1 (fails 4.5 body text, passes 3:1 graphics/large text) · `#00486D` 9.78:1 (passes AA text) · `#0084BB` 4.18:1 | Computed with WCAG 2.x relative-luminance formula | Inference | https://www.w3.org/TR/WCAG21/#dfn-contrast-ratio |
+| B-07 | Logo form | Two interlocking shapes (red + blue) beside a sans-serif wordmark | Visual description by logo database; consistent with SVG shapes | Reported | https://whatthelogo.com/logo/capitecbank/109346 |
+| B-08 | Typography | Typeface **not found** in any public source. Wordmark described as sans-serif only | Searches of logo, font and rebrand coverage | UNKNOWN: needs decision | https://whatthelogo.com/logo/capitecbank/109346 |
+| B-09 | Iconography | No public Capitec icon guideline found. API supplies icon names (`shopping-cart`, `film`, `car`, `utensils`, `shopping-bag`, `zap`) that match open-source outline icon sets | Comparison of API names with common icon libraries | Inference | `docs/brief/api-spec.md` |
+| B-10 | Tone of voice | Short, plain, benefit-led imperatives. Tagline "Simplify banking, live better." Feature headings such as "Your security matters" | Read Capitec Bank Limited's own App Store listing | Verified | https://apps.apple.com/za/app/capitec-bank/id1217842108 |
+| B-11 | Tone of voice (users) | Users praise speed and simplicity; one review: "Quick, responsive. No AI." | BA review sample (G1) | Verified by BA 2026-10-20, not re-read by FA | https://apps.apple.com/za/app/capitec-bank/id1217842108 |
+| B-12 | Design principle | Redesigned app built around simplicity, tested with clients in branches | Search-result summary of Capitec blog; page itself returned 403 | Reported | https://www.capitecbank.co.za/blog/articles/best-way-to-bank/What-if-there-was-a-simpler-way-to-bank/ |
+| B-13 | App UI pattern: navigation | Track → Money out / Money in → category → details | BA read of Capitec help page (2026-10-20) | Verified by BA, not re-read by FA (site 403) | https://www.capitecbank.co.za/were-here-to-help/how-to/how-to-track-your-spending/ |
+| B-14 | App UI pattern: structure | Product areas Transact, Save, Insure, Credit, Connect, Business; bullet feature lists | Capitec App Store listing | Verified | https://apps.apple.com/za/app/capitec-bank/id1217842108 |
+| B-15 | App UI pattern: dashboard | "My dashboard" with a show-balance toggle and an edit screen for which balances appear | App Store user reviews only | Reported | https://apps.apple.com/za/app/capitec-bank/id1217842108 |
+| B-16 | App UI pattern: theme | No evidence of dark mode; it is the most-requested feature in the BA sample (12 reviews) | BA review sample; searches found no launch | Reported | https://apps.apple.com/za/app/capitec-bank/id1217842108 · https://businesstech.co.za/news/banking/379321/why-capitec-launched-a-whole-new-banking-app/ |
+| B-17 | Brand name | Holding company renamed Capitec Limited (effective 2026-10-02); bank app publisher shown as Capitec Bank Limited | Wikipedia article; App Store developer field | Reported | https://en.wikipedia.org/wiki/Capitec_Bank |
+
+## 2. Trademark-sensitive items
+
+| # | Item | Flag | Rule for CapSense (proposed, needs Muzi) |
+|---|---|---|---|
+| T-01 | Capitec logo (mark + wordmark) | Wikimedia marks the file "Trademarked"; public-domain copyright status does not grant trademark rights | ~~Do not reproduce the logo without Capitec's written permission.~~ **Erratum (Muzi 2026-10-22):** official Capitec logo SVG approved for use: `docs/design/assets/capitec-logo.svg` (source Wikimedia, B-01 URL; exported from Capitec's site nav per Muzi, not re-verified by BA: Reported). Never recoloured; in dark mode shown on a white patch. Wikimedia "Trademarked" flag still applies |
+| T-02 | Name "Capitec" | Registered business name; implies endorsement if used as product branding | Use only descriptively in README ("take-home for Capitec"), not in UI chrome as if official |
+| T-03 | Exact brand colours | Colours alone are low risk, but red + blue + interlocking shapes together imitate the mark | Use colours as accents in tokens, never recreate the interlocking-shape motif |
+| T-04 | Third-party logo files (seeklogo, logowik, companieslogo) | Unknown licence; download not performed | Do not download or ship them |
+| T-05 | App screenshots / copy | Capitec copyright | Do not copy screenshots or long copy; short paraphrase of tone only |
+
+## 3. Open decisions (for RAID via SM)
+
+| # | Decision needed | Options |
+|---|---|---|
+| DS-01 | Which red/blue to use as tokens | B-01/B-02 (SVG) vs B-04 (auto-extracted) |
+| DS-02 | Typeface | Open sans-serif substitute (choice is Muzi's ADR) |
+| DS-03 | Secondary palette | Derive from B-01/B-02 vs adopt `#0084BB` (Reported only) |
+| DS-04 | Red as brand vs warning colour | Brand red collides with error/over-budget states and Groceries `#FF6B6B` (I-06) |
+
+Post-G5 errata 2026-10-21: G5 N16, Q-01–Q-04 renumbered DS-01–DS-04 (ID collision with QA Q-xx); status of each in `tokens.md` §7
+
+Errata 2026-10-22 (Muzi 2026-10-22):
+
+| # | Item | Change |
+|---|---|---|
+| E-01 | T-01 and `capitec-design-language.md` L-07 ("No logo") | Superseded: official logo SVG approved (T-01 row). L-07 is Designer-owned; update raised for Designer |
+| E-02 | B-08 / DS-02 typeface | Capitec display face Flama is commercial: **not used**. Nunito Sans only (`capitec-design-language.md` L-01, Verified there) |
