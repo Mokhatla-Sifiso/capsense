@@ -1,0 +1,12 @@
+# ADR-005 Test tooling
+
+| Field | Value |
+|---|---|
+| Status | **Accepted** · Muzi · 2026-10-21 (rev. 3: G6 bundle Q-08) |
+| Context | Production-grade evidence (MR-01); README must explain how to test (MR-03); all UI states, breakpoints and WCAG 2.2 AA must be verified |
+| Options | A Vitest + Testing Library + Playwright + axe · B Jest + Testing Library + Cypress · optional Storybook |
+| **Decision** | **A**, no Storybook |
+| Test levels | **Unit** (Vitest): seed, schemas, formatters, period mapping · **Component** (Vitest + Testing Library + MSW in Node): client components in every state · **E2E** (Playwright + `@axe-core/playwright`) against the production build with real route handlers: async Server Components, flows, a11y, breakpoints; states triggered via `x-mock-scenario` (ADR-003) · **Contract** (Vitest, CI): route handlers vs `api-spec.md` · **Lighthouse** (CI, against the Docker image) for NFR-P1/A1 |
+| Rationale | Vitest 77.5M vs Jest 25.8M npm/wk; Playwright 46.6M vs Cypress 3.2M; satisfaction Vitest 95%, Playwright 94% (State of JS 2025). Vitest doesn't render async Server Components, so they're covered by e2e |
+| Consequences | + One seed for every level; CI runs all suites (B1); Playwright screenshots document states in place of Storybook. − Two runners to configure |
+| Trace | MR-01, MR-03; NFR-A1, NFR-O1, NFR-Q1, NFR-R1; B1, B10, #32 |

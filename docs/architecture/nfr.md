@@ -1,0 +1,28 @@
+# Non-Functional Requirements
+
+Owner: Muzi · Status: **Accepted 2026-10-21 (rev. 2)**. Every threshold below confirmed by Muzi 2026-10-21 ("approve all", QA-B3 items 1–9) and rev-2 details (404/400 extensions, CSP inline styles, size-limit, macOS-only Safari smoke, device matrix, health probe/digest/pin-age script) confirmed 2026-10-21. Closes A-07.
+
+| ID | Requirement | Threshold | Verification |
+|---|---|---|---|
+| NFR-P1 | Core Web Vitals (lab) | LCP ≤ 2.5 s · CLS ≤ 0.1 · TBT ≤ 200 ms (lab proxy for INP ≤ 200 ms) | Lighthouse CLI, **default mobile profile** (emulated mid-tier device, slow-4G + CPU throttling), production build in Docker, **median of 3 runs** |
+| NFR-P2 | Initial JavaScript on `/` (only route) | ≤ 250 KB gzipped | `size-limit` on build output in CI; cross-checked by Lighthouse transfer size |
+| NFR-A1 | Accessibility | **WCAG 2.2 AA**; axe: 0 serious/critical; Lighthouse a11y ≥ 95 | `@axe-core/playwright` on every screen × state; Lighthouse a11y score (same run as P1); manual SC checklist + screen-reader pass defined in test strategy (#27) |
+| NFR-A2 | Contrast, **both themes** | Graphics and UI components ≥ 3:1; text ≥ 4.5:1 | Token contrast check (G5) in CI; axe |
+| NFR-R1 | Responsive | 320–1920 px, no horizontal scroll | Playwright viewports **320, 360, 768, 1280, 1920**; assert `scrollWidth ≤ clientWidth` |
+| NFR-B1 | Browser engines | Chromium (Chrome, Edge), Gecko (Firefox), WebKit (Safari) | Playwright projects for all 3 engines in CI + one manual smoke on real Safari (macOS) before #36. Limitation: "latest 2 versions" is covered by engine, not by exact version |
+| NFR-S1 | Security headers | CSP: `default-src 'self'`; scripts nonce-based, no `unsafe-eval`; `style-src 'self' 'unsafe-inline'` (Recharts inline styles); `connect-src 'self'`; `frame-ancestors 'none'` · `X-Content-Type-Options: nosniff` · `Referrer-Policy: strict-origin-when-cross-origin` | Header assertion test against the running container |
+| NFR-S2 | Privacy (R-02) | No PII (name, email) in logs, console, browser storage or query strings; `customerId` only in the spec path; no analytics or third-party origins | Unit test on logger; Playwright checks console, storage and URLs; CSP `connect-src 'self'` |
+| NFR-S3 | Dependencies | 0 high/critical advisories; exact versions pinned, each ≥ 2 weeks old at pin time | `npm audit --audit-level=high` + pin-age script (`npm view <pkg> time`) in CI |
+| NFR-Q1 | Code quality | TypeScript strict; 0 lint/typecheck errors; unit + component line coverage ≥ 80% on `src/` | CI gates on every PR (B1); Vitest coverage threshold |
+| NFR-O1 | Resilience | Every section renders loading, error (with retry) and empty states; client API timeout 10 s | Component tests (MSW latency/error); e2e via `x-mock-scenario` (ADR-003) |
+
+## Device matrix (#19 AC-4)
+
+| Class | Width | Engine(s) | Input | Tested by |
+|---|---|---|---|---|
+| Small phone | 320, 360 | WebKit, Chromium | Touch | Playwright mobile emulation (`hasTouch`) |
+| Tablet | 768 | WebKit, Chromium | Touch | Playwright |
+| Laptop | 1280 | Chromium, Gecko, WebKit | Keyboard + pointer | Playwright + manual keyboard pass |
+| Desktop | 1920 | Chromium, Gecko | Keyboard + pointer | Playwright |
+
+Sources: [web.dev Core Web Vitals](https://web.dev/articles/vitals) · [W3C WCAG 2.2](https://www.w3.org/TR/WCAG22/) · [Lighthouse throttling](https://github.com/GoogleChrome/lighthouse/blob/main/docs/throttling.md)

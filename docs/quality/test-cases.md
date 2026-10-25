@@ -1,0 +1,233 @@
+# Test Cases: CapSense
+
+| Owner · Date · ADO | Status | Inputs | Keys |
+|---|---|---|---|
+| `qa-tester` · 2026-10-21 · PBI #27 (AC-2, AC-4) | **Rev 4, 2026-10-22 (Muzi 2026-10-22 approval): TC-130–TC-141 added (FR-37–FR-41); TC-001/003/004/012/018/019/026/036/038/081/082/093/094/102/103/104/107/109/112/128 updated; Q-12–Q-15 open.** Rev 3: TC-013, TC-115 aligned to closed A-21. Rev 2: Muzi bundle (I-15), G5 run 2. Draft, not signed off. Reference table (charter Std 1: exempt from row limit) | FR-01–FR-41 (FR-37–FR-41 per Muzi 2026-10-22); BR-01–BR-38; SM-01–SM-11; DQ-01–DQ-17; ADR-002/003/005 rev. 3; `design/screen-spec.md` Rev 2; `api-spec.md`; `test-strategy.md`; brief MR-04, MR-05 | **Spec fx** = MSW fixture with `api-spec.md` sample body · **Seed** = seed module at `MOCK_TODAY` 2024-09-16 · **Harness** = `x-mock-scenario` (`error`/`empty`/`slow`/`edge`) with `MOCK_SCENARIOS=true`, first render included (ADR-003 rev. 3) · Levels: U unit · C component · K contract · E e2e · A a11y · P perf · S security · M manual · Priority: P1 = Must BR · P2 = Should · P3 = Could · Numbers per FR-03 `Intl.NumberFormat("en-ZA")` (decimal comma, NBSP grouping; PROPOSED A-19) · "PROPOSED" = expected value depends on an FA default pending Muzi · Q-xx = test-design question, §4 (resolved or open) · Copy = FR copy approved in the bundle (I-15) |
+
+## 1. Test cases (AC-2)
+
+| TC-ID | FR | Level | Preconditions | Steps | Expected result | Priority | Automated |
+|---|---|---|---|---|---|---|---|
+| TC-001 | FR-01, FR-37 | C | Spec fx §1 (`name` "John Doe", `accountType` "premium", `joinDate` "2023-01-15"); S, M, L, XL | Render app shell; read header DOM; hover the greeting; move the pointer away; Tab to the greeting | 0 profile pill, popover or profile block in the header at every width (FR-01 GWT 3) · greeting `p` holds one focusable element (`tabindex="0"`) with `aria-describedby` → an element with `role="tooltip"` · on hover and on focus the tooltip is visible and reads "John Doe", "Premium" (words, no badge) and "Customer since 15 Jan 2023" (DATE, A-09) · tooltip is not a live region · greeting first name per TC-131 · "12345" and "john.doe@email.com" absent (FR-02) (Muzi 2026-10-23; G5 re-run 2) | P3 | Y · component |
+| TC-002 | FR-01 | C, E | As TC-001; E at 1280 and 360 | (a) Focus the greeting, press Esc · (b) hover the greeting, move the pointer onto the tooltip, then off both · (c) hover only (focus elsewhere), press Esc · (d) Tab away · (e) E 360: tap the greeting | (a) Tooltip hidden, focus stays on the greeting · (b) Shown while the pointer is on the tooltip (hoverable), hidden after leaving both · (c) Hidden without moving the pointer (SC 1.4.13 dismissible; tooltip covers the date line, shot B4-06; `figma-handoff.md` CL-05) · (d) Hidden on blur · (e) **PROPOSED** (DS-19, Muzi): tap focuses the greeting and shows the tooltip | P3 | Y · component + e2e |
+| TC-003 | FR-01 | C | §1 variants: `name` ""; `name` 45 × "A"; `joinDate` "2099-01-01"; `joinDate` "not-a-date"; `accountType` "gold" | Render shell per variant | No name and no placeholder text; greeting per TC-131 · accessible name = all 45 chars; no element overflow at 320 px · "Customer since" hidden (both dates) · "Gold" in words, neutral text, no badge (PROPOSED A-09; Muzi 2026-10-22) | P3 | Y · component |
+| TC-004 | FR-01, FR-26, FR-37 | C | §1 returns 500, then 200 | Render landing; choose Retry in header | "Couldn't load profile" + Retry; logo (Q-13), theme toggle, Refresh and "About this demo" shown; greeting has no name (copy **OPEN Q-14**); summary, categories, trends, goals populated · Retry re-requests §1 only; greeting then contains "John" (FR-01, FR-26; SS C-01) | P1 | Y · component |
+| TC-005 | FR-02 | C | Spec fx all 7 | Render landing; read full DOM text | No "12345", "john.doe@email.com", "15420.50" or "R 15 420,50" (A-13 PROPOSED) | P1 | Y · component |
+| TC-006 | FR-02 | C | §1 `customerId` "99999"; requested "12345" | Render shell | "Couldn't load profile" + Retry; "John Doe" not rendered | P1 | Y · component |
+| TC-007 | FR-03 | U | None | Format 1250.3, 0, 1000000, −50 with `currency` ZAR | "R 1 250,30" · "R 0,00" · "R 1 000 000,00" · "-R 50,00" (FR-03, sign before symbol); separators normalised (NBSP) | P1 | Y · unit |
+| TC-008 | FR-03 | C | §2 fx without `currency` in §1; second run `currency` "USD" | Render summary | Run 1: amount blocks show error state, never "R" · Run 2: "USD 4 250,75", no conversion (PROPOSED A-09) | P2 | Y · component |
+| TC-009 | FR-03 | E | Harness `edge` (amounts ≥ R 1 000 000); widths 320, 360 | Load; measure each KPI tile and transaction amount | Full amount text present (no ellipsis); amounts wrap, never truncate (SS §1 r3); each element `scrollWidth ≤ clientWidth`; page no horizontal scroll | P2 | Y · e2e (`edge`) |
+| TC-010 | FR-04 | C | Spec fx; no URL state | Render landing; read MSW request log | "Last 30 days" selected; §2 and §3 requested with `period=30d` | P1 | Y · component |
+| TC-011 | FR-04 | C | MSW §3 returns `dateRange` 2024-06-16 → 2024-09-16 for `90d` | Choose "Last 90 days" | §2, §3 re-requested `period=90d`; then §5 with `startDate=2024-06-16`, `endDate=2024-09-16`, `offset=0`; all 3 blocks update | P1 | Y · component |
+| TC-012 | FR-04 | E | Seed; 320 and 1280 px | Choose "Last 90 days" on the period control; reload | Exactly 1 period control in DOM (role "Period" count 1, no copy in rail or header; Muzi 2026-10-22); "Last 90 days" still selected; category caption "19 Jun 2024 – 16 Sep 2024" (A-21(a)) | P1 | Y · e2e |
+| TC-013 | FR-04 | K | Seed; `MOCK_TODAY` 2024-09-16 | GET §3 with `period` 7d, 30d, 90d, 1y | `dateRange.startDate` 2024-09-10, 2024-08-18, 2024-06-19, 2023-09-18 (N days inclusive = `MOCK_TODAY` − (N − 1); `1y` = 365 days, A-21(a) closed); every `endDate` 2024-09-16 (FR-04 GWT 4, DQ-16) | P1 | Y · contract |
+| TC-014 | FR-04 | C | §7 variants: `dateRangePresets` []; §7 500; one preset `value` "2w" | Render period control | [] and 500: 4 options "Last 7 days", "Last 30 days", "Last 90 days", "Last year" (PROPOSED A-16) · "2w" option not shown | P2 | Y · component |
+| TC-015 | FR-04 | C | §2 echoes `period` "7d" when "30d" requested | Render landing | "Last 7 days" selected | P2 | Y · component |
+| TC-016 | FR-04 | C | §3 returns 500 | Render landing | §5 requested with no `startDate`/`endDate`; list caption "All dates" (PROPOSED A-16) | P2 | Y · component |
+| TC-017 | FR-04 | C | MSW delay: `7d` 800 ms, `90d` 400 ms, `1y` 0 ms | Choose 7d, 90d, 1y within 100 ms | Only `1y` fixture values displayed after all resolve | P1 | Y · component |
+| TC-018 | FR-05 | C | Spec fx §2, §7 | Render summary | Tiles "R 4 250,75", "47", "R 90,44", "Groceries" with the Phosphor Fill glyph mapped from §7 `icon` `shopping-cart`; 0 lucide icons in DOM (Muzi 2026-10-22) | P1 | Y · component |
+| TC-019 | FR-05 | E | Seed; viewport 1280 × 800 (rail shown, FR-41) | Load `/`; no interaction | 4 summary figures precede every other data block in DOM order (greeting, "Data as of", period control, rail links are not data blocks); each figure bottom ≤ 800 px with no rail overlap; summary, comparison, categories, trends, goals all rendered in the document scroll (5/5, SM-04) | P1 | Y · e2e |
+| TC-020 | FR-05 | C | Custom range active (FR-09) | Render summary | "Available for preset periods only"; no figures, no change statements | P2 | Y · component |
+| TC-021 | FR-05 | C, E | C: §2 `totalSpent` 0, `transactionCount` 0. E: Harness `empty` | Render summary | "R 0,00", average "—", "No spending in this period" (PROPOSED) | P1 | Y · component, e2e |
+| TC-022 | FR-05 | C | §2 variants: `topCategory` null; "Pets"; `transactionCount` 12345 | Render summary | "—" · neutral icon · "12 345" | P2 | Y · component |
+| TC-023 | FR-05 | K | Seed | GET §2, §3 for each `period` | `topCategory` = §3 `name` with max `amount` (tie A–Z); `averageTransaction` = `totalSpent` ÷ `transactionCount` (2 dp) or 0 (DQ-07, DQ-15) | P1 | Y · contract |
+| TC-024 | FR-06 | C | Spec fx §2 | Render summary | "Up 12,5% on previous period" with up-arrow; "Down 3,2% on previous period" with down-arrow (FR-06; PROPOSED A-09 unit) | P1 | Y · component |
+| TC-025 | FR-06 | C | §2 variants: both changes 0; `comparedToPrevious` null; only `spentChange` present | Render summary | "No change on previous period" ×2 · no statements and no "0%" · spend statement only | P1 | Y · component |
+| TC-026 | FR-06 | C | Spec fx §2; both themes | Inspect change cues | Spend and count cues = arrow icon + word ("Up"/"Down"/"No change") in a neutral text token; 0 change cues use `--warning`, `--success` or `--danger` colour (neutral cues, Muzi 2026-10-22) | P1 | Y · component |
+| TC-027 | FR-07 | C | Spec fx §3 | Render breakdown | Order: Groceries R 1 250,30 · Entertainment R 890,20 · Transportation R 680,45 · Dining R 520,30 · Utilities R 458,70 · Shopping R 450,80 (PROPOSED A-11); Groceries "29,4%", "15 transactions"; total "R 4 250,75"; percentages unscaled (Σ 99.9) | P1 | Y · component |
+| TC-028 | FR-07 | C, E | C: §3 `categories` [], `totalAmount` 0. E: Harness `empty` | Render breakdown | "No category spending in this period" (PROPOSED); no chart | P1 | Y · component, e2e |
+| TC-029 | FR-07 | C | §3 variants: 1 category; 8 categories; one `amount` 0; `transactionCount` 1; `color` "nope"; `icon` "unknown"; duplicate `name`; two equal amounts "Beta"/"Alpha" | Render breakdown | "100%" full chart · 8 rows, no "Other" · row shown, no segment · "1 transaction" · neutral colour · fallback icon · 2 rows · "Alpha" before "Beta" | P2 | Y · component |
+| TC-030 | FR-07 | K | Seed | GET §3 for each `period` | Σ `percentage` = 100 ± 0.1; each within 0.05 of `amount` ÷ `totalAmount` × 100; `totalAmount` = Σ `amount` (DQ-04, DQ-05) | P1 | Y · contract |
+| TC-031 | FR-08 | C | Spec fx §3; variant with both dates 2024-09-16 | Render caption | "16 Aug 2024 – 16 Sep 2024" · "16 Sep 2024" | P2 | Y · component |
+| TC-032 | FR-08 | C | §3 variants: no `dateRange`; start 2024-09-16 > end 2024-08-16; start "2024-13-01" | Render breakdown | Caption hidden, chart kept · block error state · caption hidden | P2 | Y · component |
+| TC-033 | FR-09 | C | Spec fx; today = `MOCK_TODAY` | Set From 2024-09-01, To 2024-09-10; Apply | §3 requested `startDate=2024-09-01&endDate=2024-09-10`, no `period`; §5 same + `offset=0`; no preset selected, caption "Custom: 1 Sep 2024 – 10 Sep 2024"; summary "Available for preset periods only" (PROPOSED A-10) | P2 | Y · component |
+| TC-034 | FR-09 | C | Spec fx | From 2024-09-10, To 2024-09-01; Apply | Apply blocked; "Start date must be on or before end date" tied to field; 0 new requests | P2 | Y · component |
+| TC-035 | FR-09 | C | Spec fx | Variants: From only; To 2024-09-17; From 2023-09-16 To 2024-09-16 (367 days); From 2023-09-17 To 2024-09-16 (366 days) | Blocked: "Enter both a start and an end date" · "Dates can't be after 16 Sep 2024" · "Choose a range of 366 days or fewer" · 366 days **applies** (limit inclusive, DQ date semantics, FR-09) | P2 | Y · component |
+| TC-036 | FR-09 | E | Seed; custom range 2024-09-01 → 2024-09-10 applied | Choose "Last 7 days" on the period control (1280 px) | Exactly 1 period control in DOM (Muzi 2026-10-22); custom range cleared, "Custom range…" button name without dates; summary figures return; caption "10 Sep 2024 – 16 Sep 2024" | P2 | Y · e2e |
+| TC-037 | FR-09 | C | §3 and §5 return empty for the range | Apply valid range | Category empty state and "No transactions in this period" | P2 | Y · component |
+| TC-038 | FR-10 | E | Seed; landing, 30d | Click "Dining" once | 1 interaction; list shows only "Dining" rows; §5 request has `category=Dining`, `startDate=2024-08-18` (A-21(a)), `endDate=2024-09-16`, `offset=0`; count = seed Dining `transactionCount` | P1 | Y · e2e |
+| TC-039 | FR-10 | E | TC-038 state | Activate "Utilities", then "Groceries" | Each time `category` replaced, `offset=0`; no "Dining" rows remain; never stuck on first pick; `history.length` +1 per activation (push, FR-18) | P1 | Y · e2e |
+| TC-040 | FR-10 | E | Seed | Tab to "Dining"; Enter; repeat with Space on "Shopping" | Same result as TC-038; focus moves to list heading (FR-28) | P1 | Y · e2e |
+| TC-041 | FR-10 | C | Variant A: §3 without `dateRange`. Variant B: §5 returns `total` 0 for "Dining" | Activate "Dining" | A: §5 sent with `category` only (PROPOSED A-17) · B: "No transactions match these filters" | P2 | Y · component |
+| TC-042 | FR-11 | C | Spec fx §4 | Render trends | 6 points ascending, labels "Jan 24"…"Jun 24" | P1 | Y · component |
+| TC-043 | FR-11 | C | Spec fx §4 | Focus "Jan 24" point; then hover | Shows "R 3 890,25", "42", "R 92,62"; tooltip dismissible by Esc (SC 1.4.13) | P1 | Y · component |
+| TC-044 | FR-11 | C, M | Spec fx §4 | Query table; VoiceOver pass (strategy §6) | Table with 6 rows × month, total, count, average; headers announced | P1 | Y · component; N · SR |
+| TC-045 | FR-11 | C | §4 variants: []; 1 month; 2024-01 + 2024-03 only; `month` "2024-13"; `totalSpent` 0; `transactionCount` 0; 2023-12 + 2024-01 | Render trends | "No monthly spending to show" · single point, no line · gap for Feb, not zero (PROPOSED A-16) · point dropped · zero point visible · average "—" · "Dec 23", "Jan 24" | P2 | Y · component |
+| TC-046 | FR-11 | K | Seed | GET §4 default; `months=24` | 12 items, last `month` "2024-09"; 24 items; each `totalSpent` = Σ §5 `amount` in that month (DQ-02, DQ-08) | P1 | Y · contract |
+| TC-047 | FR-12 | C | Spec fx | Render; then pick 24 | First §4 request `months=12`; then `months=24`; chart updates | P2 | Y · component |
+| TC-048 | FR-12 | C, E | Seed (E) | C: open months control. E: pick 6; reload | Options exactly 3, 6, 12, 24, no free input (PROPOSED A-15) · 6 still selected, 6 points | P2 | Y · component, e2e |
+| TC-049 | FR-13 | C | Spec fx §5 | Render list | Row 1: "16 Sep 2024 16:30", "Pick n Pay", "Groceries", "R 245,80", "Weekly groceries", "Credit Card" (PROPOSED SAST, A-09); no edit or recategorise control | P1 | Y · component |
+| TC-050 | FR-13 | U | None | Format `date` "2024-09-15T22:30:00Z"; "bad" | "16 Sep 2024 00:30" (PROPOSED SAST) · "—" | P1 | Y · unit |
+| TC-051 | FR-13 | C | §5 variants: `merchant` ""; `description` ""; `merchant` 120 chars; `category` "Pets"; same `id` on page 1 and 2; `paymentMethod` "EFT" | Render list (and page 2) | `description` as primary text · line hidden · 1 line truncated, full text in accessible name · neutral style · row shown once · "EFT" | P2 | Y · component |
+| TC-052 | FR-14 | C | Spec fx §7 | Open category filter | "All categories" + Groceries, Entertainment, Transportation, Dining, Shopping, Utilities (§7 order) | P1 | Y · component |
+| TC-053 | FR-14 | C | Spec fx | Choose "Transportation"; then "All categories" | §5 `category=Transportation&offset=0`; then no `category` param | P1 | Y · component |
+| TC-054 | FR-14 | C | §7 500; then §7 `categories` [] | Render list | Category filter hidden; rows shown | P1 | Y · component |
+| TC-055 | FR-15 | C | Spec fx | In list: From 2024-09-01, To 2024-09-16; Apply | §5 with both dates + `offset=0`; §3 re-requested with same dates; period control "Custom" | P1 | Y · component |
+| TC-056 | FR-15 | C | Spec fx | Repeat TC-034 and TC-035 variants from list controls | Same blocks and messages as FR-09 (one shared rule) | P1 | Y · component |
+| TC-057 | FR-16 | C | MSW §5 returns ids t3, t1, t2 for `amount_desc` | Render; choose "Amount: high to low" | First request `sortBy=date_desc`; then `sortBy=amount_desc&offset=0`; DOM order t3, t1, t2; exactly 4 options "Newest first", "Oldest first", "Amount: high to low", "Amount: low to high" (FR-16) | P1 | Y · component |
+| TC-058 | FR-16 | K | Seed | GET §5 with each `sortBy` | `date_desc` non-increasing `date`; `date_asc` non-decreasing; `amount_desc` non-increasing `amount`; `amount_asc` non-decreasing | P1 | Y · contract |
+| TC-059 | FR-17 | C | §5 `total` 1250, `limit` 20, `offset` 0, `hasMore` true | Render; choose Next | "Showing 1–20 of 1 250", Next enabled; request `offset=20`; page-2 rows **replace** page 1 (20 rows in DOM, none from page 1); "Showing 21–40 of 1 250" (FR-17 GWT 2) | P1 | Y · component |
+| TC-060 | FR-17 | C | Variants: `offset` 1240 / `total` 1250; `hasMore` false; `hasMore` true with `offset`+`limit` ≥ `total` | Render | "Showing 1 241–1 250 of 1 250", Next disabled · Next disabled · Next disabled (PROPOSED A-16) | P1 | Y · component |
+| TC-061 | FR-17 | C | Variants: `offset` 40 ≥ `total` 30; no `pagination`; `pagination.limit` 50 when 20 requested | Render | Empty page + "Back to first page" · rows shown, paging hidden · "Showing 1–50 of …" | P2 | Y · component |
+| TC-062 | FR-17 | C, E | C: page-2 request returns 500. E: seed; `page.route` adds `x-mock-scenario: error` to page-2 request only | Choose Next; then Retry without error | Page-1 rows stay; "Couldn't load this page" + Retry below list; Retry loads page 2, which replaces page 1 (FR-17, PROPOSED A-16) | P1 | Y · component, e2e |
+| TC-063 | FR-17 | K | Seed | GET §5 pages until `hasMore` false; `limit=150` | Rows counted = `total`; `hasMore` = `offset` + rows < `total`; 100 rows and `pagination.limit` 100 (DQ-12) | P1 | Y · contract |
+| TC-064 | FR-18 | E | Seed; repeat 10× (`--repeat-each=10`, SM-05) | Landing scrolled to Y0; click "Dining"; sort "Amount: high to low"; Next; scroll so row 10 is first visible; Back; Forward; reload | Back: pre-drill-down entry (no category, `date_desc`, page 1), `scrollY` = Y0 · Forward: Dining, `amount_desc`, "Showing 21–40", same first visible row `id` · reload: same state from URL, `scrollY` 0 · storage holds theme key only; 10/10 pass (FR-18 GWT 1–3, SM-05) | P1 | Y · e2e |
+| TC-065 | FR-18 | E | Seed | Set 30d; click "Dining"; change sort 3 times; choose Next; change months; Back once; Forward | `history.length` +1 after drill-down only (sort, page, months, period replace) · Back → pre-drill-down entry · Forward → Dining with last sort, page and months (FR-18 GWT 4) | P1 | Y · e2e |
+| TC-066 | FR-18 | E | Seed | Load URL with invalid sort value and `offset` 7, valid category Dining | Sort `date_desc`, `offset` 0, Dining kept | P1 | Y · e2e |
+| TC-067 | FR-18 | E | Seed | Load URL with category "Pets" | Filter cleared; "“Pets” is no longer available, so all categories are shown" (FR-18) | P1 | Y · e2e |
+| TC-068 | FR-18 | S | Seed | Walk TC-064 steps; capture every URL and storage | No "12345", "John Doe", "john.doe@email.com"; no server write (0 non-GET requests) | P1 | Y · e2e |
+| TC-069 | FR-19 | E | Seed; scrolled to row 15 | `page.clock` advance 5 min; blur and refocus window | 0 new §5 requests; same row order; `scrollY` unchanged | P1 | Y · e2e |
+| TC-070 | FR-19 | C | MSW page-2 delay 2 s; then identical refetch | Choose Next; observe rows; trigger same request | During load: page-1 rows stay at full contrast (no opacity change), "Loading page…" shown, list `aria-busy` true; then replaced; identical response → 0 DOM mutations in list (FR-19, SS C-09) | P1 | Y · component |
+| TC-071 | FR-20 | C | Category "Dining" set; §5 `total` 0 | Render | "No transactions match these filters" + "Clear filters" | P2 | Y · component |
+| TC-072 | FR-20 | C | Custom range + "Dining" + `amount_asc` active; last preset 30d (`dateRange` 2024-08-16 → 2024-09-16) | Choose "Clear filters" | §5 without `category`, `startDate=2024-08-16&endDate=2024-09-16`, `offset=0`, `sortBy=amount_asc`; summary figures return (PROPOSED) | P2 | Y · component |
+| TC-073 | FR-20 | C, E | C: no filters, §5 `total` 0. E: Harness `empty` | Render list | "No transactions in this period"; no "Clear filters" | P2 | Y · component, e2e |
+| TC-074 | FR-21 | C | Spec fx §6, §7 | Render goals | Card 1 "Entertainment", "R 650,30 of R 1 000,00", "65,0% used", "12 days left", "On track"; card 2 "Groceries", "R 1 450,80 of R 1 500,00", "96,7% used", "Close to limit"; returned order | P1 | Y · component |
+| TC-075 | FR-21 | C, E | C: `goals` []. E: Harness `empty` | Render goals | "No spending goals yet"; no "Create goal" control | P1 | Y · component, e2e |
+| TC-076 | FR-21 | C | §6 variants: 25 goals; `monthlyBudget` 0; `percentageUsed` 120; `daysRemaining` 1, 0, −1; `category` "Pets"; duplicate `id` | Render goals | 25 cards in order · "No budget set", no bar · bar full, "120,0% used" · "1 day left", "Last day", "—" · neutral icon · both shown | P2 | Y · component |
+| TC-077 | FR-21 | K | Seed | GET §6 and §5 (category, 2024-09-01 → 2024-09-16) | Every `daysRemaining` 14; `currentSpent` = Σ §5 `amount`; `percentageUsed` = formula (2 dp); `status` `warning` iff ≥ 80 (DQ-09–DQ-11) | P1 | Y · contract |
+| TC-078 | FR-22 | U | `currentSpent` 650.30, `daysRemaining` 12, 31-day month, budget 1000 | Compute + format projection | Days elapsed 19; "Projected R 1 061,02 of R 1 000,00"; "On pace to exceed by R 61,02" (PROPOSED A-06) | P1 | Y · unit |
+| TC-079 | FR-22 | U | Variants: `daysRemaining` 30 in 30-day month; 35; `currentSpent` 0; budget 0 | Compute | "Too early to project", no division · projection hidden · "Projected R 0,00" · projection, no comparison | P1 | Y · unit |
+| TC-080 | FR-22 | E | Seed | Load landing | Each goal projection = `currentSpent` ÷ 16 × 30 (2 dp) from the seed §6 response | P1 | Y · e2e |
+| TC-081 | FR-23 | C | §6 `status` variants: `on_track`; `warning`; `over_budget`; missing; `on_track` with `percentageUsed` 96 | Render goals | "On track" + glyph · "Close to limit" + glyph · "Over budget" in words + neutral glyph (PROPOSED A-09) · no status text or glyph · "On track"; every status = Phosphor Fill glyph + words, 0 badge containers (no pill, border or fill; Muzi 2026-10-22) | P1 | Y · component |
+| TC-082 | FR-24 | C | Variants: 1600/1500 `on_track`; 1500/1500 | Render goals | Bar full in `--danger` + alert glyph + "Over budget by R 100,00", and status "On track" as glyph + words, no badge (FR-24; Muzi 2026-10-22) · no over-budget text | P2 | Y · component |
+| TC-083 | FR-25 | E | Empty storage; `colorScheme: dark` | Load | Dark theme; control shows "System" | P1 | Y · e2e |
+| TC-084 | FR-25 | E | System; category "Dining" selected | `emulateMedia` light | Light theme, no reload (navigation count unchanged), Dining still selected | P1 | Y · e2e |
+| TC-085 | FR-25 | E | `colorScheme: dark` | Choose "Light"; reload; choose "System" | Light at once · light after reload · dark | P1 | Y · e2e |
+| TC-086 | FR-25 | C | Variants: `localStorage.getItem` throws; `setItem` throws; stored "purple"; no device preference | Render; choose "Dark" (setItem case) | System · dark until reload, then System · System · light | P1 | Y · component |
+| TC-087 | FR-26 | C | MSW each of 7 endpoints held pending | Render landing | Each block shows loading placeholder, others unaffected; size match checked by TC-112 CLS | P1 | Y · component |
+| TC-088 | FR-26 | C | One endpoint at a time returns 500 (7 runs) | Render; choose Retry | Only that block: "Couldn't load <block>" + Retry; others populated; Retry re-requests that endpoint once | P1 | Y · component |
+| TC-089 | FR-26 | C | Fake timers; §2 delay 12 s | Advance 5 s, 10 s, 12 s | "Still loading…" at 5 s; error + Retry at 10 s; late response discarded, error stays | P1 | Y · component |
+| TC-090 | FR-26 | C | §6 always 500 | Retry once; advance 30 s | 2 requests total; error + Retry still shown | P1 | Y · component |
+| TC-091 | FR-26 | E | Harness `error`, then `empty`, then `slow` (first render + client) | Load per scenario | `error`: every block incl. header shows "Couldn't load <block>" + Retry; "CapSense" + theme toggle render · `empty`: TC-021/028/073/075 copy, trends "No monthly spending to show" · `slow`: "Still loading…" then error at 10 s · each on first render and after a client change (ADR-003 rev. 3) | P1 | Y · e2e |
+| TC-092 | FR-27 | A, M | Seed; both themes | `filter: grayscale(1)`; screenshot; inspect | Every category, goal status and change has text or icon; manual review of screenshots | P1 | Partial · e2e screenshot + manual |
+| TC-093 | FR-27 | U, E | `design/tokens.md` §1, §2, §6 re-derived (I-18); E: seed, both themes | U: compute contrast of each token pair, light and dark. E: scan computed styles of every rendered element | Light values (Muzi 2026-10-22): `--primary` `#2259D0`, spend/heading `#0033A0`, ring `#2F70EF`, muted `#666666`, input border `#767676`; all other values = TK ±0.01 · text ≥ 4.5:1; UI, marks, fill vs track, ring ≥ 3:1 on every TK bg/card · `#2F70EF` only on focus ring (0 text, fill or border uses) · 0 elements with `#FFFFFF` text on `#2F70EF` · no API hex painted (I-06) | P1 | Y · unit + e2e |
+| TC-094 | FR-28 | E | Seed; Harness `error` for Retry step; 320 and 1280 px | Keyboard only: Tab through rail links (1280), period control, "Custom range…" (Enter → From, To, Apply in C-04), categories, months, category filter, sort, Next, Refresh, "About this demo", theme, Retry; operate each | Exactly 1 period control tab stop per width (Muzi 2026-10-22); all reachable and operable by Enter/Space/arrows; visible focus on each (computed outline ≠ none) | P1 | Y · e2e |
+| TC-095 | FR-28 | E | Seed | Drill into "Dining"; choose Next | Focus on list heading · focus on first new row | P1 | Y · e2e |
+| TC-096 | FR-28 | C | MSW pending then 500 | Render; read live regions | Loading and error text inside `aria-live="polite"` region | P1 | Y · component |
+| TC-097 | FR-28 | E | Seed; 320 and 1280 px | Measure interactive elements; Tab under sticky header | Each ≥ 24 × 24 CSS px or meets spacing exception (SC 2.5.8); focused element never fully covered (SC 2.4.11) | P1 | Y · e2e |
+| TC-098 | FR-28 | A | Seed + Harness; both themes; 320, 1280 px | axe on populated, loading (`slow`), error, empty | 0 serious/critical per run (NFR-A1) | P1 | Y · a11y |
+| TC-099 | FR-28 | M | Docker image | Strategy §6 VoiceOver + Safari script and SC checklist | 100 % of checklist rows pass | P1 | N · manual |
+| TC-100 | FR-29 | E | Seed; widths 320, 360, 768, 1280, 1920 × engines per `nfr.md` device matrix | Load; check page and each tile | `scrollWidth ≤ clientWidth`; 4 tiles fully visible, boxes non-overlapping, no element text overflow | P1 | Y · e2e |
+| TC-101 | FR-29 | E | Harness `edge` (names ≥ 60 chars, amounts ≥ R 1 000 000); widths 320, 360, 768 | Load; measure page, category rows, goal cards, transaction rows | Page `scrollWidth ≤ clientWidth`; no element text overflow; truncated names keep full text in accessible name (FR-13); amounts never truncated | P1 | Y · e2e (`edge`) + screenshot |
+| TC-102 | FR-30 | U, E, M | `design/tokens.md` re-derived (I-18); seed; both themes | Compare CSS variables to TK; render header light and dark; read README | CSS variables = TK (values per TC-093) · logo rendered in header with non-empty accessible name (text **OPEN Q-13**), served from app origin · dark: logo on a white patch (container computed background `#FFFFFF`) (Muzi 2026-10-22) · README notes the unofficial brand source | P2 | Partial · unit + e2e + manual |
+| TC-103 | FR-31 | S | Seed; full walkthrough (TC-064 + theme + paging + Refresh + About) | Record requests, console, localStorage, sessionStorage, cookies, IndexedDB | 100 % requests to app origin; 0 requests to `fonts.googleapis.com`/`fonts.gstatic.com`; Nunito Sans `.woff2` from app origin (Muzi 2026-10-22); no "John Doe"/"john.doe@email.com" in any; storage holds only the theme key | P1 | Y · e2e |
+| TC-104 | FR-31 | U | None; static search of `src/` | Build seed twice; run FR-07 ordering and FR-22 projection twice on same input | Deep-equal outputs · 0 `Math.random` · `Date.now()`/argless `new Date()` only in the clock module that feeds FR-37 greeting and FR-39 "Updated HH:MM"; seed, insights and FR-38 date depend on `MOCK_TODAY` only (Muzi 2026-10-22) | P1 | Y · unit + CI script |
+| TC-105 | FR-31 | E, S | Seed | Visit every state; inspect address bar; static check of `package.json` and bundle | URL never contains "12345"; no control edits `customerId`; no AI/LLM SDK or origin (NG-07) | P1 | Y · e2e + CI script |
+| TC-106 | FR-31 | S | Docker image | GET `/` headers | CSP `default-src 'self'`, nonce scripts, no `unsafe-eval`, `style-src 'self' 'unsafe-inline'`, `connect-src 'self'`, `frame-ancestors 'none'`; `nosniff`; `strict-origin-when-cross-origin` (NFR-S1) | P1 | Y · security |
+| TC-107 | FR-32 | P | Docker image; Lighthouse default mobile | 3 runs; take median; list font requests | LCP ≤ 2.5 s; CLS ≤ 0.1 incl. font swap; TBT ≤ 200 ms; a11y ≥ 95 (NFR-P1, NFR-A1) · fonts = Nunito Sans `.woff2` from app origin only, 0 Google Fonts requests (Muzi 2026-10-22) | P1 | Y · perf (CI job against Docker image, ADR-005 rev. 3) |
+| TC-108 | FR-32 | C | MSW §6 delay 3 s | Render landing | Summary, categories, trends populated before goals resolve | P1 | Y · component |
+| TC-109 | FR-33 | M | Fresh clone; machine with Docker only; egress to `fonts.googleapis.com`/`fonts.gstatic.com` blocked | Follow README verbatim: build, run, open URL, run test command | Attempt 1 succeeds (build downloads no font; woff2 in repo, Muzi 2026-10-22); landing populated, `document.fonts.check('16px "Nunito Sans"')` true; test command exits 0, 100 % pass; 0 extra steps (SM-01) | P1 | Partial · CI `docker build` + run + `GET /` 200 |
+| TC-110 | FR-33 | M | README | Read | States `customerId` in path with no authentication; states how to change port | P2 | N · manual |
+| TC-111 | FR-33 | S | Docker image | GET §2 with `x-mock-scenario: error` | 200, normal spec body (harness off) | P1 | Y · security |
+| TC-112 | FR-26 | P | Docker image; cache cleared | Lighthouse run (TC-107) | CLS ≤ 0.1 proves loading placeholders and the Nunito Sans swap keep size | P1 | Y · perf |
+| TC-113 | FR-34 | K | Seed | GET each of 7 endpoints, no params | 200; body passes spec schema (all fields, types); `period` 30d; 12 trends; 20 rows; `offset` 0; `date_desc` order | P1 | Y · contract |
+| TC-114 | FR-34 | K | Seed | `limit=150`; `months=30`; `category=Dining` | 100 rows, `pagination.limit` 100 · 24 trends (PROPOSED clamp) · only Dining rows, `total` = Dining count | P1 | Y · contract |
+| TC-115 | FR-34 | K | Seed | `period=2w`; `sortBy=price`; `months=0`; `months=-5`; `limit=0`; `offset=-1`; `months=abc`; `limit=abc`; `offset=abc`; `months=2.5`; `limit=2.5`; `offset=1.5` | 200 each: `period` 30d · `date_desc` order · 1 trend · 1 trend · 1 row, `pagination.limit` 1 · `offset` 0 (clamp: Q-01, FR-34, ADR-003 rev. 3) · 12 trends · 20 rows, `pagination.limit` 20 · `pagination.offset` 0 · 12 trends · 20 rows, `pagination.limit` 20 · `pagination.offset` 0 (non-numeric / non-integer → spec default: FR-34, A-21(b) closed) | P1 | Y · contract |
+| TC-116 | FR-34 | K | Seed | `offset` ≥ `total`; `category=Pets`; customer "99999"; `startDate=2024/09/01` | `[]`, `hasMore` false · `[]`, `total` 0 · 404 · 400 with README-documented body; also `startDate=2024-02-30` → 400 (ADR-003 rev. 3) | P1 | Y · contract |
+| TC-117 | FR-34 | K | Seed | List routes; diff response keys vs spec | 7 spec routes + `GET /` only; 0 non-spec fields (SM-11) | P1 | Y · contract |
+| TC-118 | FR-34 | K | Run A `MOCK_SCENARIOS` unset; run B `=true` | Send `x-mock-scenario` error, empty, slow, edge | A: normal 200 each · B: HTTP 500 (PROPOSED FR-34) · schema-valid empty arrays, zero totals · response after ≥ 12 s (PROPOSED A-18) · schema-valid; ≥ 1 merchant and category name ≥ 60 chars, ≥ 1 amount ≥ 1 000 000; DQ-03/DQ-04 still hold (DQ-17) | P1 | Y · contract |
+| TC-119 | FR-35 | K | Seed | For each `period`: GET §2, §3, §5 (§3 `dateRange`) | §2 `totalSpent` = §3 `totalAmount` = Σ `amount`; §2 `transactionCount` = Σ §3 `transactionCount` = §5 `total` (DQ-03, DQ-04) | P1 | Y · contract |
+| TC-120 | FR-35 | K | Seed | For each period × 6 categories: GET §5 filtered | `pagination.total` = that category's §3 `transactionCount` | P1 | Y · contract |
+| TC-121 | FR-35 | K | Seed | Run DQ-01, DQ-13, DQ-14 checks | `profile.totalSpent` = Σ all §5 `amount` · no date after 2024-09-16 · same `name` → same colour/icon in §3, §5, §7 | P1 | Y · contract |
+| TC-122 | FR-35 | K | Run A `MOCK_TODAY=2024-03-31`; run B `2024-05-31`; run C `2024-02-29` | A: GET §3 `30d`, `7d`, §6 · B: §3 `30d` · C: §3 `1y` | A: `30d` 2024-02-29 → 2024-03-31 (month-end clamp), `7d` 2024-03-25; every `daysRemaining` 0 · B: 2024-04-30 → 2024-05-31 · C: 2023-02-28 → 2024-02-29 (DQ-16) | P2 | Y · contract |
+| TC-123 | FR-36 | C | §2 without `totalSpent`; §2 with extra `foo`; §5 `amount` "245.80" | Render | Summary error · populated, `foo` ignored · transactions error | P1 | Y · component |
+| TC-124 | FR-36 | C | §5 20 rows, row 5 `amount` null; spec fx (47 vs 53) | Render | 19 rows (PROPOSED A-16) · "47" and category counts shown as given | P1 | Y · component |
+| TC-125 | FR-36 | U | Spec sample bodies | Parse each with its schema; remove each required field in turn | All samples parse; every removal fails | P1 | Y · unit |
+| TC-126 | — (MR-04 → PBI #36) | M | Submission ready (#36) | Open the submitted GitHub link signed out; `git log -1 --format=%cs` | Repo opens and matches the README; final commit date ≤ 2026-10-28 (SM-11) | P1 | N · manual release check |
+| TC-127 | — (MR-05 → ADR-001–007) | M | README final (#35) | Read README architecture section | Links ADR-001–007; explains server code in a front-end submission (ADR-003 consequences) | P2 | N · manual |
+| TC-128 | FR-09 | E, A | Seed; 1280 px and 320 px | Tab into period group; ←/→ through all 4 presets (S: native select keys); Tab to "Custom range…"; Enter; Esc | Exactly 1 period group/select in DOM per width (Muzi 2026-10-22) · each arrow selects a preset and re-requests; no dialog opens, focus stays in the group (SC 3.2.2, G5 B1) · Enter opens C-04, focus on From · Esc = Cancel, prior range kept, focus back on "Custom range…" | P1 | Y · e2e |
+| TC-129 | FR-10 | E | Seed; "Dining" drilled down | Activate "Dining" again | Category filter cleared, `offset=0`, `history.length` unchanged (replace), `aria-pressed` false (**PROPOSED DS-16**, pending Muzi) | P2 | Y · e2e |
+| TC-130 | FR-37 | U | Greeting fn, injected instant; `name` "John Doe"; process `TZ` UTC, then America/New_York | Evaluate at 02:59:59Z, 03:00:00Z, 09:59:59Z, 10:00:00Z, 15:59:59Z, 16:00:00Z, 21:59:59Z, 22:00:00Z (SAST UTC+2: 04:59:59, 05:00, 11:59:59, 12:00, 17:59:59, 18:00, 23:59:59, 00:00) | evening · morning · morning · afternoon · afternoon · evening · evening · evening ("Good <band>", contains "John", not "Doe"); identical under both `TZ` (Africa/Johannesburg; Muzi 2026-10-22) | P3 | Y · unit |
+| TC-131 | FR-37 | C | Instant 2024-09-16T07:00:00Z (09:00 SAST); §1 `name` variants "John Doe"; "J. Doe"; "John"; ""; missing | Render header | Contains "John", not "Doe" · "J. Doe" (initial → full name) · "John" · exactly "Good morning" (no comma, no placeholder) · same as "" · greeting element is `p`, not a heading; page has exactly 1 h1 (Muzi 2026-10-22). No-name copy at other bands **OPEN Q-14** | P3 | Y · component |
+| TC-132 | FR-37 | E | Server instant 2024-09-16T09:59:30Z (11:59:30 SAST) via clock hook (**OPEN Q-12**); browser `timezoneId` America/New_York; `page.clock` 2024-09-16T10:05:00Z | Load `/`; read server HTML; wait for hydration | Server HTML and hydrated DOM greeting identical, starts "Good morning"; 0 hydration warnings or errors in console; not recomputed from browser clock or zone (server instant passed to client; Muzi 2026-10-22; I-21) | P3 | Y · e2e |
+| TC-133 | FR-38 | C | Run A default `MOCK_TODAY`; run B `MOCK_TODAY` 2024-03-31; fake clock 2026-10-22 | Render landing | A: "Data as of 16 Sep 2024" · B: "Data as of 31 Mar 2024"; never the real clock date (Muzi 2026-10-22) | P2 | Y · component |
+| TC-134 | FR-39 | E | Seed; 1280 px; URL `period=90d`, `category=Dining`, `sortBy=amount_desc`, page 2, `months=6`; scrolled to row 10 | Record URL, `history.length`, `scrollY`; activate Refresh | Each endpoint behind a rendered block requested once with current URL state (§2/§3 `period=90d`; §5 `category=Dining&sortBy=amount_desc&offset=20` + 90d dates; §4 `months=6`; block set **OPEN Q-15**) · URL string, `history.length`, `scrollY` unchanged · no skeletons; prior values visible until replaced (Muzi 2026-10-22, SM-05) | P2 | Y · e2e |
+| TC-135 | FR-39 | C | Populated; MSW all endpoints delay 1 s | Activate Refresh 3× within 200 ms (pointer, Enter, Space) | Each endpoint requested once; extra activations ignored; no second refresh after the first completes (Muzi 2026-10-22) | P2 | Y · component |
+| TC-136 | FR-39 | C | Populated; prior refresh "Updated 15:00"; on next refresh §6 → 500, others 200 with changed values; then §6 200 | Activate Refresh; then Retry in goals | Other blocks show new values; goals keep old values + "Couldn't refresh goals" + Retry; "Updated 15:00" unchanged · Retry requests §6 only; goals updated ("Updated" after Retry **OPEN Q-15**) (Muzi 2026-10-22) | P2 | Y · component |
+| TC-137 | FR-39 | C, E | Fake clock 2024-09-16T14:05:00Z; browser `timezoneId` UTC; all 200. Run 2: `reducedMotion: reduce` | Activate Refresh; record polite live region; inspect Refresh icon during load | "Updated 16:05" (SAST 24 h) only after all succeed · exactly 2 polite announcements per refresh (start, end) · run 2: icon not spinning (computed `animation-name` none, transform constant) (Muzi 2026-10-22) | P2 | Y · component, e2e |
+| TC-138 | FR-40 | E | Seed; 320 and 1280 px | Activate "About this demo"; Tab round the dialog; Esc; reopen; close button | Modal (`role="dialog"`, `aria-modal="true"`, named by its heading); focus inside and trapped; Esc and close return focus to trigger · 0 network requests open → close · 0 links in dialog to any other origin (no external link; copy A-27) · URL, `history.length` unchanged (Muzi 2026-10-22) | P2 | Y · e2e |
+| TC-139 | FR-40 | A, M | Seed; dialog open; both themes; 320, 1280 px | axe on open dialog; VoiceOver pass (strategy §6) | 0 serious/critical; dialog name and content announced; content behind dialog inert | P2 | Y · a11y; N · SR |
+| TC-140 | FR-41 | E | Seed; widths 1280, 1920; then 1279, 768, 320 | Activate each rail section link (pointer, then Enter) | ≥ 1280: one link per main section h2; activation focuses that h2 (`document.activeElement`), h2 in viewport and not covered; URL string and `history.length` unchanged (no hash) · < 1280: 0 rail links visible or in tab order (Muzi 2026-10-22, SM-05) | P2 | Y · e2e |
+| TC-141 | FR-41, FR-29, FR-28 | E | Seed; 320, 768, 1280, 1920 × light, dark | Scroll top → bottom; Tab through every control in `main`; at each stop compare rects | Document is the only scroller: `scrollingElement.scrollHeight` > `innerHeight` and 0 shell elements with `overflow-y` auto/scroll and `scrollHeight` > `clientHeight` (open dialog body excepted, SS §1) · sticky rail rect never intersects `main` at any scroll position · focused element 0 % covered by any sticky element (SC 2.4.11) (Muzi 2026-10-22) | P1 | Y · e2e |
+
+## 2. Traceability BR → FR → TC (AC-4)
+
+| BR | FR | TC |
+|---|---|---|
+| BR-01 | FR-03, FR-05 | TC-007–009, TC-018–023 |
+| BR-02 | FR-06 | TC-024–026 |
+| BR-03 | FR-04 | TC-010–017 |
+| BR-04 | FR-09 | TC-033–037, TC-128 |
+| BR-05 | FR-03, FR-07 | TC-007, TC-027–030 |
+| BR-06 | FR-08 | TC-031, TC-032 |
+| BR-07 | FR-03, FR-11 | TC-007, TC-042–046 |
+| BR-08 | FR-12 | TC-047, TC-048 |
+| BR-09 | FR-03, FR-21 | TC-007, TC-074–077 |
+| BR-10 | FR-22 | TC-078–080 |
+| BR-11 | FR-23 | TC-081 |
+| BR-12 | FR-24 | TC-082 |
+| BR-13 | FR-10 | TC-038, TC-040, TC-041, TC-129 |
+| BR-14 | FR-10 | TC-039 |
+| BR-15 | FR-03, FR-13 | TC-007, TC-049–051 |
+| BR-16 | FR-14, FR-15 | TC-052–056 |
+| BR-17 | FR-16 | TC-057, TC-058 |
+| BR-18 | FR-17 | TC-059–063 |
+| BR-19 | FR-18 | TC-064–067 |
+| BR-20 | FR-19 | TC-069, TC-070 |
+| BR-21 | FR-20 | TC-071–073 |
+| BR-22 | FR-01, FR-37 | TC-001–004, TC-130–132 |
+| BR-23 | FR-01, FR-02, FR-36 | TC-001–006, TC-123–125 |
+| BR-24 | FR-34, FR-36 | TC-113–118, TC-123–125 |
+| BR-25 | FR-35 | TC-119–122 |
+| BR-26 | FR-25 | TC-083–086 |
+| BR-27 | FR-07, FR-27 | TC-026, TC-029, TC-092, TC-093 |
+| BR-28 | FR-20, FR-26 | TC-071–073, TC-087–091, TC-112 |
+| BR-29 | FR-11, FR-28 | TC-043, TC-044, TC-094–099, TC-141 |
+| BR-30 | FR-29 | TC-100, TC-101, TC-141 |
+| BR-31 | FR-30 | TC-102 |
+| BR-32 | FR-02, FR-18, FR-31 | TC-005, TC-068, TC-103–106 |
+| BR-33 | FR-32 | TC-107, TC-108 |
+| BR-34 | FR-33 | TC-109, TC-111 |
+| BR-35 | FR-33 | TC-110 |
+| BR-36 | FR-39 | TC-134–137 |
+| BR-37 | FR-38, FR-40 | TC-133, TC-138, TC-139 |
+| BR-38 | FR-41 | TC-140, TC-141 |
+| MR-04 | — (PBI #36, bundle 2026-10-21) | TC-126 |
+| MR-05 | — (ADR-001–007, bundle 2026-10-21) | TC-127 |
+| **Result** | 38/38 BR → ≥ 1 FR (BR-22 ext., BR-36–BR-38 per BA errata 2026-10-22) · 41/41 FR → ≥ 1 TC · 139/141 TC → ≥ 1 FR; TC-126, TC-127 → MR via PBI #36 / ADRs (by decision) · 0 orphans | Blocked: FR-37–FR-41 rows not yet in `functional-requirements.md` (FA, parallel); TC-130–141 trace to the Muzi 2026-10-22 decision text until then. Open values: Q-12–Q-15. Manual-only: TC-099, TC-110, TC-126, TC-127 |
+
+## 3. SM-xx → TC
+
+| SM | TC | Gap |
+|---|---|---|
+| SM-01 | TC-109, TC-110, TC-111 | Manual; CI covers build/run only |
+| SM-02 | TC-013, TC-058, TC-063, TC-113–118 | None (A-21(b) closed) |
+| SM-03 | TC-023, TC-030, TC-119, TC-120 | None |
+| SM-04 | TC-019, TC-100 | None |
+| SM-05 | TC-038, TC-039, TC-064, TC-065, TC-134, TC-140 | None (SM-05 aligned to FR-18 by PO; A-21(c) closed 2026-10-21; Refresh and rail links +0 history, PO errata 2026-10-22) |
+| SM-06 | TC-078–081 | Formula pending A-06 |
+| SM-07 | TC-083–086, TC-093, TC-098 | None |
+| SM-08 | TC-087–091, TC-094, TC-098 | None |
+| SM-09 | TC-068, TC-103, TC-105 | None |
+| SM-10 | TC-107 | None |
+| SM-11 | TC-117, TC-126 | Final-commit date: manual (TC-126, #36) |
+
+## 4. Test-design questions (status after Muzi bundle approval 2026-10-21, I-15)
+
+| Q-ID | Question | Status (decision ref) | Affects |
+|---|---|---|---|
+| Q-01 | Malformed params: spec default vs 400 | **Resolved** (unknown enum → default, numbers clamped, malformed date → 400, unknown customer → 404; ADR-003 rev. 3, FR-34). Residual non-numeric / non-integer → spec default (A-21(b) closed 2026-10-21) | TC-115, TC-116 |
+| Q-02 | Paging replace vs append | **Resolved** (page replace; ADR-002 rev. 3, FR-17 GWT 2) | TC-059, TC-062, TC-070 |
+| Q-03 | Which controls push vs replace history | **Resolved** (drill-down push; filter, sort, page, period, months replace; ADR-002 rev. 3, FR-18) | TC-039, TC-064, TC-065, TC-129 |
+| Q-04 | Scroll restore after refresh vs FR-31 storage | **Resolved** (Back restores scroll; refresh starts at top; no extra storage; ADR-002 rev. 3, FR-18 GWT 3; SM-05 aligned by PO) | TC-064, TC-103 |
+| Q-05 | Date edges: 7d length, day 29–31, 366 inclusive | **Resolved** (7d inclusive, month-end clamp, 366-day limit inclusive; DQ-16, FR-09). Residual `1y` = 365 days inclusive, 2023-09-18 … 2024-09-16 (A-21(a) closed 2026-10-21) | TC-013, TC-035, TC-122 |
+| Q-06 | E2E edge-data and first-render scenario injection | **Resolved** (`edge` scenario; RSC prefetch reads the header; ADR-003 rev. 3, FR-34, DQ-17) | TC-009, TC-101, TC-118 |
+| Q-07 | Seed figures fixed only at B2 | **Open** by design: e2e expected values derive from contract-proven seed outputs at B2 | E2E TCs |
+| Q-08 | Contract runner and Lighthouse job placement | **Resolved** (contract in Vitest; Lighthouse in CI against the Docker image; ADR-005 rev. 3) | Strategy §1, TC-107 |
+| Q-09 | Unspecified copy and values | **Resolved** (UI copy as PROPOSED in the FRs approved: FR-03, FR-09, FR-16, FR-18, FR-34). FRs still tag it PROPOSED; harness `error` = 500 PROPOSED | TC-007, TC-035, TC-057, TC-067, TC-118 |
+| Q-10 | MR-04, MR-05, SM-11 traceability | **Resolved** (MR-04 → PBI #36; MR-05 via ADRs; TC-126, TC-127). SM-11 commit date placed in TC-126 by QA | §2, §3 |
+| Q-11 | FR header status stale | **Resolved** (FR l.9 "Signed off 2026-10-21 (G4) + post-G4 errata") | Doc hygiene |
+| Q-12 | How do e2e tests fix the server instant that the greeting uses (env, header or route hook)? Must be test-only and off in Docker, like `x-mock-scenario` | **Open** (Muzi, ADR-003/ADR-005; with I-21) | TC-132, TC-137 |
+| Q-13 | After the greeting, is the full name still shown in the header? What is the logo's accessible name, and does the "CapSense" text stay? | **Open** (FA, FR-01/FR-30 rev.) | TC-001, TC-004, TC-091, TC-102 |
+| Q-14 | Empty or missing name outside 05:00–11:59: is it the band phrase ("Good evening") or literally "Good morning"? Greeting while §1 is loading or failed? | **Open** (FA, FR-37; A-23/A-25) | TC-004, TC-131 |
+| Q-15 | Refresh scope: does Refresh re-request §1 profile and §7 filters? Does a successful block Retry after a partial failure set "Updated HH:MM"? | **Open** (FA, FR-39; A-26) | TC-134, TC-136 |
