@@ -30,6 +30,7 @@ jobs:
           node-version-file: .nvmrc
           cache: pnpm
       - run: pnpm install --frozen-lockfile
+      - run: pnpm check:pin-age
       - run: pnpm format:check
       - run: pnpm lint
       - run: pnpm typecheck

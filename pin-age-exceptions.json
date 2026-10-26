@@ -1,0 +1,18 @@
+{
+  "next": {
+    "version": "16.4.3",
+    "reason": "16.4.0 and older have critical advisories GHSA-673q-mjm6-r5xr and GHSA-2464-fhr4-w9xw and high advisory GHSA-p3m5-59mp-jv5r, fixed in 16.4.1; 16.4.3 adds proxy.ts and standalone fixes we rely on"
+  },
+  "eslint-config-next": {
+    "version": "16.4.3",
+    "reason": "Released together with next and kept on the same version"
+  },
+  "react": {
+    "version": "19.3.1",
+    "reason": "Server components transport fix released alongside the Next.js security release"
+  },
+  "react-dom": {
+    "version": "19.3.1",
+    "reason": "Must match react"
+  }
+}
