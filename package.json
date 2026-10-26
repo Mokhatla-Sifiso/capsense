@@ -22,6 +22,7 @@
     "test:e2e": "playwright test",
     "test:e2e:install": "playwright install --with-deps chromium",
     "check:pin-age": "node scripts/check-pin-age.mjs",
+    "check:audit": "pnpm audit --audit-level=high",
     "check": "pnpm format:check && pnpm lint && pnpm typecheck && pnpm test",
     "prepare": "husky",
     "start:standalone": "node scripts/start-standalone.mjs"

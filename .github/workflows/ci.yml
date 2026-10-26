@@ -31,6 +31,7 @@ jobs:
           cache: pnpm
       - run: pnpm install --frozen-lockfile
       - run: pnpm check:pin-age
+      - run: pnpm check:audit
       - run: pnpm format:check
       - run: pnpm lint
       - run: pnpm typecheck
