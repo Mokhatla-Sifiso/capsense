@@ -1,6 +1,3 @@
-// Runs the Next.js standalone server exactly as the Docker image does (ADR-006): copies public/ and
-// .next/static into .next/standalone, then loads server.js in this same process. No child process, so the
-// signal Playwright sends on teardown stops the server directly (a spawned child left CI hanging).
 import { cpSync, existsSync } from "node:fs";
 import { createRequire } from "node:module";
 import { resolve } from "node:path";

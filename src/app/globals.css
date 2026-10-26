@@ -1,9 +1,5 @@
 @import "tailwindcss";
 
-/*
- * Design tokens land in B4-T1 (#299) from docs/design/tokens.md. Until then only the neutral base below
- * exists so the placeholder page meets contrast in both themes.
- */
 :root {
   --background: #ffffff;
   --foreground: #3a3a3a;
