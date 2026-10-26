@@ -20,6 +20,7 @@ export default defineConfig({
         "src/test/**",
         "src/app/**/layout.tsx",
         "src/app/**/page.tsx",
+        "src/app/providers.tsx",
         "src/components/ui/**",
       ],
       thresholds: { lines: 80, statements: 80, functions: 80, branches: 75 },
