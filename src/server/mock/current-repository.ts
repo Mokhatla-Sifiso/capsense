@@ -1,12 +1,15 @@
 import { parseServerEnv } from "@/lib/env";
-import { createMockRepository, type SpendingRepository } from "./spending-repository";
+import { applyVariant, type DataVariant } from "./scenarios";
+import { SpendingRepository, mockData } from "./spending-repository";
 
-let current: { today: string; repository: SpendingRepository } | undefined;
+const repositories = new Map<string, SpendingRepository>();
 
-export function currentRepository(): SpendingRepository {
+export function currentRepository(variant: DataVariant = "normal"): SpendingRepository {
   const { MOCK_TODAY } = parseServerEnv(process.env);
-  if (current?.today !== MOCK_TODAY) {
-    current = { today: MOCK_TODAY, repository: createMockRepository(MOCK_TODAY) };
-  }
-  return current.repository;
+  const key = `${MOCK_TODAY}:${variant}`;
+  const cached = repositories.get(key);
+  if (cached) return cached;
+  const repository = new SpendingRepository(applyVariant(mockData(MOCK_TODAY), variant));
+  repositories.set(key, repository);
+  return repository;
 }
