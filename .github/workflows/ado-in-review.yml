@@ -1,9 +1,5 @@
 name: ADO In Review trigger
 
-# Azure DevOps service hooks cannot send GitHub's repository_dispatch payload, so this polls the sprint:
-# any work item in the "In Review" column (taskboard for tasks, board for PBIs) with an open PR that
-# references AB#<id> gets a Claude review. The label ai-review:done prevents repeat reviews until new
-# commits arrive (see ai-review-reset.yml).
 on:
   schedule:
     - cron: "*/5 * * * *"

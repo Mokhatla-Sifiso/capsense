@@ -1,6 +1,5 @@
 import { z } from "zod";
 
-// ADR-003: server-side runtime configuration, validated once. Never import this into client components.
 const envSchema = z.object({
   MOCK_TODAY: z
     .string()

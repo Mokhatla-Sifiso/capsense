@@ -16,7 +16,6 @@ export default defineConfig([
     },
   },
   {
-    // Named exports only in shared code (Oddity convention). Next.js route files keep default exports.
     files: [
       "src/lib/**/*.{ts,tsx}",
       "src/components/**/*.{ts,tsx}",

@@ -1,4 +1,3 @@
-"""Small Azure DevOps REST helpers for CI scripts (PAT auth, standard library only)."""
 import base64
 import json
 import os
@@ -7,7 +6,7 @@ import urllib.request
 
 
 def _auth_header() -> str:
-    if os.environ.get("ADO_BEARER"):  # local testing with `az account get-access-token`
+    if os.environ.get("ADO_BEARER"):
         return "Bearer " + os.environ["ADO_BEARER"]
     pat = os.environ.get("ADO_PAT", "")
     if not pat:

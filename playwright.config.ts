@@ -3,12 +3,9 @@ import { defineConfig, devices } from "@playwright/test";
 const PORT = Number(process.env.E2E_PORT ?? 3217);
 const baseURL = process.env.E2E_BASE_URL ?? `http://127.0.0.1:${PORT}`;
 
-// ADR-005: e2e runs against the production build with real route handlers. MOCK_SCENARIOS enables the
-// test-only x-mock-scenario header (ADR-003).
 export default defineConfig({
   testDir: "./e2e",
   fullyParallel: true,
-  // Fail fast instead of hanging CI: whole run 5 min, each test 30 s.
   globalTimeout: 5 * 60_000,
   timeout: 30_000,
   forbidOnly: Boolean(process.env.CI),
