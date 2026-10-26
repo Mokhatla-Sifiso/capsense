@@ -30,6 +30,8 @@ jobs:
           node-version-file: .nvmrc
           cache: pnpm
       - run: pnpm install --frozen-lockfile
+      - run: pnpm check:pin-age
+      - run: pnpm check:audit
       - run: pnpm format:check
       - run: pnpm lint
       - run: pnpm typecheck
@@ -60,7 +62,22 @@ jobs:
           cache: pnpm
       - run: pnpm install --frozen-lockfile
       - run: pnpm build
-      - run: pnpm test:e2e:install
+      - run: pnpm check:size
+      - name: Read the Playwright version
+        id: playwright
+        run: echo "version=$(pnpm exec playwright --version | awk '{print $2}')" >> "$GITHUB_OUTPUT"
+      - uses: actions/cache@v6
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ steps.playwright.outputs.version }}
+      - name: Install the test browser
+        timeout-minutes: 3
+        run: |
+          for attempt in 1 2; do
+            timeout 85 pnpm test:e2e:install && exit 0
+            echo "::warning::Browser install attempt $attempt failed or stalled"
+          done
+          exit 1
       - run: pnpm test:e2e
       - uses: actions/upload-artifact@v7
         if: failure()
