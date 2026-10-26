@@ -62,6 +62,7 @@ jobs:
           cache: pnpm
       - run: pnpm install --frozen-lockfile
       - run: pnpm build
+      - run: pnpm check:size
       - run: pnpm test:e2e:install
       - run: pnpm test:e2e
       - uses: actions/upload-artifact@v7
