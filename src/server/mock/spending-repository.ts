@@ -34,6 +34,10 @@ const WARNING_AT_PERCENT = 80;
 export class SpendingRepository {
   constructor(private readonly data: SpendingData) {}
 
+  hasCustomer(customerId: string): boolean {
+    return customerId === this.data.customer.customerId;
+  }
+
   windowFor(period: Period): DateWindow {
     const days = this.data.presets.find((preset) => preset.value === period)?.days ?? 30;
     return { start: addDays(this.data.today, 1 - days), end: this.data.today };
