@@ -1,8 +1,5 @@
 name: Claude review
 
-# Automated first-pass code review. Dispatched by "ADO In Review trigger" when the linked Azure DevOps
-# work item moves to In Review; can also be run manually. Final review and merge are done by the
-# reviewer (Muzi's Claude Code session).
 on:
   workflow_dispatch:
     inputs:

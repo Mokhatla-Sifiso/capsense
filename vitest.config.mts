@@ -22,7 +22,6 @@ export default defineConfig({
         "src/app/**/page.tsx",
         "src/components/ui/**",
       ],
-      // NFR-Q1: unit + component line coverage >= 80% on src/.
       thresholds: { lines: 80, statements: 80, functions: 80, branches: 75 },
     },
   },

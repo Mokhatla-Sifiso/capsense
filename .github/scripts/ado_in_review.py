@@ -1,4 +1,3 @@
-"""Dispatch a Claude review for every open PR whose work item is in the "In Review" column."""
 import json
 import subprocess
 import sys

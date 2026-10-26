@@ -1,7 +1,5 @@
 import type { NextConfig } from "next";
 
-// Baseline security headers (NFR-S1). The nonce-based Content-Security-Policy is set per request in
-// `src/proxy.ts` (task #264, B11) because nonces cannot be static.
 const securityHeaders = [
   { key: "X-Content-Type-Options", value: "nosniff" },
   { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
@@ -11,12 +9,9 @@ const securityHeaders = [
 ];
 
 const nextConfig: NextConfig = {
-  // ADR-006: standalone server output for the multi-stage Docker image.
   output: "standalone",
   poweredByHeader: false,
   reactStrictMode: true,
-  // Next.js 16.4 defaults (Partial Prerendering + Partial Prefetching). Pages that read headers() or
-  // searchParams must render inside <Suspense> (ADR-001 amendment, pending Muzi).
   cacheComponents: true,
   partialPrefetching: true,
   turbopack: {

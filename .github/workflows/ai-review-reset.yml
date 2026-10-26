@@ -1,6 +1,5 @@
 name: AI review reset
 
-# New commits on a reviewed PR make it eligible for another automated review on the next poll.
 on:
   pull_request_target:
     types: [synchronize]
