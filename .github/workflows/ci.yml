@@ -50,7 +50,7 @@ jobs:
   e2e:
     name: E2E (Playwright + axe)
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 12
     steps:
       - uses: actions/checkout@v7
       - uses: pnpm/action-setup@v6

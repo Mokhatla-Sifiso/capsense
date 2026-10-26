@@ -8,6 +8,9 @@ const baseURL = process.env.E2E_BASE_URL ?? `http://127.0.0.1:${PORT}`;
 export default defineConfig({
   testDir: "./e2e",
   fullyParallel: true,
+  // Fail fast instead of hanging CI: whole run 5 min, each test 30 s.
+  globalTimeout: 5 * 60_000,
+  timeout: 30_000,
   forbidOnly: Boolean(process.env.CI),
   retries: process.env.CI ? 2 : 0,
   workers: process.env.CI ? 2 : undefined,
@@ -20,9 +23,10 @@ export default defineConfig({
   webServer: process.env.E2E_BASE_URL
     ? undefined
     : {
-        command: "pnpm start:standalone",
+        command: "node scripts/start-standalone.mjs",
         url: baseURL,
         reuseExistingServer: !process.env.CI,
+        gracefulShutdown: { signal: "SIGTERM", timeout: 5_000 },
         timeout: 120_000,
         env: { HOSTNAME: "127.0.0.1", PORT: String(PORT), MOCK_SCENARIOS: "true", MOCK_TODAY: "2024-09-16" },
       },
