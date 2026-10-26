@@ -59,7 +59,7 @@ DoD per column is configured on the board (S3).
 | Artifact       | Convention                                                                                                |
 | -------------- | --------------------------------------------------------------------------------------------------------- |
 | Connection     | Azure Boards app connected to the GitHub repo (one org only)                                              |
-| Branch         | `feature/AB<id>-<slug>` · `fix/AB<id>-<slug>`                                                             |
+| Branch         | Short, plain-English, kebab-case, no prefixes or IDs: `mock-api`, `data-layer`, `fix-chart-tooltip`       |
 | Commit         | Conventional Commits + footer `AB#<taskId>`                                                               |
 | PR description | What · Why · How tested · Checklist (DoD) · `Fixes AB#<pbiOrBugId>` (moves it to Done on merge to `main`) |
 | Rule           | `AB#` must be in the commit message or PR **description**, not the PR title (S5)                          |
