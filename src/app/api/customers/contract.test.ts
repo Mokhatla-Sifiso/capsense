@@ -1,10 +1,18 @@
 import { NextRequest } from "next/server";
 import type { z } from "zod";
-import { filtersSchema, goalsSchema, profileSchema, summarySchema, trendsSchema } from "@/schemas/api";
+import {
+  categoriesSchema,
+  filtersSchema,
+  goalsSchema,
+  profileSchema,
+  summarySchema,
+  trendsSchema,
+} from "@/schemas/api";
 import type { CustomerRouteContext } from "@/server/mock/respond";
 import { GET as getFilters } from "./[customerId]/filters/route";
 import { GET as getGoals } from "./[customerId]/goals/route";
 import { GET as getProfile } from "./[customerId]/profile/route";
+import { GET as getCategories } from "./[customerId]/spending/categories/route";
 import { GET as getSummary } from "./[customerId]/spending/summary/route";
 import { GET as getTrends } from "./[customerId]/spending/trends/route";
 
@@ -13,6 +21,7 @@ type Handler = (request: NextRequest, ctx: CustomerRouteContext) => Promise<Resp
 const endpoints: [string, Handler, z.ZodType][] = [
   ["profile", getProfile, profileSchema],
   ["spending/summary", getSummary, summarySchema],
+  ["spending/categories", getCategories, categoriesSchema],
   ["spending/trends", getTrends, trendsSchema],
   ["goals", getGoals, goalsSchema],
   ["filters", getFilters, filtersSchema],
@@ -52,5 +61,31 @@ describe("query parameters reach the repository", () => {
     expect((await body(getTrends, "spending/trends", "")).trends).toHaveLength(12);
     expect((await body(getTrends, "spending/trends", "?months=3")).trends).toHaveLength(3);
     expect((await body(getTrends, "spending/trends", "?months=30")).trends).toHaveLength(21);
+  });
+
+  it("categories covers the period by default and a custom range when both dates are given", async () => {
+    expect((await body(getCategories, "spending/categories", "?period=7d")).dateRange).toEqual({
+      startDate: "2024-09-10",
+      endDate: "2024-09-16",
+    });
+    expect(
+      (await body(getCategories, "spending/categories", "?startDate=2024-09-01&endDate=2024-09-05")).dateRange,
+    ).toEqual({
+      startDate: "2024-09-01",
+      endDate: "2024-09-05",
+    });
+  });
+
+  it("categories answers 400 for a date that isn't real", async () => {
+    const response = await call(getCategories, "spending/categories", "12345", "?startDate=2024-02-30");
+    expect(response.status).toBe(400);
+    expect(await response.json()).toEqual({
+      error: "bad_request",
+      message: "startDate must be a real date in YYYY-MM-DD format",
+    });
+  });
+
+  it("an unknown customer is a 404 even when the dates are also wrong", async () => {
+    expect((await call(getCategories, "spending/categories", "99999", "?startDate=nope")).status).toBe(404);
   });
 });
