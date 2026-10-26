@@ -72,7 +72,9 @@ export class SpendingRepository {
   }
 
   profile(): Profile {
-    return { ...this.data.customer, totalSpent: toRands(this.totals(this.data.ledger).cents) };
+    const { customerId, name, email, joinDate, accountType, currency } = this.data.customer;
+    const totalSpent = toRands(this.totals(this.data.ledger).cents);
+    return { customerId, name, email, joinDate, accountType, totalSpent, currency };
   }
 
   summary(period: Period): Summary {

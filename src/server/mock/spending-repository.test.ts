@@ -209,3 +209,17 @@ describe("transactions", () => {
     expect(first).toMatchObject({ icon: "shopping-cart", categoryColor: "#FF6B6B" });
   });
 });
+
+describe("field order", () => {
+  it("lists profile fields in the same order as the spec", () => {
+    expect(Object.keys(repository.profile())).toEqual([
+      "customerId",
+      "name",
+      "email",
+      "joinDate",
+      "accountType",
+      "totalSpent",
+      "currency",
+    ]);
+  });
+});
