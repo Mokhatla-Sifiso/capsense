@@ -1,4 +1,3 @@
-"""Print an Azure DevOps work item (title, description, acceptance criteria) as Markdown for the reviewer."""
 import html
 import re
 import sys

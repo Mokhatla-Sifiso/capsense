@@ -1,6 +1,5 @@
 name: CD
 
-# Publishes the production image (ADR-006) to GitHub Container Registry after CI passes on main.
 on:
   workflow_run:
     workflows: [CI]
