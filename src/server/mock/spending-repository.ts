@@ -1,4 +1,16 @@
-import type { CategorySpend, Categories, Filters, Goals, Period, Profile, Summary, Trends } from "@/schemas/api";
+import type {
+  CategorySpend,
+  Categories,
+  Filters,
+  Goals,
+  Period,
+  Profile,
+  SortOrder,
+  Summary,
+  Transaction,
+  Transactions,
+  Trends,
+} from "@/schemas/api";
 import {
   addDays,
   type DateWindow,
@@ -23,12 +35,28 @@ export interface SpendingData {
   ledger: readonly LedgerEntry[];
 }
 
+export interface TransactionQuery {
+  limit: number;
+  offset: number;
+  sortBy: SortOrder;
+  category: string | null;
+  startDate: string | null;
+  endDate: string | null;
+}
+
 interface Totals {
   cents: number;
   count: number;
 }
 
 const LEDGER_SEED = 12345;
+
+const SORTERS: Record<SortOrder, (a: LedgerEntry, b: LedgerEntry) => number> = {
+  date_desc: (a, b) => b.date.localeCompare(a.date),
+  date_asc: (a, b) => a.date.localeCompare(b.date),
+  amount_desc: (a, b) => b.cents - a.cents,
+  amount_asc: (a, b) => a.cents - b.cents,
+};
 const WARNING_AT_PERCENT = 80;
 
 export class SpendingRepository {
@@ -119,10 +147,43 @@ export class SpendingRepository {
     };
   }
 
+  transactions(query: TransactionQuery): Transactions {
+    const matching = this.data.ledger
+      .filter((entry) => query.category === null || entry.category === query.category)
+      .filter((entry) => query.startDate === null || entry.day >= query.startDate)
+      .filter((entry) => query.endDate === null || entry.day <= query.endDate)
+      .toSorted(SORTERS[query.sortBy]);
+    const page = matching.slice(query.offset, query.offset + query.limit);
+    return {
+      transactions: page.map((entry) => this.toTransaction(entry)),
+      pagination: {
+        total: matching.length,
+        limit: query.limit,
+        offset: query.offset,
+        hasMore: query.offset + page.length < matching.length,
+      },
+    };
+  }
+
   filters(): Filters {
     return {
       categories: this.data.categories.map(({ name, color, icon }) => ({ name, color, icon })),
       dateRangePresets: this.data.presets.map(({ label, value }) => ({ label, value })),
+    };
+  }
+
+  private toTransaction(entry: LedgerEntry): Transaction {
+    const category = this.data.categories.find((profile) => profile.name === entry.category);
+    return {
+      id: entry.id,
+      date: entry.date,
+      merchant: entry.merchant,
+      category: entry.category,
+      amount: toRands(entry.cents),
+      description: entry.description,
+      paymentMethod: entry.paymentMethod,
+      icon: category?.icon ?? "tag",
+      categoryColor: category?.color ?? "#6B7280",
     };
   }
 
