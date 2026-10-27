@@ -9,6 +9,7 @@ interface DashboardLayoutProps {
   trends: ReactNode;
   goals: ReactNode;
   transactions: ReactNode;
+  themeRow: ReactNode;
 }
 
 export function DashboardLayout({
@@ -20,6 +21,7 @@ export function DashboardLayout({
   trends,
   goals,
   transactions,
+  themeRow,
 }: DashboardLayoutProps): ReactNode {
   return (
     <div className="min-h-screen bg-window lg:bg-frame">
@@ -46,6 +48,7 @@ export function DashboardLayout({
             </div>
             <div className="min-w-0 lg:col-span-2 xl:col-span-1">{transactions}</div>
           </div>
+          <div className="mt-grid md:hidden">{themeRow}</div>
         </main>
       </div>
     </div>

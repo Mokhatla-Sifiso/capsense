@@ -14,6 +14,7 @@ function renderLayout() {
       trends={region("Trends")}
       goals={region("Goals")}
       transactions={region("Transactions")}
+      themeRow={<p>Theme</p>}
     />,
   );
 }
