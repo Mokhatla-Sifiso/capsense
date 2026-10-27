@@ -7,6 +7,7 @@ import { requestInstant } from "@/server/clock";
 import { demoToday } from "@/server/demo-today";
 import { DataFreshness } from "./data-freshness";
 import { ProfileGreeting } from "./profile-greeting";
+import { RefreshButton } from "./refresh-button";
 
 async function GreetingForThisVisit(): Promise<ReactNode> {
   const today = await demoToday();
@@ -21,11 +22,16 @@ async function GreetingForThisVisit(): Promise<ReactNode> {
 
 export function TopBar(): ReactNode {
   return (
-    <div className="flex flex-col gap-4 md:gap-5">
+    <div className="grid grid-cols-[minmax(0,1fr)_auto] items-start gap-x-4 gap-y-4 md:gap-y-5">
       <Brand placement="top-bar" />
-      <Suspense fallback={<p className="h-[1.2em] w-60 animate-pulse rounded-6 bg-skeleton text-greeting" />}>
-        <GreetingForThisVisit />
-      </Suspense>
+      <div className="col-start-2 row-start-1 flex items-center gap-2">
+        <RefreshButton />
+      </div>
+      <div className="col-span-2 lg:col-span-1 lg:row-start-1">
+        <Suspense fallback={<p className="h-[1.2em] w-60 animate-pulse rounded-6 bg-skeleton text-greeting" />}>
+          <GreetingForThisVisit />
+        </Suspense>
+      </div>
     </div>
   );
 }

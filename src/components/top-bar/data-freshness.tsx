@@ -2,15 +2,11 @@
 
 import { type ReactNode, useState } from "react";
 import { formatDay } from "@/lib/format";
-import { useDashboardStatus } from "@/lib/query/use-dashboard-status";
+import { couldNotRefresh, useDashboardStatus } from "@/lib/query/use-dashboard-status";
 import { formatSouthAfricaTime } from "@/lib/south-africa-time";
 
 interface DataFreshnessProps {
   today: string;
-}
-
-function couldNotRefresh(sections: number): string {
-  return sections === 1 ? "1 section couldn't refresh" : `${sections} sections couldn't refresh`;
 }
 
 export function DataFreshness({ today }: DataFreshnessProps): ReactNode {
