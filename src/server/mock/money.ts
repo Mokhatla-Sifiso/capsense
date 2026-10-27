@@ -15,17 +15,28 @@ export function percentOf(part: number, whole: number): number {
   return whole === 0 ? 0 : Math.round((part / whole) * 10_000) / 100;
 }
 
+interface Share {
+  exactTenths: number;
+  tenths: number;
+}
+
 export function sharesOfTotal(amounts: readonly number[]): number[] {
   const total = amounts.reduce((sum, amount) => sum + amount, 0);
   if (total === 0) return amounts.map(() => 0);
-  const exactTenths = amounts.map((amount) => (amount / total) * 1000);
-  const tenths = exactTenths.map(Math.floor);
-  const leftover = 1000 - tenths.reduce((sum, value) => sum + value, 0);
-  const byLargestRemainder = exactTenths
-    .map((value, index) => ({ index, remainder: value - Math.floor(value) }))
-    .sort((a, b) => b.remainder - a.remainder);
-  byLargestRemainder.slice(0, leftover).forEach(({ index }) => {
-    tenths[index] = (tenths[index] ?? 0) + 1;
+
+  const shares: Share[] = amounts.map((amount) => {
+    const exactTenths = (amount / total) * 1000;
+    return { exactTenths, tenths: Math.floor(exactTenths) };
   });
-  return tenths.map((value) => value / 10);
+
+  const leftOver = (share: Share) => share.exactTenths - share.tenths;
+  let missingTenths = 1000 - shares.reduce((sum, share) => sum + share.tenths, 0);
+  const closestToNextTenth = [...shares].sort((a, b) => leftOver(b) - leftOver(a));
+  for (const share of closestToNextTenth) {
+    if (missingTenths === 0) break;
+    share.tenths += 1;
+    missingTenths -= 1;
+  }
+
+  return shares.map((share) => share.tenths / 10);
 }
