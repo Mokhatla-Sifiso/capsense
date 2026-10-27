@@ -1,4 +1,4 @@
-import type { z } from "zod";
+import type { z } from "zod/mini";
 
 export const REQUEST_TIMEOUT_MS = 10_000;
 
@@ -31,7 +31,7 @@ async function send(url: URL, cancelled: AbortSignal | undefined, timedOut: Abor
   }
 }
 
-async function readBody<T>(response: Response, schema: z.ZodType<T>): Promise<T> {
+async function readBody<T>(response: Response, schema: z.ZodMiniType<T>): Promise<T> {
   if (!response.ok) throw new ApiError("status", `The server answered ${response.status}`, response.status);
   const body: unknown = await response.json().catch(() => undefined);
   const parsed = schema.safeParse(body);
@@ -39,7 +39,7 @@ async function readBody<T>(response: Response, schema: z.ZodType<T>): Promise<T>
   return parsed.data;
 }
 
-export async function fetchJson<T>(path: string, schema: z.ZodType<T>, options: FetchOptions = {}): Promise<T> {
+export async function fetchJson<T>(path: string, schema: z.ZodMiniType<T>, options: FetchOptions = {}): Promise<T> {
   const url = new URL(path, globalThis.location?.origin);
   const timedOut = AbortSignal.timeout(options.timeoutMs ?? REQUEST_TIMEOUT_MS);
   const response = await send(url, options.signal, timedOut);
