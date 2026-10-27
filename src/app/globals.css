@@ -1,24 +1,199 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #3a3a3a;
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0f1216;
-    --foreground: #f2f2f2;
+@custom-variant dark {
+  &:where([data-theme="dark"], [data-theme="dark"] *) {
+    @slot;
+  }
+  @media (prefers-color-scheme: dark) {
+    &:where(:root:not([data-theme="light"]), :root:not([data-theme="light"]) *) {
+      @slot;
+    }
   }
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
+@theme static {
+  --breakpoint-*: initial;
+  --breakpoint-md: 48rem;
+  --breakpoint-lg: 80rem;
+  --breakpoint-xl: 120rem;
+
+  --color-*: initial;
+  --color-frame: light-dark(#ffffff, #0f1216);
+  --color-window: light-dark(#f4f6fa, #12161c);
+  --color-card: light-dark(#ffffff, #1a1f27);
+  --color-row: light-dark(#f7f7f7, #222833);
+  --color-soft: light-dark(#eef2f9, #252b35);
+  --color-foreground: light-dark(#3a3a3a, #f2f2f2);
+  --color-muted-foreground: light-dark(#666666, #a9b0ba);
+  --color-heading: light-dark(#0033a0, #9db8ff);
+  --color-border: light-dark(#ededed, #2a303a);
+  --color-primary: light-dark(#2259d0, #7ea6f7);
+  --color-primary-foreground: light-dark(#ffffff, #0b1220);
+  --color-ring: light-dark(#2f70ef, #7ea6f7);
+  --color-input: light-dark(#767676, #7d8794);
+  --color-track: light-dark(#e6e9f0, #2c323c);
+  --color-spend: light-dark(#0033a0, #1e3f96);
+  --color-spend-fg: #ffffff;
+  --color-spend-muted: #c9d6f2;
+  --color-spend-subtle: #d6e0f5;
+  --color-spend-line: light-dark(#2b52b3, #3a5bb0);
+  --color-spend-blob-1: light-dark(#0a3daa, #2449a3);
+  --color-spend-blob-2: light-dark(#1448b5, #2a52b0);
+  --color-on-spend-button-bg: #ffffff;
+  --color-on-spend-button-fg: #0033a0;
+  --color-bar: light-dark(#6e8fe0, #5c73a3);
+  --color-bar-selected: light-dark(#0033a0, #7ea6f7);
+  --color-bar-selected-fg: light-dark(#ffffff, #0b1220);
+  --color-tooltip-bg: light-dark(#0033a0, #f2f2f2);
+  --color-tooltip-fg: light-dark(#ffffff, #0b1220);
+  --color-selected: light-dark(#e8effd, #243049);
+  --color-skeleton: light-dark(#e9edf3, #252b35);
+  --color-success-text: light-dark(#166534, #4ade80);
+  --color-warning-text: light-dark(#92400e, #fbbf24);
+  --color-warning-ring: light-dark(#b45309, #fbbf24);
+  --color-warning-surface: light-dark(#fbf0e1, #2a2416);
+  --color-danger-text: light-dark(#b91c1c, #fca5a5);
+  --color-danger-border: light-dark(#f3c7c7, #5b2a2a);
+  --color-chip-glyph: #ffffff;
+  --color-logo-patch: light-dark(transparent, #ffffff);
+  --color-scrim: rgb(58 58 58 / 0.5);
+  --color-category-groceries: #cc5656;
+  --color-category-entertainment: #348983;
+  --color-category-transportation: #328699;
+  --color-category-dining: #8a7b3e;
+  --color-category-shopping: #926fa0;
+  --color-category-utilities: #59819b;
+  --color-category-neutral: #768190;
+
+  --font-*: initial;
+  --font-sans: var(--font-nunito-sans, Arial, Helvetica, sans-serif);
+  --font-weight-*: initial;
+  --font-weight-normal: 400;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
+
+  --text-*: initial;
+  --text-greeting: 1.5rem;
+  --text-greeting--line-height: 1.2;
+  --text-greeting--letter-spacing: -0.025rem;
+  --text-h1: 1.25rem;
+  --text-h1--line-height: 1.3;
+  --text-h2: 1.125rem;
+  --text-h2--line-height: 1.35;
+  --text-h3: 1rem;
+  --text-h3--line-height: 1.35;
+  --text-kpi-spent: 2.25rem;
+  --text-kpi-spent--line-height: 1.05;
+  --text-kpi-spent--letter-spacing: -0.0625rem;
+  --text-kpi: 1.125rem;
+  --text-kpi--line-height: 1.2;
+  --text-hero-label: 1rem;
+  --text-change: 0.875rem;
+  --text-stat-sub: 0.8125rem;
+  --text-stat-sub--line-height: 1.35;
+  --text-base: 1rem;
+  --text-base--line-height: 1.5;
+  --text-control: 0.9375rem;
+  --text-sm: 0.875rem;
+  --text-sm--line-height: 1.4;
+  --text-xs: 0.8125rem;
+  --text-xs--line-height: 1.4;
+  --text-axis: 0.6875rem;
+  --text-tick: 0.75rem;
+  --text-ring: 0.6875rem;
+  --text-goal: 1.0625rem;
+  --text-goal-spent: 1.0625rem;
+  --text-wordmark: 1.25rem;
+  --text-wordmark--line-height: 1;
+  --text-wordmark--letter-spacing: -0.025rem;
+
+  --radius-*: initial;
+  --radius-window: 32px;
+  --radius-hero: 28px;
+  --radius-card: 24px;
+  --radius-panel: 20px;
+  --radius-row: 18px;
+  --radius-hero-glyph: 16px;
+  --radius-icon-button: 14px;
+  --radius-12: 12px;
+  --radius-10: 10px;
+  --radius-8: 8px;
+  --radius-6: 6px;
+  --radius-pill: 999px;
+  --radius-circle: 50%;
+
+  --shadow-*: initial;
+  --shadow-card:
+    0 1px 2px light-dark(rgb(16 24 40 / 0.04), transparent), 0 8px 24px light-dark(rgb(16 24 40 / 0.06), transparent),
+    0 0 0 1px light-dark(transparent, var(--color-border));
+  --shadow-dialog: 0 30px 30px -15px rgb(58 58 58 / 0.4);
+  --shadow-tooltip: 0 8px 16px -8px rgb(58 58 58 / 0.25);
+
+  --spacing-gutter: 1rem;
+  --spacing-card: 1rem;
+  --spacing-grid: 0.75rem;
+  --spacing-card-gap: 0.875rem;
+  --spacing-rail: 14.75rem;
+  --spacing-target-min: 1.5rem;
+  --spacing-target-touch: 2.75rem;
+  --container-content: 110rem;
+
+  --default-transition-duration: 150ms;
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: var(--font-nunito-sans, Arial, Helvetica, sans-serif);
+@layer base {
+  :root {
+    color-scheme: light dark;
+
+    @variant md {
+      --text-greeting: 1.75rem;
+      --text-h1: 1.375rem;
+      --text-h2: 1.25rem;
+      --text-kpi-spent: 2.875rem;
+      --text-kpi: 1.5rem;
+      --text-change: 0.9375rem;
+      --text-goal: 1.125rem;
+      --text-wordmark: 1.375rem;
+      --spacing-gutter: 1.5rem;
+      --spacing-card: 1.25rem;
+      --spacing-grid: 1rem;
+      --spacing-card-gap: 1.125rem;
+    }
+
+    @variant lg {
+      --text-greeting: 2rem;
+      --text-wordmark: 1.625rem;
+      --spacing-gutter: 2rem;
+      --spacing-card: 1.5rem;
+      --spacing-grid: 1.5rem;
+    }
+
+    @variant xl {
+      --spacing-gutter: 2.5rem;
+      --spacing-card: 1.75rem;
+      --spacing-rail: 16rem;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      --default-transition-duration: 0ms;
+    }
+  }
+
+  :root[data-theme="light"] {
+    color-scheme: light;
+  }
+
+  :root[data-theme="dark"] {
+    color-scheme: dark;
+  }
+
+  body {
+    background-color: var(--color-window);
+    color: var(--color-foreground);
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--color-ring);
+    outline-offset: 2px;
+  }
 }
