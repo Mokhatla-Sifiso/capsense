@@ -1,4 +1,3 @@
-import { dehydrate } from "@tanstack/react-query";
 import { getQueryClient, makeQueryClient } from "./query-client";
 
 describe("query client", () => {
@@ -14,11 +13,5 @@ describe("query client", () => {
 
   it("keeps one client for the whole browser session", () => {
     expect(getQueryClient()).toBe(getQueryClient());
-  });
-
-  it("hands queries that are still loading from the server to the browser", () => {
-    const client = makeQueryClient();
-    void client.prefetchQuery({ queryKey: ["slow"], queryFn: () => new Promise(() => undefined) });
-    expect(dehydrate(client).queries.map((query) => query.queryKey)).toEqual([["slow"]]);
   });
 });
