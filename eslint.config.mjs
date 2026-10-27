@@ -39,6 +39,10 @@ export default defineConfig([
     rules: { "import/no-default-export": "error" },
   },
   {
+    files: ["src/components/brand/**/*.tsx"],
+    rules: { "@next/next/no-img-element": "off" },
+  },
+  {
     files: ["**/*.test.{ts,tsx}", "src/test/**/*.{ts,tsx}", "e2e/**/*.ts"],
     rules: { "no-console": "off" },
   },

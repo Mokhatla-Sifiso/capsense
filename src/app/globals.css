@@ -11,6 +11,8 @@
   }
 }
 
+@custom-variant tall (@media (min-height: 42rem));
+
 @theme static {
   --breakpoint-*: initial;
   --breakpoint-md: 48rem;
