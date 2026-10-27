@@ -1,4 +1,5 @@
 import { DashboardLayout } from "@/components/layout/dashboard-layout";
+import { ThemeRow } from "@/components/theme/theme-control";
 import { Rail } from "@/components/layout/rail";
 import { TopBar } from "@/components/top-bar/top-bar";
 import { cn } from "@/lib/utils";
@@ -49,6 +50,7 @@ export default function Home() {
       trends={<Placeholder title="Monthly trends" headingId="trends-heading" className="h-149 rounded-card" />}
       goals={<Placeholder title="Spending goals" headingId="goals-heading" className="h-94.5 rounded-card" />}
       transactions={<Placeholder title="Transactions" headingId="transactions-heading" className="h-87 rounded-card" />}
+      themeRow={<ThemeRow />}
     />
   );
 }
