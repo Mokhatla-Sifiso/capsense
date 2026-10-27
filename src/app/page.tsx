@@ -1,6 +1,6 @@
-import { Brand } from "@/components/brand/brand";
 import { DashboardLayout } from "@/components/layout/dashboard-layout";
 import { Rail } from "@/components/layout/rail";
+import { TopBar } from "@/components/top-bar/top-bar";
 import { parseServerEnv } from "@/lib/env";
 import { cn } from "@/lib/utils";
 
@@ -44,7 +44,7 @@ export default function Home() {
           }
         />
       }
-      topBar={<Brand placement="top-bar" />}
+      topBar={<TopBar today={MOCK_TODAY} />}
       heading={<h1 className="text-h1 font-bold">Spending insights</h1>}
       summary={<Placeholder title="Spending summary" className="h-74.5 rounded-hero" />}
       categories={
