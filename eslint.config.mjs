@@ -13,6 +13,19 @@ export default defineConfig([
       "@typescript-eslint/consistent-type-imports": ["error", { fixStyle: "inline-type-imports" }],
       "@typescript-eslint/no-unused-vars": ["error", { argsIgnorePattern: "^_", varsIgnorePattern: "^_" }],
       eqeqeq: ["error", "always"],
+      "@typescript-eslint/no-restricted-imports": [
+        "error",
+        {
+          paths: [
+            { name: "lucide-react", message: "Use Phosphor glyphs drawn with the Icon component." },
+            {
+              name: "@phosphor-icons/react",
+              allowTypeImports: true,
+              message: "Import glyphs from @phosphor-icons/react/ssr and draw them with the Icon component.",
+            },
+          ],
+        },
+      ],
     },
   },
   {

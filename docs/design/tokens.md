@@ -51,6 +51,8 @@
 
 Rule (DS-06): mark colour = API `color` / `categoryColor` multiplied toward black until relative luminance = 0.20; one value serves both themes; invalid or missing hex → `--category-neutral`; API hex never painted directly. Colour is never the only cue: every tile, chip and ring sits next to its visible name, with a white Phosphor fill glyph (FR-27).
 
+In the app (Muzi 2026-10-27): the colour is a fixed map from the category name to the six tokens below; any other name uses `--category-neutral`. The glyph follows the API `icon` (`screen-spec.md` §3a).
+
 | Token                       | API colour | API on white | Derived (L and D)               | White glyph on mark (= mark vs L card) | vs L row `#F7F7F7` | vs D card `#1A1F27` · D row `#222833` (script range, 6 marks) | Usage                                                           |
 | --------------------------- | ---------- | ------------ | ------------------------------- | -------------------------------------- | ------------------ | ------------------------------------------------------------- | --------------------------------------------------------------- |
 | `--category-groceries`      | `#FF6B6B`  | 2.78         | `#CC5656`                       | 4.16–4.21 (script range)               | 3.89 (hand, Kept)  | Card 3.93–3.98 · row 3.51–3.56 · D window Not scripted        | Category tile (C-06), chip (C-05, C-09), share-ring fill (C-06) |
