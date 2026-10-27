@@ -1,13 +1,13 @@
 import type { Profile } from "@/schemas/api";
 import { formatDay } from "./format";
+import { southAfricaHour } from "./south-africa-time";
 
 export type DayPart = "morning" | "afternoon" | "evening";
 
-const SOUTH_AFRICA_UTC_OFFSET_HOURS = 2;
 const SINGLE_INITIAL = /^\p{L}\.?$/u;
 
 export function dayPartAt(instant: Date): DayPart {
-  const hour = (instant.getUTCHours() + SOUTH_AFRICA_UTC_OFFSET_HOURS) % 24;
+  const hour = southAfricaHour(instant);
   if (hour >= 5 && hour < 12) return "morning";
   if (hour >= 12 && hour < 18) return "afternoon";
   return "evening";

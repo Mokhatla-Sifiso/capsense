@@ -6,7 +6,7 @@ import { Rail } from "./rail";
 function renderRail() {
   render(
     <>
-      <Rail today="2024-09-16" learnMore={<button type="button">Learn more</button>} />
+      <Rail learnMore={<button type="button">Learn more</button>} />
       {PAGE_SECTIONS.map((section) => (
         <h2 key={section.headingId} id={section.headingId} tabIndex={-1}>
           {section.title}
@@ -41,10 +41,9 @@ describe("Rail", () => {
     expect(screen.getByRole("heading", { name: "Spending goals" })).toHaveFocus();
   });
 
-  it("shows the About card with the demo date and its action", () => {
+  it("shows the About card with its action", () => {
     renderRail();
     expect(screen.getByText("About this demo")).toBeInTheDocument();
-    expect(screen.getByText("Sample data, fixed to 16 Sep 2024. Read-only.")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Learn more" })).toBeInTheDocument();
   });
 });

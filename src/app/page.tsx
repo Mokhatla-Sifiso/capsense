@@ -1,7 +1,6 @@
 import { DashboardLayout } from "@/components/layout/dashboard-layout";
 import { Rail } from "@/components/layout/rail";
 import { TopBar } from "@/components/top-bar/top-bar";
-import { parseServerEnv } from "@/lib/env";
 import { cn } from "@/lib/utils";
 
 interface PlaceholderProps {
@@ -27,13 +26,10 @@ function Placeholder({ title, headingId, className }: PlaceholderProps) {
 }
 
 export default function Home() {
-  const { MOCK_TODAY } = parseServerEnv(process.env);
-
   return (
     <DashboardLayout
       rail={
         <Rail
-          today={MOCK_TODAY}
           learnMore={
             <button
               type="button"
@@ -44,7 +40,7 @@ export default function Home() {
           }
         />
       }
-      topBar={<TopBar today={MOCK_TODAY} />}
+      topBar={<TopBar />}
       heading={<h1 className="text-h1 font-bold">Spending insights</h1>}
       summary={<Placeholder title="Spending summary" className="h-74.5 rounded-hero" />}
       categories={
