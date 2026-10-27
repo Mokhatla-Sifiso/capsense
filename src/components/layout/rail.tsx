@@ -6,11 +6,10 @@ import { JumpToHeading } from "./jump-to-heading";
 import { PAGE_SECTIONS } from "./page-sections";
 
 interface RailProps {
-  today: string;
   learnMore: ReactNode;
 }
 
-export function Rail({ today, learnMore }: RailProps): ReactNode {
+export function Rail({ learnMore }: RailProps): ReactNode {
   return (
     <div className="flex min-h-full flex-col px-4 pt-5.5 pb-5 tall:sticky tall:top-0 tall:h-dvh tall:min-h-0">
       <div className="px-3">
@@ -39,7 +38,7 @@ export function Rail({ today, learnMore }: RailProps): ReactNode {
       </nav>
 
       <div className="mt-auto pt-10">
-        <AboutCard today={today} action={learnMore} />
+        <AboutCard action={learnMore} />
       </div>
     </div>
   );
