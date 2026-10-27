@@ -10,7 +10,7 @@ export async function GET(
   const params = request.nextUrl.searchParams;
   const dates = readDateFilter(params);
   const period = readPeriod(params.get("period"));
-  return respondFor(ctx, (repository) => {
+  return respondFor(request, ctx, (repository) => {
     if (!dates.ok) return badRequest(dates.message);
     return repository.categories(customWindow(dates.filter) ?? repository.windowFor(period));
   });

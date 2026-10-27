@@ -203,13 +203,17 @@ export class SpendingRepository {
   }
 }
 
-export function createMockRepository(today: string): SpendingRepository {
-  return new SpendingRepository({
+export function mockData(today: string): SpendingData {
+  return {
     today,
     customer: CUSTOMER,
     categories: CATEGORIES,
     budgets: BUDGETS,
     presets: PERIOD_PRESETS,
     ledger: generateLedger({ categories: CATEGORIES, from: CUSTOMER.joinDate, to: today, seed: LEDGER_SEED }),
-  });
+  };
+}
+
+export function createMockRepository(today: string): SpendingRepository {
+  return new SpendingRepository(mockData(today));
 }

@@ -7,5 +7,5 @@ export async function GET(
   ctx: RouteContext<"/api/customers/[customerId]/spending/trends">,
 ): Promise<Response> {
   const months = readWholeNumber(request.nextUrl.searchParams.get("months"), MONTHS);
-  return respondFor(ctx, (repository) => repository.trends(months));
+  return respondFor(request, ctx, (repository) => repository.trends(months));
 }
