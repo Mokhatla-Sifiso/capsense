@@ -74,7 +74,7 @@ jobs:
         timeout-minutes: 3
         run: |
           for attempt in 1 2; do
-            timeout 85 pnpm test:e2e:install && exit 0
+            timeout 85 pnpm exec playwright install chromium && exit 0
             echo "::warning::Browser install attempt $attempt failed or stalled"
           done
           exit 1
