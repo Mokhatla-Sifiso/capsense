@@ -16,7 +16,10 @@ interface ProfileGreetingProps {
 export function ProfileGreeting({ dayPart, today, children }: ProfileGreetingProps): ReactNode {
   const profile = useQuery(dashboardQueries.profile());
   const loaded = profile.data?.customerId === CUSTOMER_ID ? profile.data : null;
-  const failed = profile.isError || (profile.isSuccess && loaded === null);
+  const loading = profile.isPending;
+  let problem: string | null = null;
+  if (loaded === null && !loading) problem = "Couldn't load profile";
+  else if (profile.isError) problem = "Couldn't refresh profile";
 
   return (
     <div>
@@ -27,20 +30,20 @@ export function ProfileGreeting({ dayPart, today, children }: ProfileGreetingPro
             description={profileSummary(loaded, today)}
           />
         )}
-        {profile.isPending && (
+        {loading && (
           <>
             {`Good ${dayPart}, `}
             <span aria-hidden className="inline-block h-5 w-20 animate-pulse rounded-6 bg-skeleton align-middle" />
           </>
         )}
-        {failed && greetingText(dayPart, null)}
+        {loaded === null && !loading && greetingText(dayPart, null)}
       </p>
 
       {children}
 
-      {failed && (
+      {problem && (
         <p className="mt-1 text-sm">
-          <span className="font-semibold text-danger-text">Couldn&apos;t load profile</span>
+          <span className="font-semibold text-danger-text">{problem}</span>
           <span className="text-muted-foreground"> · </span>
           <button
             type="button"
