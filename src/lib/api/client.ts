@@ -20,26 +20,28 @@ export interface FetchOptions {
   timeoutMs?: number;
 }
 
-export async function fetchJson<T>(path: string, schema: z.ZodType<T>, options: FetchOptions = {}): Promise<T> {
-  const { signal, timeoutMs = REQUEST_TIMEOUT_MS } = options;
-  const timeout = AbortSignal.timeout(timeoutMs);
-  const url = new URL(path, globalThis.location?.origin);
-
-  let response: Response;
+async function send(url: URL, cancelled: AbortSignal | undefined, timedOut: AbortSignal): Promise<Response> {
+  const stopWhen = cancelled ? AbortSignal.any([cancelled, timedOut]) : timedOut;
   try {
-    response = await fetch(url, {
-      headers: { accept: "application/json" },
-      signal: signal ? AbortSignal.any([signal, timeout]) : timeout,
-    });
+    return await fetch(url, { headers: { accept: "application/json" }, signal: stopWhen });
   } catch (error) {
-    if (signal?.aborted) throw error;
-    if (timeout.aborted) throw new ApiError("timeout", "The request took longer than 10 seconds");
+    if (cancelled?.aborted) throw error;
+    if (timedOut.aborted) throw new ApiError("timeout", "The request took longer than 10 seconds");
     throw new ApiError("network", "The request couldn't reach the server");
   }
+}
 
+async function readBody<T>(response: Response, schema: z.ZodType<T>): Promise<T> {
   if (!response.ok) throw new ApiError("status", `The server answered ${response.status}`, response.status);
-
-  const parsed = schema.safeParse(await response.json().catch(() => undefined));
+  const body: unknown = await response.json().catch(() => undefined);
+  const parsed = schema.safeParse(body);
   if (!parsed.success) throw new ApiError("invalid", "The response didn't match the API contract");
   return parsed.data;
+}
+
+export async function fetchJson<T>(path: string, schema: z.ZodType<T>, options: FetchOptions = {}): Promise<T> {
+  const url = new URL(path, globalThis.location?.origin);
+  const timedOut = AbortSignal.timeout(options.timeoutMs ?? REQUEST_TIMEOUT_MS);
+  const response = await send(url, options.signal, timedOut);
+  return readBody(response, schema);
 }

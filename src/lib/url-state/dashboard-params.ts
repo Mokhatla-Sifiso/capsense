@@ -1,10 +1,11 @@
 import { createLoader, createParser, parseAsNumberLiteral, parseAsString, parseAsStringLiteral } from "nuqs/server";
 import { z } from "zod";
 import type { CategoryRange, TransactionParams } from "@/lib/api/spending-api";
-import { PERIODS, SORT_ORDERS } from "@/schemas/api";
+import { PERIODS, type Period, SORT_ORDERS, type SortOrder } from "@/schemas/api";
 
 export const PAGE_SIZE = 20;
 export const MONTH_OPTIONS = [3, 6, 12, 24] as const;
+export type MonthOption = (typeof MONTH_OPTIONS)[number];
 
 const isoDay = z.iso.date();
 
@@ -30,7 +31,15 @@ export const dashboardParams = {
 
 export const loadDashboardParams = createLoader(dashboardParams);
 
-export type DashboardParams = Awaited<ReturnType<typeof loadDashboardParams>>;
+export interface DashboardParams {
+  period: Period;
+  startDate: string | null;
+  endDate: string | null;
+  months: MonthOption;
+  category: string | null;
+  sort: SortOrder;
+  page: number;
+}
 
 export interface DayRange {
   startDate: string;

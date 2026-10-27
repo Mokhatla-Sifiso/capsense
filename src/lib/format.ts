@@ -9,26 +9,19 @@ const percentFormat = new Intl.NumberFormat(LOCALE, {
   minimumFractionDigits: 1,
   maximumFractionDigits: 1,
 });
-const currencyFormats = new Map<string, Intl.NumberFormat>();
 
 function keepOnOneLine(text: string): string {
   return text.replace(ANY_SPACE, NO_BREAK_SPACE);
 }
 
-function currencyFormat(currency: string): Intl.NumberFormat {
-  const cached = currencyFormats.get(currency);
-  if (cached) return cached;
-  const format = new Intl.NumberFormat(LOCALE, {
-    style: "currency",
-    currency,
-    currencyDisplay: currency === HOME_CURRENCY ? "symbol" : "code",
-  });
-  currencyFormats.set(currency, format);
-  return format;
-}
+const randFormat = new Intl.NumberFormat(LOCALE, { style: "currency", currency: HOME_CURRENCY });
 
 export function formatCurrency(amount: number, currency: string): string {
-  return keepOnOneLine(currencyFormat(currency).format(amount));
+  const format =
+    currency === HOME_CURRENCY
+      ? randFormat
+      : new Intl.NumberFormat(LOCALE, { style: "currency", currency, currencyDisplay: "code" });
+  return keepOnOneLine(format.format(amount));
 }
 
 export function formatCount(value: number): string {
