@@ -1,4 +1,4 @@
-import { formatCount, formatCurrency, formatPercent } from "./format";
+import { formatCount, formatCurrency, formatDay, formatPercent } from "./format";
 
 const NBSP = " ";
 const readable = (text: string) => text.replaceAll(NBSP, "·");
@@ -40,5 +40,15 @@ describe("formatCount", () => {
     [1250, "1·250"],
   ])("shows %d as %s", (value, expected) => {
     expect(readable(formatCount(value))).toBe(expected);
+  });
+});
+
+describe("formatDay", () => {
+  it.each([
+    ["2024-09-16", "16 Sep 2024"],
+    ["2023-01-05", "5 Jan 2023"],
+    ["2024-12-31", "31 Dec 2024"],
+  ])("shows %s as %s, the same in every browser", (isoDay, expected) => {
+    expect(formatDay(isoDay)).toBe(expected);
   });
 });

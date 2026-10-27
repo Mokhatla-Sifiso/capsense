@@ -1,26 +1,58 @@
+import { Brand } from "@/components/brand/brand";
 import { DashboardLayout } from "@/components/layout/dashboard-layout";
+import { Rail } from "@/components/layout/rail";
+import { parseServerEnv } from "@/lib/env";
 import { cn } from "@/lib/utils";
 
 interface PlaceholderProps {
-  name: string;
+  title: string;
+  headingId?: string;
   className: string;
 }
 
-function Placeholder({ name, className }: PlaceholderProps) {
-  return <section aria-label={name} className={cn("bg-card shadow-card", className)} />;
+function Placeholder({ title, headingId, className }: PlaceholderProps) {
+  return (
+    <section
+      aria-label={headingId ? undefined : title}
+      aria-labelledby={headingId}
+      className={cn("bg-card p-card shadow-card", className)}
+    >
+      {headingId && (
+        <h2 id={headingId} tabIndex={-1} className="text-h2 font-bold">
+          {title}
+        </h2>
+      )}
+    </section>
+  );
 }
 
 export default function Home() {
+  const { MOCK_TODAY } = parseServerEnv(process.env);
+
   return (
     <DashboardLayout
-      rail={<nav aria-label="On this page" />}
-      topBar={null}
+      rail={
+        <Rail
+          today={MOCK_TODAY}
+          learnMore={
+            <button
+              type="button"
+              className="min-h-11 rounded-pill bg-on-spend-button-bg px-5 font-semibold text-on-spend-button-fg focus-visible:outline-spend-fg"
+            >
+              Learn more
+            </button>
+          }
+        />
+      }
+      topBar={<Brand placement="top-bar" />}
       heading={<h1 className="text-h1 font-bold">Spending insights</h1>}
-      summary={<Placeholder name="Spending summary" className="h-74.5 rounded-hero" />}
-      categories={<Placeholder name="Spending by category" className="h-149 rounded-card" />}
-      trends={<Placeholder name="Monthly trends" className="h-149 rounded-card" />}
-      goals={<Placeholder name="Spending goals" className="h-94.5 rounded-card" />}
-      transactions={<Placeholder name="Transactions" className="h-87 rounded-card" />}
+      summary={<Placeholder title="Spending summary" className="h-74.5 rounded-hero" />}
+      categories={
+        <Placeholder title="Spending by category" headingId="categories-heading" className="h-149 rounded-card" />
+      }
+      trends={<Placeholder title="Monthly trends" headingId="trends-heading" className="h-149 rounded-card" />}
+      goals={<Placeholder title="Spending goals" headingId="goals-heading" className="h-94.5 rounded-card" />}
+      transactions={<Placeholder title="Transactions" headingId="transactions-heading" className="h-87 rounded-card" />}
     />
   );
 }
