@@ -23,7 +23,6 @@ playwright/.cache/
 npm-debug.log*
 pnpm-debug.log*
 
-.claude/
 .vscode/
 .idea/
 *.tsbuildinfo
