@@ -7,5 +7,5 @@ export async function GET(
   ctx: RouteContext<"/api/customers/[customerId]/spending/summary">,
 ): Promise<Response> {
   const period = readPeriod(request.nextUrl.searchParams.get("period"));
-  return respondFor(ctx, (repository) => repository.summary(period));
+  return respondFor(request, ctx, (repository) => repository.summary(period));
 }

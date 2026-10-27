@@ -2,8 +2,8 @@ import type { NextRequest } from "next/server";
 import { respondFor } from "@/server/mock/respond";
 
 export async function GET(
-  _request: NextRequest,
+  request: NextRequest,
   ctx: RouteContext<"/api/customers/[customerId]/profile">,
 ): Promise<Response> {
-  return respondFor(ctx, (repository) => repository.profile());
+  return respondFor(request, ctx, (repository) => repository.profile());
 }
