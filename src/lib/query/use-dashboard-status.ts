@@ -2,6 +2,17 @@ import { type QueryClient, useQueryClient } from "@tanstack/react-query";
 import { useMemo, useSyncExternalStore } from "react";
 import { dashboardKeys } from "./dashboard-queries";
 
+export function couldNotRefresh(sections: number): string {
+  return sections === 1 ? "1 section couldn't refresh" : `${sections} sections couldn't refresh`;
+}
+
+export function failedSectionCount(client: QueryClient): number {
+  return client
+    .getQueryCache()
+    .findAll({ queryKey: dashboardKeys.all, type: "active" })
+    .filter((section) => section.state.status === "error").length;
+}
+
 export interface DashboardStatus {
   fetching: boolean;
   failedSections: number;
