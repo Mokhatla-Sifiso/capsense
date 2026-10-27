@@ -38,9 +38,11 @@ describe("API schemas reject data the screens can't trust", () => {
   });
 
   it("rejects an amount sent as text", () => {
-    const [first] = specTransactions.transactions;
-    const broken = { ...specTransactions, transactions: [{ ...first, amount: "245.80" }] };
-    expect(transactionsSchema.safeParse(broken).success).toBe(false);
+    expect(summarySchema.safeParse({ ...specSummary, totalSpent: "4250.75" }).success).toBe(false);
+  });
+
+  it("rejects a list that isn't a list", () => {
+    expect(transactionsSchema.safeParse({ ...specTransactions, transactions: "none" }).success).toBe(false);
   });
 
   it("rejects a period the spec doesn't define", () => {
@@ -54,5 +56,25 @@ describe("API schemas reject data the screens can't trust", () => {
   it("drops fields the spec doesn't define", () => {
     const parsed = profileSchema.parse({ ...specProfile, internalNote: "not for the UI" });
     expect(parsed).toEqual(specProfile);
+  });
+});
+
+describe("one bad item in a list is left out and the rest still show", () => {
+  it("drops a transaction whose amount is text", () => {
+    const [first] = specTransactions.transactions;
+    const broken = { ...first, id: "txn_broken", amount: "245.80" };
+    const parsed = transactionsSchema.parse({ ...specTransactions, transactions: [broken, first] });
+    expect(parsed.transactions).toEqual([first]);
+  });
+
+  it("drops a goal with a missing field", () => {
+    const [first] = specGoals.goals;
+    const { status: _status, ...withoutStatus } = { ...first };
+    const parsed = goalsSchema.parse({ goals: [withoutStatus, first] });
+    expect(parsed.goals).toEqual([first]);
+  });
+
+  it("keeps an empty list when every item is bad", () => {
+    expect(trendsSchema.parse({ trends: [null, 42] }).trends).toEqual([]);
   });
 });
