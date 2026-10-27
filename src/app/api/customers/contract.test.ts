@@ -6,6 +6,7 @@ import {
   goalsSchema,
   profileSchema,
   summarySchema,
+  transactionsSchema,
   trendsSchema,
 } from "@/schemas/api";
 import type { CustomerRouteContext } from "@/server/mock/respond";
@@ -15,6 +16,7 @@ import { GET as getProfile } from "./[customerId]/profile/route";
 import { GET as getCategories } from "./[customerId]/spending/categories/route";
 import { GET as getSummary } from "./[customerId]/spending/summary/route";
 import { GET as getTrends } from "./[customerId]/spending/trends/route";
+import { GET as getTransactions } from "./[customerId]/transactions/route";
 
 type Handler = (request: NextRequest, ctx: CustomerRouteContext) => Promise<Response>;
 
@@ -23,6 +25,7 @@ const endpoints: [string, Handler, z.ZodType][] = [
   ["spending/summary", getSummary, summarySchema],
   ["spending/categories", getCategories, categoriesSchema],
   ["spending/trends", getTrends, trendsSchema],
+  ["transactions", getTransactions, transactionsSchema],
   ["goals", getGoals, goalsSchema],
   ["filters", getFilters, filtersSchema],
 ];
@@ -87,5 +90,23 @@ describe("query parameters reach the repository", () => {
 
   it("an unknown customer is a 404 even when the dates are also wrong", async () => {
     expect((await call(getCategories, "spending/categories", "99999", "?startDate=nope")).status).toBe(404);
+  });
+
+  it("transactions uses the spec defaults", async () => {
+    const { transactions, pagination } = await body(getTransactions, "transactions", "");
+    expect(transactions).toHaveLength(20);
+    expect(pagination).toMatchObject({ limit: 20, offset: 0, hasMore: true });
+  });
+
+  it("transactions caps the page at 100 and ignores an unknown sort order", async () => {
+    const { transactions, pagination } = await body(getTransactions, "transactions", "?limit=150&sortBy=price");
+    expect(transactions).toHaveLength(100);
+    expect(pagination.limit).toBe(100);
+  });
+
+  it("transactions filters by category and answers 400 for a malformed date", async () => {
+    const dining = await body(getTransactions, "transactions", "?category=Dining&limit=100");
+    expect(dining.transactions.every((t: { category: string }) => t.category === "Dining")).toBe(true);
+    expect((await call(getTransactions, "transactions", "12345", "?startDate=2024/09/01")).status).toBe(400);
   });
 });
