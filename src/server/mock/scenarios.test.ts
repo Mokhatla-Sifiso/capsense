@@ -1,4 +1,4 @@
-import { applyVariant, dataVariantFor, readScenario } from "./scenarios";
+import { emptyData, extremeData, readScenario } from "./scenarios";
 import { SpendingRepository, mockData } from "./spending-repository";
 
 const TODAY = "2024-09-16";
@@ -14,17 +14,10 @@ describe("readScenario", () => {
     expect(readScenario(headers("explode"), true)).toBeNull();
     expect(readScenario(new Headers(), true)).toBeNull();
   });
-
-  it("only swaps the data for empty and edge", () => {
-    expect(dataVariantFor("empty")).toBe("empty");
-    expect(dataVariantFor("edge")).toBe("edge");
-    expect(dataVariantFor("slow")).toBe("normal");
-    expect(dataVariantFor(null)).toBe("normal");
-  });
 });
 
 describe("empty data", () => {
-  const empty = new SpendingRepository(applyVariant(mockData(TODAY), "empty"));
+  const empty = new SpendingRepository(emptyData(mockData(TODAY)));
 
   it("keeps the spec's shape with empty lists and zero totals", () => {
     expect(empty.summary("30d").totalSpent).toBe(0);
@@ -37,7 +30,7 @@ describe("empty data", () => {
 });
 
 describe("edge data", () => {
-  const edge = new SpendingRepository(applyVariant(mockData(TODAY), "edge"));
+  const edge = new SpendingRepository(extremeData(mockData(TODAY)));
   const window = edge.windowFor("30d");
   const breakdown = edge.categories(window);
   const newest = edge.transactions({
