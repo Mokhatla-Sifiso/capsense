@@ -1,4 +1,4 @@
-import type { z } from "zod";
+import type { z } from "zod/mini";
 import { GET as getFilters } from "@/app/api/customers/[customerId]/filters/route";
 import { GET as getGoals } from "@/app/api/customers/[customerId]/goals/route";
 import { GET as getProfile } from "@/app/api/customers/[customerId]/profile/route";
@@ -20,7 +20,7 @@ import type { CustomerRoute } from "./routes";
 export interface Endpoint {
   path: string;
   route: CustomerRoute;
-  schema: z.ZodType;
+  schema: z.ZodMiniType;
 }
 
 export const ENDPOINTS: readonly Endpoint[] = [
