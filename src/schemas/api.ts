@@ -9,6 +9,15 @@ export type SortOrder = (typeof SORT_ORDERS)[number];
 const isoDay = z.iso.date();
 const count = z.number().int().nonnegative();
 
+function listOf<T extends z.ZodType>(item: T) {
+  return z.array(z.unknown()).transform((values) =>
+    values.flatMap((value) => {
+      const parsed = item.safeParse(value);
+      return parsed.success ? [parsed.data] : [];
+    }),
+  );
+}
+
 export const profileSchema = z.object({
   customerId: z.string(),
   name: z.string(),
@@ -43,7 +52,7 @@ export const categorySpendSchema = z.object({
 export const categoriesSchema = z.object({
   dateRange: z.object({ startDate: isoDay, endDate: isoDay }),
   totalAmount: z.number(),
-  categories: z.array(categorySpendSchema),
+  categories: listOf(categorySpendSchema),
 });
 
 export const monthlyTrendSchema = z.object({
@@ -53,7 +62,7 @@ export const monthlyTrendSchema = z.object({
   averageTransaction: z.number(),
 });
 
-export const trendsSchema = z.object({ trends: z.array(monthlyTrendSchema) });
+export const trendsSchema = z.object({ trends: listOf(monthlyTrendSchema) });
 
 export const transactionSchema = z.object({
   id: z.string(),
@@ -68,7 +77,7 @@ export const transactionSchema = z.object({
 });
 
 export const transactionsSchema = z.object({
-  transactions: z.array(transactionSchema),
+  transactions: listOf(transactionSchema),
   pagination: z.object({
     total: count,
     limit: count,
@@ -87,11 +96,11 @@ export const goalSchema = z.object({
   status: z.string(),
 });
 
-export const goalsSchema = z.object({ goals: z.array(goalSchema) });
+export const goalsSchema = z.object({ goals: listOf(goalSchema) });
 
 export const filtersSchema = z.object({
-  categories: z.array(z.object({ name: z.string(), color: z.string(), icon: z.string() })),
-  dateRangePresets: z.array(z.object({ label: z.string(), value: z.string() })),
+  categories: listOf(z.object({ name: z.string(), color: z.string(), icon: z.string() })),
+  dateRangePresets: listOf(z.object({ label: z.string(), value: z.string() })),
 });
 
 export type Profile = z.infer<typeof profileSchema>;
