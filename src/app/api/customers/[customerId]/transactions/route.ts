@@ -9,7 +9,7 @@ export async function GET(
 ): Promise<Response> {
   const params = request.nextUrl.searchParams;
   const dates = readDateFilter(params);
-  return respondFor(ctx, (repository) => {
+  return respondFor(request, ctx, (repository) => {
     if (!dates.ok) return badRequest(dates.message);
     return repository.transactions({
       limit: readWholeNumber(params.get("limit"), LIMIT),
