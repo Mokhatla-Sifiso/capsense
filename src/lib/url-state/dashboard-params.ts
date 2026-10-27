@@ -1,5 +1,5 @@
 import { createLoader, createParser, parseAsNumberLiteral, parseAsString, parseAsStringLiteral } from "nuqs/server";
-import { z } from "zod";
+import { z } from "zod/mini";
 import type { CategoryRange, TransactionParams } from "@/lib/api/spending-api";
 import { PERIODS, type Period, SORT_ORDERS, type SortOrder } from "@/schemas/api";
 

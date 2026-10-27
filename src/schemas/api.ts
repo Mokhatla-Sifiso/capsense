@@ -1,4 +1,4 @@
-import { z } from "zod";
+import { z } from "zod/mini";
 
 export const PERIODS = ["7d", "30d", "90d", "1y"] as const;
 export const SORT_ORDERS = ["date_desc", "date_asc", "amount_desc", "amount_asc"] as const;
@@ -7,15 +7,16 @@ export type Period = (typeof PERIODS)[number];
 export type SortOrder = (typeof SORT_ORDERS)[number];
 
 const isoDay = z.iso.date();
-const count = z.number().int().nonnegative();
+const count = z.int().check(z.nonnegative());
 
-function listOf<T extends z.ZodType>(item: T) {
-  return z.array(z.unknown()).transform((values) =>
+function listOf<T extends z.ZodMiniType>(item: T) {
+  const keepValidItems = z.transform((values: unknown[]) =>
     values.flatMap((value) => {
       const parsed = item.safeParse(value);
       return parsed.success ? [parsed.data] : [];
     }),
   );
+  return z.pipe(z.array(z.unknown()), keepValidItems);
 }
 
 export const profileSchema = z.object({
@@ -56,7 +57,7 @@ export const categoriesSchema = z.object({
 });
 
 export const monthlyTrendSchema = z.object({
-  month: z.string().regex(/^\d{4}-\d{2}$/),
+  month: z.string().check(z.regex(/^\d{4}-\d{2}$/)),
   totalSpent: z.number(),
   transactionCount: count,
   averageTransaction: z.number(),
