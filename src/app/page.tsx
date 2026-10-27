@@ -1,3 +1,4 @@
+import { AboutDialog } from "@/components/about/about-dialog";
 import { DashboardLayout } from "@/components/layout/dashboard-layout";
 import { ThemeRow } from "@/components/theme/theme-control";
 import { Rail } from "@/components/layout/rail";
@@ -29,18 +30,7 @@ function Placeholder({ title, headingId, className }: PlaceholderProps) {
 export default function Home() {
   return (
     <DashboardLayout
-      rail={
-        <Rail
-          learnMore={
-            <button
-              type="button"
-              className="min-h-11 rounded-pill bg-on-spend-button-bg px-5 font-semibold text-on-spend-button-fg focus-visible:outline-spend-fg"
-            >
-              Learn more
-            </button>
-          }
-        />
-      }
+      rail={<Rail learnMore={<AboutDialog opener="learn-more" />} />}
       topBar={<TopBar />}
       heading={<h1 className="text-h1 font-bold">Spending insights</h1>}
       summary={<Placeholder title="Spending summary" className="h-74.5 rounded-hero" />}
