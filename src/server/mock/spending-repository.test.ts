@@ -137,3 +137,89 @@ describe("a ledger with no spending", () => {
     expect(empty.goals().goals.every((goal) => goal.currentSpent === 0 && goal.status === "on_track")).toBe(true);
   });
 });
+
+describe("transactions", () => {
+  const query = { limit: 20, offset: 0, sortBy: "date_desc", category: null, startDate: null, endDate: null } as const;
+
+  it("returns the newest 20 first by default", () => {
+    const { transactions, pagination } = repository.transactions(query);
+    const dates = transactions.map((transaction) => transaction.date);
+    expect(transactions).toHaveLength(20);
+    expect(dates).toEqual(dates.toSorted().reverse());
+    expect(pagination).toMatchObject({ limit: 20, offset: 0, hasMore: true });
+  });
+
+  it.each([
+    ["date_asc", (a: number, b: number) => a <= b],
+    ["amount_desc", (a: number, b: number) => a >= b],
+    ["amount_asc", (a: number, b: number) => a <= b],
+  ] as const)("sorts by %s", (sortBy, inOrder) => {
+    const { transactions } = repository.transactions({ ...query, sortBy, limit: 100 });
+    const values = transactions.map((t) => (sortBy === "date_asc" ? Date.parse(t.date) : t.amount));
+    expect(values.every((value, index) => index === 0 || inOrder(values[index - 1] ?? value, value))).toBe(true);
+  });
+
+  it("pages with offset and says when there is more", () => {
+    const first = repository.transactions({ ...query, limit: 10 });
+    const second = repository.transactions({ ...query, limit: 10, offset: 10 });
+    expect(second.transactions[0]?.id).not.toBe(first.transactions[0]?.id);
+    const last = repository.transactions({ ...query, limit: 10, offset: first.pagination.total - 5 });
+    expect(last.transactions).toHaveLength(5);
+    expect(last.pagination.hasMore).toBe(false);
+  });
+
+  it("returns an empty page past the end", () => {
+    const { transactions, pagination } = repository.transactions({ ...query, offset: 100_000 });
+    expect(transactions).toEqual([]);
+    expect(pagination.hasMore).toBe(false);
+  });
+
+  it("filters by category, and an unknown category matches nothing", () => {
+    const dining = repository.transactions({ ...query, category: "Dining", limit: 100 });
+    expect(dining.transactions.every((t) => t.category === "Dining")).toBe(true);
+    expect(repository.transactions({ ...query, category: "Pets" }).pagination.total).toBe(0);
+  });
+
+  it("filters by date, both ends included", () => {
+    const { transactions } = repository.transactions({
+      ...query,
+      startDate: "2024-09-10",
+      endDate: "2024-09-16",
+      limit: 100,
+    });
+    expect(transactions.every((t) => t.date.slice(0, 10) >= "2024-09-10" && t.date.slice(0, 10) <= "2024-09-16")).toBe(
+      true,
+    );
+  });
+
+  it("counts the same transactions as the category breakdown for the same days", () => {
+    const window = repository.windowFor("30d");
+    const groceries = repository.categories(window).categories.find((c) => c.name === "Groceries");
+    const listed = repository.transactions({
+      ...query,
+      category: "Groceries",
+      startDate: window.start,
+      endDate: window.end,
+    });
+    expect(listed.pagination.total).toBe(groceries?.transactionCount);
+  });
+
+  it("carries each category's icon and colour", () => {
+    const [first] = repository.transactions({ ...query, category: "Groceries" }).transactions;
+    expect(first).toMatchObject({ icon: "shopping-cart", categoryColor: "#FF6B6B" });
+  });
+});
+
+describe("field order", () => {
+  it("lists profile fields in the same order as the spec", () => {
+    expect(Object.keys(repository.profile())).toEqual([
+      "customerId",
+      "name",
+      "email",
+      "joinDate",
+      "accountType",
+      "totalSpent",
+      "currency",
+    ]);
+  });
+});
