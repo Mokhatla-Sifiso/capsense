@@ -21,7 +21,7 @@ function renderList(searchParams = "") {
   render(
     <QueryClientProvider client={makeQueryClient()}>
       <NuqsAdapter>
-        <TransactionList problem={null} />
+        <TransactionList problem={null} filters={null} removeIcon={null} />
       </NuqsAdapter>
     </QueryClientProvider>,
   );
@@ -100,6 +100,29 @@ describe("TransactionList", () => {
     renderList();
     expect(await screen.findByText("No transactions in this period")).toBeInTheDocument();
     expect(screen.queryByRole("table")).not.toBeInTheDocument();
+  });
+
+  it("says nothing matches, with Clear filters, when a filter is set and there are no rows", async () => {
+    answerTransactions([]);
+    renderList("?category=Dining");
+    expect(await screen.findByText("No transactions match these filters")).toBeInTheDocument();
+    expect(screen.getAllByRole("button", { name: "Clear filters" })).toHaveLength(2);
+    expect(screen.queryByText("No transactions in this period")).not.toBeInTheDocument();
+  });
+
+  it("asks for the chosen sort and shows the rows in the order they come back", async () => {
+    const asked: string[] = [];
+    server.use(
+      http.get(TRANSACTIONS_PATH, ({ request }) => {
+        asked.push(new URL(request.url).searchParams.get("sortBy") ?? "");
+        const rows = ["t3", "t1", "t2"].map((id) => ({ ...PICK_N_PAY, id, merchant: id }));
+        return HttpResponse.json({ ...specTransactions, transactions: rows });
+      }),
+    );
+    renderList("?sort=amount_desc");
+    const merchants = (await tableRows()).map(([merchant]) => merchant?.slice(0, 2));
+    expect(merchants).toEqual(["t3", "t1", "t2"]);
+    expect(asked).toEqual(["amount_desc"]);
   });
 
   it("shows an error with Retry, and Retry asks again", async () => {
