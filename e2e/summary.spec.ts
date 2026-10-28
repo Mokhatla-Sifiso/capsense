@@ -67,6 +67,26 @@ test("with no transactions it shows the empty version", async ({ page }) => {
   await expect(valueOf(page, "Top category")).toHaveText("—");
 });
 
+for (const width of [320, 360]) {
+  test(`at ${width} px an amount over a million stays on one line, clear of the wallet tile`, async ({ page }) => {
+    await page.setViewportSize({ width, height: 800 });
+    await page.setExtraHTTPHeaders({ "x-mock-scenario": "edge" });
+    await page.goto("/");
+    const amount = valueOf(page, "Spent");
+    await expect(amount).toHaveText(/^R\s\d\s\d{3}\s\d{3},\d{2}$/);
+    const fits = await amount.evaluate((element) => element.scrollWidth <= element.clientWidth);
+    expect(fits).toBe(true);
+    const text = await amount.evaluate((element) => {
+      const range = document.createRange();
+      range.selectNodeContents(element);
+      return range.getBoundingClientRect();
+    });
+    const tile = await summaryCard(page).locator(":scope > span[aria-hidden]").boundingBox();
+    expect(text.height).toBeLessThan(60);
+    expect(text.right).toBeLessThanOrEqual(tile?.x ?? 0);
+  });
+}
+
 test("with custom dates it shows the preset-only note and no figures", async ({ page }) => {
   await page.goto("/?startDate=2024-09-01&endDate=2024-09-16");
   await expect(summaryCard(page)).toHaveText("Summary is available for preset periods only");
