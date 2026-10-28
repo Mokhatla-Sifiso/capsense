@@ -76,7 +76,7 @@ export const trendsSchema = z.object({ trends: listOf(monthlyTrendSchema) });
 
 export const transactionSchema = z.object({
   id: z.string(),
-  date: z.iso.datetime(),
+  date: z.catch(z.iso.datetime(), ""),
   merchant: z.string(),
   category: z.string(),
   amount: z.number(),
