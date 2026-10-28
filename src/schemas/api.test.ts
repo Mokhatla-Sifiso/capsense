@@ -47,6 +47,18 @@ describe("API schemas reject data the screens can't trust", () => {
     expect(summarySchema.safeParse({ ...specSummary, comparedToPrevious: { spentChange: 4 } }).success).toBe(true);
   });
 
+  it("keeps the categories when the date range is missing or not a real date, so only the caption is hidden", () => {
+    const { dateRange: _range, ...withoutRange } = specCategories;
+    expect(categoriesSchema.parse(withoutRange).dateRange).toBeUndefined();
+    const badDay = { ...specCategories, dateRange: { startDate: "2024-13-01", endDate: "2024-09-16" } };
+    expect(categoriesSchema.parse(badDay)).toEqual({ ...withoutRange, dateRange: undefined });
+  });
+
+  it("rejects a date range that starts after it ends", () => {
+    const backwards = { ...specCategories, dateRange: { startDate: "2024-09-16", endDate: "2024-08-16" } };
+    expect(categoriesSchema.safeParse(backwards).success).toBe(false);
+  });
+
   it("rejects a list that isn't a list", () => {
     expect(transactionsSchema.safeParse({ ...specTransactions, transactions: "none" }).success).toBe(false);
   });
