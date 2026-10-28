@@ -34,6 +34,18 @@ async function openAndType(start: string, end: string) {
 }
 
 describe("CustomRange", () => {
+  it("can open from a Dates button for the transactions", async () => {
+    const NuqsAdapter = withNuqsTestingAdapter({ searchParams: "?startDate=2024-09-01&endDate=2024-09-16" });
+    render(
+      <NuqsAdapter>
+        <CustomRange today="2024-09-16" calendarIcon={null} problemIcon={null} opener="transactions" />
+      </NuqsAdapter>,
+    );
+    await userEvent.click(screen.getByRole("button", { name: "Dates" }));
+    expect(screen.getByRole("dialog", { name: "Custom range" })).toBeInTheDocument();
+    expect(from()).toHaveValue("2024-09-01");
+  });
+
   it("opens a window named Custom range with the limits, the two dates and the actions", async () => {
     renderRange();
     expect(opener()).toHaveAttribute("aria-haspopup", "dialog");
@@ -67,12 +79,12 @@ describe("CustomRange", () => {
     expect(screen.getByRole("alert")).toHaveTextContent(message);
   });
 
-  it("applies a valid range: dates set, preset and page cleared, no Back step, window closed", async () => {
+  it("applies a valid range: dates set, page cleared, preset kept for later, no Back step, window closed", async () => {
     const onUrlUpdate = vi.fn<OnUrlUpdateFunction>();
     renderRange("?period=90d&page=3&sort=amount_desc", onUrlUpdate);
     await openAndType("2023-09-17", "2024-09-16");
     const update = onUrlUpdate.mock.calls[0]?.[0];
-    expect(update?.queryString).toBe("?sort=amount_desc&startDate=2023-09-17&endDate=2024-09-16");
+    expect(update?.queryString).toBe("?period=90d&sort=amount_desc&startDate=2023-09-17&endDate=2024-09-16");
     expect(update?.options.history).toBe("replace");
     expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
     expect(opener("Custom range: 17 Sep 2023 – 16 Sep 2024")).toHaveTextContent("Custom: 17 Sep 2023 – 16 Sep 2024");

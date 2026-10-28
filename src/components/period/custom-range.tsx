@@ -11,6 +11,7 @@ interface CustomRangeProps {
   today: string;
   calendarIcon: ReactNode;
   problemIcon: ReactNode;
+  opener?: "period" | "transactions";
 }
 
 interface DateFieldProps {
@@ -23,6 +24,8 @@ interface DateFieldProps {
 
 const OPENER =
   "flex min-h-12 w-full items-center justify-center gap-2 rounded-pill px-5 font-semibold whitespace-nowrap shadow-card transition-colors md:w-auto lg:min-h-11";
+const DATES_OPENER =
+  "flex min-h-12 w-full items-center justify-center gap-2 rounded-pill border border-primary bg-card px-5 font-semibold text-primary md:w-auto lg:min-h-11";
 const ACTION = "min-h-12 rounded-pill px-6 font-semibold lg:min-h-11";
 
 function DateField({ label, value, max, problemId, onChange }: DateFieldProps): ReactNode {
@@ -46,7 +49,7 @@ function DateField({ label, value, max, problemId, onChange }: DateFieldProps): 
   );
 }
 
-export function CustomRange({ today, calendarIcon, problemIcon }: CustomRangeProps): ReactNode {
+export function CustomRange({ today, calendarIcon, problemIcon, opener = "period" }: CustomRangeProps): ReactNode {
   const [params, setParams] = useDashboardParams();
   const applied = customRange(params);
   const [from, setFrom] = useState("");
@@ -54,6 +57,11 @@ export function CustomRange({ today, calendarIcon, problemIcon }: CustomRangePro
   const [problem, setProblem] = useState<string | null>(null);
   const problemId = useId();
   const dates = applied && `${formatDay(applied.startDate)} – ${formatDay(applied.endDate)}`;
+  const fromPeriod = opener === "period";
+  const periodText = dates ? `Custom: ${dates}` : "Custom range";
+  const openerText = fromPeriod ? periodText : "Dates";
+  const periodClassName = `${OPENER} ${applied ? "bg-primary text-primary-foreground" : "bg-card text-primary"}`;
+  const openerClassName = fromPeriod ? periodClassName : DATES_OPENER;
 
   function open(): void {
     setFrom(applied?.startDate ?? "");
@@ -66,7 +74,7 @@ export function CustomRange({ today, calendarIcon, problemIcon }: CustomRangePro
     const found = rangeProblem(from, to, today);
     setProblem(found);
     if (found) return;
-    void setParams({ period: null, startDate: from, endDate: to, page: null });
+    void setParams({ startDate: from, endDate: to, page: null });
     event.currentTarget.closest("dialog")?.close();
   }
 
@@ -76,11 +84,11 @@ export function CustomRange({ today, calendarIcon, problemIcon }: CustomRangePro
       trigger={
         <>
           {calendarIcon}
-          {dates ? `Custom: ${dates}` : "Custom range"}
+          {openerText}
         </>
       }
-      triggerLabel={dates ? `Custom range: ${dates}` : undefined}
-      triggerClassName={`${OPENER} ${applied ? "bg-primary text-primary-foreground" : "bg-card text-primary"}`}
+      triggerLabel={fromPeriod && dates ? `Custom range: ${dates}` : undefined}
+      triggerClassName={openerClassName}
       onOpen={open}
     >
       <form noValidate onSubmit={apply}>
