@@ -9,10 +9,13 @@ import { transactionMeta, transactionWhen, uniqueById } from "@/lib/transaction-
 import { transactionRequest } from "@/lib/url-state/dashboard-params";
 import { useDashboardParams } from "@/lib/url-state/use-dashboard-params";
 import type { Transaction } from "@/schemas/api";
-import { TRANSACTION_CARD, TransactionSkeleton, TransactionsHeading } from "./transaction-skeleton";
+import { FilterLabels, useClearFilters } from "./transaction-filters";
+import { SkeletonRows, TRANSACTION_CARD, TransactionsHeading } from "./transaction-skeleton";
 
 interface TransactionListProps {
   problem: ReactNode;
+  filters: ReactNode;
+  removeIcon: ReactNode;
 }
 
 interface RowProps {
@@ -86,51 +89,9 @@ function ListRow({ transaction, currency }: RowProps): ReactNode {
   );
 }
 
-export function TransactionList({ problem }: TransactionListProps): ReactNode {
-  const [params] = useDashboardParams();
-  const transactions = useQuery(dashboardQueries.transactions(transactionRequest(params)));
-  const profile = useQuery(dashboardQueries.profile());
-
-  if (transactions.isPending || profile.isPending) return <TransactionSkeleton />;
-
-  if (!transactions.data || !profile.data) {
-    const retry = (): void => {
-      void transactions.refetch();
-      if (profile.isError) void profile.refetch();
-    };
-    return (
-      <section aria-labelledby="transactions-heading" className={TRANSACTION_CARD}>
-        <TransactionsHeading />
-        <div className="mt-card-gap flex items-center gap-3 rounded-panel border border-danger-border p-4 md:p-5">
-          <span className="text-danger-text">{problem}</span>
-          <p className="flex-1 font-semibold text-danger-text">Couldn&apos;t load transactions</p>
-          <button
-            type="button"
-            onClick={retry}
-            className="min-h-11 rounded-pill border border-primary px-5 font-semibold text-primary"
-          >
-            Retry
-          </button>
-        </div>
-      </section>
-    );
-  }
-
-  const rows = uniqueById(transactions.data.transactions);
-  const currency = profile.data.currency;
-
-  if (rows.length === 0) {
-    return (
-      <section aria-labelledby="transactions-heading" className={TRANSACTION_CARD}>
-        <TransactionsHeading />
-        <p className="mt-3 text-muted-foreground">No transactions in this period</p>
-      </section>
-    );
-  }
-
+function Rows({ rows, currency }: { rows: readonly Transaction[]; currency: string }): ReactNode {
   return (
-    <section aria-labelledby="transactions-heading" className={TRANSACTION_CARD}>
-      <TransactionsHeading />
+    <>
       <table className="mt-card-gap hidden w-full table-fixed border-collapse text-left md:table">
         <caption className="sr-only">Transactions</caption>
         <colgroup>
@@ -166,6 +127,67 @@ export function TransactionList({ problem }: TransactionListProps): ReactNode {
           <ListRow key={transaction.id} transaction={transaction} currency={currency} />
         ))}
       </ul>
+    </>
+  );
+}
+
+export function TransactionList({ problem, filters, removeIcon }: TransactionListProps): ReactNode {
+  const [params] = useDashboardParams();
+  const transactions = useQuery(dashboardQueries.transactions(transactionRequest(params)));
+  const profile = useQuery(dashboardQueries.profile());
+  const { filtered, clear } = useClearFilters();
+  const loading = transactions.isPending || profile.isPending;
+
+  function retry(): void {
+    void transactions.refetch();
+    if (profile.isError) void profile.refetch();
+  }
+
+  function body(): ReactNode {
+    if (loading) return <SkeletonRows />;
+    if (!transactions.data || !profile.data) {
+      return (
+        <div className="mt-card-gap flex items-center gap-3 rounded-panel border border-danger-border p-4 md:p-5">
+          <span className="text-danger-text">{problem}</span>
+          <p className="flex-1 font-semibold text-danger-text">Couldn&apos;t load transactions</p>
+          <button
+            type="button"
+            onClick={retry}
+            className="min-h-11 rounded-pill border border-primary px-5 font-semibold text-primary"
+          >
+            Retry
+          </button>
+        </div>
+      );
+    }
+    const rows = uniqueById(transactions.data.transactions);
+    const currency = profile.data.currency;
+    if (rows.length === 0 && filtered) {
+      return (
+        <div className="mt-card-gap">
+          <p className="text-muted-foreground">No transactions match these filters</p>
+          <button
+            type="button"
+            onClick={clear}
+            className="mt-4 min-h-12 rounded-pill border border-primary px-6 font-semibold text-primary lg:min-h-11"
+          >
+            Clear filters
+          </button>
+        </div>
+      );
+    }
+    if (rows.length === 0) return <p className="mt-card-gap text-muted-foreground">No transactions in this period</p>;
+    return <Rows rows={rows} currency={currency} />;
+  }
+
+  return (
+    <section aria-labelledby="transactions-heading" aria-busy={loading || undefined} className={TRANSACTION_CARD}>
+      <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+        <TransactionsHeading />
+        {filters}
+      </div>
+      <FilterLabels removeIcon={removeIcon} />
+      {body()}
     </section>
   );
 }
