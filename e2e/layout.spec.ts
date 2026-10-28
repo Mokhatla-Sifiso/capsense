@@ -6,7 +6,10 @@ async function boxes(page: Page) {
   await expect(page.getByText(/Updated \d{2}:\d{2}/)).toBeVisible();
   const found: Record<string, { left: number; right: number; top: number }> = {};
   for (const name of SECTIONS) {
-    const box = await page.getByRole("region", { name }).boundingBox();
+    const region = page.getByRole("region", { name });
+    await expect(region).toBeVisible();
+    await expect(region).not.toHaveAttribute("aria-busy", "true");
+    const box = await region.boundingBox();
     if (!box) throw new Error(`${name} is not on screen`);
     found[name] = { left: box.x, right: box.x + box.width, top: box.y };
   }
