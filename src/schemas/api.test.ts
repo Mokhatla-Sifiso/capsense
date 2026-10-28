@@ -41,6 +41,12 @@ describe("API schemas reject data the screens can't trust", () => {
     expect(summarySchema.safeParse({ ...specSummary, totalSpent: "4250.75" }).success).toBe(false);
   });
 
+  it("accepts a summary without a comparison or a top category, so only those parts are hidden", () => {
+    const { comparedToPrevious: _change, ...withoutChange } = specSummary;
+    expect(summarySchema.safeParse({ ...withoutChange, topCategory: null }).success).toBe(true);
+    expect(summarySchema.safeParse({ ...specSummary, comparedToPrevious: { spentChange: 4 } }).success).toBe(true);
+  });
+
   it("rejects a list that isn't a list", () => {
     expect(transactionsSchema.safeParse({ ...specTransactions, transactions: "none" }).success).toBe(false);
   });

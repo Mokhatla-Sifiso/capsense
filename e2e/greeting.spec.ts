@@ -46,7 +46,7 @@ test.describe("greeting", () => {
     page.on("request", (request) => {
       if (request.url().includes("/api/") && !request.url().includes("/profile")) otherCalls.push(request.url());
     });
-    await page.getByRole("button", { name: "Retry" }).click();
+    await page.getByRole("banner").getByRole("button", { name: "Retry" }).click();
     await expect(page.getByText("Good morning, John")).toBeVisible();
     expect(profileCalls).toBe(2);
     expect(otherCalls).toEqual([]);
