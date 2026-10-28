@@ -17,11 +17,11 @@ function answerTransactions(rows: object[]) {
 }
 
 function renderList(searchParams = "") {
-  const NuqsAdapter = withNuqsTestingAdapter({ searchParams });
+  const NuqsAdapter = withNuqsTestingAdapter({ searchParams, hasMemory: true });
   render(
     <QueryClientProvider client={makeQueryClient()}>
       <NuqsAdapter>
-        <TransactionList problem={null} filters={null} removeIcon={null} />
+        <TransactionList problem={null} filters={null} removeIcon={null} previousIcon={null} nextIcon={null} />
       </NuqsAdapter>
     </QueryClientProvider>,
   );
@@ -123,6 +123,75 @@ describe("TransactionList", () => {
     const merchants = (await tableRows()).map(([merchant]) => merchant?.slice(0, 2));
     expect(merchants).toEqual(["t3", "t1", "t2"]);
     expect(asked).toEqual(["amount_desc"]);
+  });
+
+  it("Next swaps in the next page's rows instead of adding them, with Loading page… meanwhile", async () => {
+    let releasePage2: () => void = () => {};
+    server.use(
+      http.get(TRANSACTIONS_PATH, async ({ request }) => {
+        const offset = Number(new URL(request.url).searchParams.get("offset"));
+        if (offset === 20) await new Promise<void>((resolve) => (releasePage2 = resolve));
+        const rows = [1, 2].map((n) => ({ ...PICK_N_PAY, id: `p${offset}-${n}`, merchant: `Row ${offset + n}` }));
+        return HttpResponse.json({ transactions: rows, pagination: { total: 1250, limit: 20, offset, hasMore: true } });
+      }),
+    );
+    renderList();
+    await table();
+    await userEvent.click(screen.getByRole("button", { name: "Next" }));
+    expect(await screen.findByRole("status")).toHaveTextContent("Loading page…");
+    expect(screen.getByRole("button", { name: "Next" })).toBeDisabled();
+    expect((await tableRows()).map(([merchant]) => merchant)).toEqual([
+      "Row 1Weekly groceries",
+      "Row 2Weekly groceries",
+    ]);
+    releasePage2();
+    await screen.findByText("Row 21", { selector: "td span" });
+    expect((await tableRows()).map(([merchant]) => merchant)).toEqual([
+      "Row 21Weekly groceries",
+      "Row 22Weekly groceries",
+    ]);
+    expect(screen.queryByText("Loading page…")).not.toBeInTheDocument();
+  });
+
+  it("keeps the current page and offers Retry when the next page fails", async () => {
+    let page2Calls = 0;
+    server.use(
+      http.get(TRANSACTIONS_PATH, ({ request }) => {
+        const offset = Number(new URL(request.url).searchParams.get("offset"));
+        if (offset === 20) {
+          page2Calls += 1;
+          if (page2Calls === 1) return HttpResponse.json({}, { status: 500 });
+        }
+        const rows = [{ ...PICK_N_PAY, id: `p${offset}`, merchant: `Row ${offset + 1}` }];
+        return HttpResponse.json({ transactions: rows, pagination: { total: 1250, limit: 20, offset, hasMore: true } });
+      }),
+    );
+    renderList();
+    await table();
+    await userEvent.click(screen.getByRole("button", { name: "Next" }));
+    expect(await screen.findByText("Couldn't load page 2. Still showing page 1.")).toBeInTheDocument();
+    expect((await tableRows())[0]?.[0]).toBe("Row 1Weekly groceries");
+    await userEvent.click(screen.getByRole("button", { name: "Retry" }));
+    await screen.findByText("Row 21", { selector: "td span" });
+    expect(screen.queryByText(/Couldn't load page/)).not.toBeInTheDocument();
+  });
+
+  it("offers Back to first page when the page asked for is past the end", async () => {
+    server.use(
+      http.get(TRANSACTIONS_PATH, () =>
+        HttpResponse.json({ transactions: [], pagination: { total: 30, limit: 20, offset: 40, hasMore: false } }),
+      ),
+    );
+    renderList("?page=3");
+    expect(await screen.findByRole("button", { name: "Back to first page" })).toBeInTheDocument();
+    expect(screen.queryByText("No transactions in this period")).not.toBeInTheDocument();
+  });
+
+  it("shows the rows without paging when the API leaves pagination out", async () => {
+    server.use(http.get(TRANSACTIONS_PATH, () => HttpResponse.json({ transactions: specTransactions.transactions })));
+    renderList();
+    expect(await tableRows()).toHaveLength(2);
+    expect(screen.queryByRole("navigation", { name: "Transaction pages" })).not.toBeInTheDocument();
   });
 
   it("shows an error with Retry, and Retry asks again", async () => {
