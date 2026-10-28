@@ -37,6 +37,17 @@ const STAT =
   "grid grid-cols-[minmax(0,1fr)_auto] items-center gap-x-4 gap-y-1 border-b border-spend-line py-3.5 last:border-b-0 md:block md:border-b-0 md:border-l md:py-0 md:pl-5 md:first:border-l-0 md:first:pl-0";
 const STAT_LABEL = "text-control font-semibold text-spend-muted md:text-sm";
 const STAT_VALUE = "text-right text-kpi font-bold md:mt-2 md:text-left";
+const AMOUNT_FIT: readonly [longest: number, size: string][] = [
+  [10, ""],
+  [12, "text-[length:min(var(--text-kpi-spent),16cqi)]"],
+  [14, "text-[length:min(var(--text-kpi-spent),14cqi)]"],
+  [16, "text-[length:min(var(--text-kpi-spent),12cqi)]"],
+];
+const LONGEST_FIT = "text-[length:min(var(--text-kpi-spent),10cqi)]";
+
+function amountFit(amount: string): string {
+  return AMOUNT_FIT.find(([longest]) => amount.length <= longest)?.[1] ?? LONGEST_FIT;
+}
 
 function TopCategory({ name, filters }: { name: string; filters: Filters | undefined }): ReactNode {
   const known = filters?.categories.find((category) => category.name === name);
@@ -69,6 +80,7 @@ function Figures({ summary, currency, filters, icons, illustration }: FiguresPro
   const empty = summary.transactionCount === 0;
   const spentChange = empty ? null : changeStatement(summary.comparedToPrevious?.spentChange);
   const countChange = empty ? null : changeStatement(summary.comparedToPrevious?.transactionChange);
+  const spent = formatCurrency(summary.totalSpent, currency);
 
   return (
     <section
@@ -83,11 +95,11 @@ function Figures({ summary, currency, filters, icons, illustration }: FiguresPro
         {icons.wallet}
       </span>
 
-      <dl className="relative pr-16">
+      <dl className="@container relative pr-16">
         <dt className="text-hero-label font-semibold text-spend-muted">
           Spent · {periodLabel(filters?.dateRangePresets, summary.period)}
         </dt>
-        <dd className="mt-1 text-kpi-spent font-bold">{formatCurrency(summary.totalSpent, currency)}</dd>
+        <dd className={`mt-1 text-kpi-spent font-bold ${amountFit(spent)}`}>{spent}</dd>
         {empty && <dd className="mt-3 text-change font-semibold md:mt-2">No spending in this period</dd>}
         {spentChange && <SpentChange change={spentChange} icons={icons} />}
       </dl>
