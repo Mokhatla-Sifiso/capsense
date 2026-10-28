@@ -66,21 +66,19 @@ describe("DataFreshness", () => {
     expect(screen.queryByText(/Updated/)).not.toBeInTheDocument();
   });
 
-  it("hides the time while a section is still waiting to ask for its data", async () => {
-    function WaitingSection() {
-      useQuery({ ...dashboardQueries.goals(), enabled: false });
+  it("shows the time when a section is switched off on purpose, like the summary during custom dates", async () => {
+    function SwitchedOffSection() {
+      useQuery({ ...dashboardQueries.summary("30d"), enabled: false });
       return null;
     }
     render(
       <QueryClientProvider client={makeQueryClient()}>
         <ProfileSection />
-        <WaitingSection />
+        <SwitchedOffSection />
         <DataFreshness today="2024-09-16" />
       </QueryClientProvider>,
     );
-    await screen.findByText("Data as of 16 Sep 2024");
-    await act(() => new Promise((resolve) => setTimeout(resolve, 20)));
-    expect(screen.queryByText(/Updated/)).not.toBeInTheDocument();
+    expect(await screen.findByText("Data as of 16 Sep 2024 · Updated 15:00")).toBeInTheDocument();
   });
 
   it("keeps the previous time and counts the sections that failed to refresh, then moves on when they recover", async () => {

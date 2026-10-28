@@ -6,7 +6,7 @@ import { categoryAppearance } from "@/lib/category-appearance";
 import { formatCurrency } from "@/lib/format";
 import { dashboardQueries } from "@/lib/query/dashboard-queries";
 import { transactionMeta, transactionWhen, uniqueById } from "@/lib/transaction-rows";
-import { categoryRange, customRange, transactionParams } from "@/lib/url-state/dashboard-params";
+import { transactionRequest } from "@/lib/url-state/dashboard-params";
 import { useDashboardParams } from "@/lib/url-state/use-dashboard-params";
 import type { Transaction } from "@/schemas/api";
 import { TRANSACTION_CARD, TransactionSkeleton, TransactionsHeading } from "./transaction-skeleton";
@@ -88,16 +88,10 @@ function ListRow({ transaction, currency }: RowProps): ReactNode {
 
 export function TransactionList({ problem }: TransactionListProps): ReactNode {
   const [params] = useDashboardParams();
-  const custom = customRange(params) !== null;
-  const categories = useQuery(dashboardQueries.categories(categoryRange(params)));
-  const ready = custom || !categories.isPending;
-  const transactions = useQuery({
-    ...dashboardQueries.transactions(transactionParams(params, categories.data?.dateRange)),
-    enabled: ready,
-  });
+  const transactions = useQuery(dashboardQueries.transactions(transactionRequest(params)));
   const profile = useQuery(dashboardQueries.profile());
 
-  if (!ready || transactions.isPending || profile.isPending) return <TransactionSkeleton />;
+  if (transactions.isPending || profile.isPending) return <TransactionSkeleton />;
 
   if (!transactions.data || !profile.data) {
     const retry = (): void => {

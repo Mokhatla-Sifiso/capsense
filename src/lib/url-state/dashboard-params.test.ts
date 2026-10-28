@@ -1,4 +1,4 @@
-import { categoryRange, loadDashboardParams, transactionParams } from "./dashboard-params";
+import { categoryRange, loadDashboardParams, transactionRequest } from "./dashboard-params";
 
 const load = (query: string) => loadDashboardParams(new URLSearchParams(query));
 
@@ -54,36 +54,27 @@ describe("turning the address bar into API requests", () => {
 
   it("asks for 90 days everywhere, from the first page, after Last 90 days is chosen", () => {
     const params = load("sort=amount_desc&period=90d");
-    const ninetyDays = { startDate: "2024-06-19", endDate: "2024-09-16" };
     expect(params.period).toBe("90d");
     expect(categoryRange(params)).toEqual({ period: "90d" });
-    expect(transactionParams(params, ninetyDays)).toMatchObject({ offset: 0, ...ninetyDays });
+    expect(transactionRequest(params)).toMatchObject({ offset: 0, range: { period: "90d" } });
   });
 
   it("pages transactions 20 at a time", () => {
-    expect(transactionParams(load("page=3&sort=amount_asc"), undefined)).toEqual({
+    expect(transactionRequest(load("page=3&sort=amount_asc"))).toEqual({
+      range: { period: "30d" },
       limit: 20,
       offset: 40,
       sortBy: "amount_asc",
       category: undefined,
-      startDate: undefined,
-      endDate: undefined,
     });
   });
 
-  it("limits transactions to the period's dates once categories report them", () => {
-    const periodRange = { startDate: "2024-08-18", endDate: "2024-09-16" };
-    expect(transactionParams(load("category=Dining"), periodRange)).toMatchObject({
-      category: "Dining",
-      ...periodRange,
-    });
+  it("keeps the chosen category", () => {
+    expect(transactionRequest(load("category=Dining"))).toMatchObject({ category: "Dining" });
   });
 
-  it("lets a custom range win over the period's dates", () => {
-    const params = load("startDate=2024-09-01&endDate=2024-09-05");
-    expect(transactionParams(params, { startDate: "2024-08-18", endDate: "2024-09-16" })).toMatchObject({
-      startDate: "2024-09-01",
-      endDate: "2024-09-05",
-    });
+  it("asks for the custom dates instead of the period when they are on", () => {
+    const params = load("period=90d&startDate=2024-09-01&endDate=2024-09-05");
+    expect(transactionRequest(params).range).toEqual({ startDate: "2024-09-01", endDate: "2024-09-05" });
   });
 });

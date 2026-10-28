@@ -1,6 +1,6 @@
 import { createLoader, createParser, parseAsNumberLiteral, parseAsString, parseAsStringLiteral } from "nuqs/server";
 import { z } from "zod/mini";
-import type { CategoryRange, TransactionParams } from "@/lib/api/spending-api";
+import type { CategoryRange, TransactionRequest } from "@/lib/api/spending-api";
 import { PERIODS, type Period, SORT_ORDERS, type SortOrder } from "@/schemas/api";
 
 export const PAGE_SIZE = 20;
@@ -56,14 +56,12 @@ export function categoryRange(params: DashboardParams): CategoryRange {
   return customRange(params) ?? { period: params.period };
 }
 
-export function transactionParams(params: DashboardParams, periodRange: DayRange | undefined): TransactionParams {
-  const range = customRange(params) ?? periodRange;
+export function transactionRequest(params: DashboardParams): TransactionRequest {
   return {
+    range: categoryRange(params),
     limit: PAGE_SIZE,
     offset: (params.page - 1) * PAGE_SIZE,
     sortBy: params.sort,
     category: params.category ?? undefined,
-    startDate: range?.startDate,
-    endDate: range?.endDate,
   };
 }
