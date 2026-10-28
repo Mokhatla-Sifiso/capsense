@@ -21,7 +21,14 @@ function renderList(searchParams = "") {
   render(
     <QueryClientProvider client={makeQueryClient()}>
       <NuqsAdapter>
-        <TransactionList problem={null} filters={null} removeIcon={null} previousIcon={null} nextIcon={null} />
+        <TransactionList
+          problem={null}
+          filters={null}
+          removeIcon={null}
+          previousIcon={null}
+          nextIcon={null}
+          infoIcon={null}
+        />
       </NuqsAdapter>
     </QueryClientProvider>,
   );

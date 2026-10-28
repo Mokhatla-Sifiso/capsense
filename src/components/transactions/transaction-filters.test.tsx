@@ -6,7 +6,7 @@ import { type OnUrlUpdateFunction, withNuqsTestingAdapter } from "nuqs/adapters/
 import { makeQueryClient } from "@/lib/query/query-client";
 import { server } from "@/test/msw";
 import { specFilters } from "@/test/spec-samples";
-import { FilterLabels, TransactionFilters } from "./transaction-filters";
+import { FilterLabels, RemovedCategoryNote, TransactionFilters } from "./transaction-filters";
 
 const FILTERS_PATH = "*/api/customers/:customerId/filters";
 
@@ -20,6 +20,7 @@ function renderFilters(searchParams = "", onUrlUpdate: OnUrlUpdateFunction = vi.
         </h2>
         <TransactionFilters caretIcon={null} datesOpener={<button type="button">Dates</button>} />
         <FilterLabels removeIcon={null} />
+        <RemovedCategoryNote infoIcon={null} />
       </NuqsAdapter>
     </QueryClientProvider>,
   );
@@ -76,9 +77,23 @@ describe("TransactionFilters", () => {
     expect(onUrlUpdate.mock.calls[0]?.[0].options.history).toBe("replace");
   });
 
-  it("keeps a chosen category that isn't in the list selectable", async () => {
-    renderFilters("?category=Pets");
-    expect(await screen.findByRole("combobox", { name: "Category" })).toHaveValue("Pets");
+  it("clears a category that's no longer available, without a Back step, and says so", async () => {
+    const onUrlUpdate = vi.fn<OnUrlUpdateFunction>();
+    renderFilters("?category=Pets&page=2", onUrlUpdate);
+    expect(await screen.findByRole("status")).toHaveTextContent(
+      "\u201cPets\u201d is no longer available, so all categories are shown",
+    );
+    const update = onUrlUpdate.mock.calls[0]?.[0];
+    expect(update?.queryString).toBe("");
+    expect(update?.options.history).toBe("replace");
+  });
+
+  it("keeps a category that's still available, with no note", async () => {
+    const onUrlUpdate = vi.fn<OnUrlUpdateFunction>();
+    renderFilters("?category=Dining", onUrlUpdate);
+    expect(await screen.findByRole("combobox", { name: "Category" })).toHaveValue("Dining");
+    expect(screen.queryByRole("status")).not.toBeInTheDocument();
+    expect(onUrlUpdate).not.toHaveBeenCalled();
   });
 });
 
