@@ -7,7 +7,8 @@ interface DialogProps {
   trigger: ReactNode;
   triggerLabel?: string;
   triggerClassName: string;
-  closeIcon: ReactNode;
+  closeIcon?: ReactNode;
+  onOpen?: () => void;
   children: ReactNode;
 }
 
@@ -17,6 +18,7 @@ export function Dialog({
   triggerLabel,
   triggerClassName,
   closeIcon,
+  onOpen,
   children,
 }: DialogProps): ReactNode {
   const dialog = useRef<HTMLDialogElement>(null);
@@ -30,7 +32,10 @@ export function Dialog({
         type="button"
         aria-haspopup="dialog"
         aria-label={triggerLabel}
-        onClick={() => dialog.current?.showModal()}
+        onClick={() => {
+          onOpen?.();
+          dialog.current?.showModal();
+        }}
         className={triggerClassName}
       >
         {trigger}
@@ -46,14 +51,16 @@ export function Dialog({
           <h2 id={titleId} className="pt-2 text-h2 font-bold">
             {title}
           </h2>
-          <button
-            type="button"
-            aria-label="Close"
-            onClick={() => dialog.current?.close()}
-            className="grid size-11 shrink-0 place-items-center rounded-icon-button bg-soft text-foreground transition-colors hover:bg-track"
-          >
-            {closeIcon}
-          </button>
+          {closeIcon && (
+            <button
+              type="button"
+              aria-label="Close"
+              onClick={() => dialog.current?.close()}
+              className="grid size-11 shrink-0 place-items-center rounded-icon-button bg-soft text-foreground transition-colors hover:bg-track"
+            >
+              {closeIcon}
+            </button>
+          )}
         </div>
         <div className="mt-5">{children}</div>
       </dialog>
