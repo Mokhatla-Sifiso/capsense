@@ -39,7 +39,9 @@ describe("dashboard queries", () => {
     [
       "transactions",
       (client: QueryClient) =>
-        client.fetchQuery(dashboardQueries.transactions({ limit: 20, offset: 0, sortBy: "date_desc" })),
+        client.fetchQuery(
+          dashboardQueries.transactions({ range: { period: "30d" }, limit: 20, offset: 0, sortBy: "date_desc" }),
+        ),
       specTransactions,
     ],
     ["goals", (client: QueryClient) => client.fetchQuery(dashboardQueries.goals()), specGoals],
@@ -56,7 +58,12 @@ describe("dashboard queries", () => {
         return HttpResponse.json(specTransactions);
       }),
     );
-    const params = (offset: number) => ({ limit: 20, offset, sortBy: "date_desc" as const });
+    const params = (offset: number) => ({
+      range: { period: "30d" as const },
+      limit: 20,
+      offset,
+      sortBy: "date_desc" as const,
+    });
     const { result, rerender } = renderHook(({ offset }) => useQuery(dashboardQueries.transactions(params(offset))), {
       wrapper,
       initialProps: { offset: 0 },
@@ -68,6 +75,37 @@ describe("dashboard queries", () => {
     expect(result.current.isPlaceholderData).toBe(true);
     expect(result.current.data).toEqual(specTransactions);
     await waitFor(() => expect(result.current.isPlaceholderData).toBe(false));
+  });
+
+  it.each([
+    [
+      "the period's dates from the category breakdown",
+      { period: "30d" as const },
+      null,
+      "&startDate=2024-08-16&endDate=2024-09-16",
+    ],
+    [
+      "the custom dates as they are",
+      { startDate: "2024-09-01", endDate: "2024-09-10" },
+      null,
+      "&startDate=2024-09-01&endDate=2024-09-10",
+    ],
+    ["no dates when the category breakdown fails", { period: "30d" as const }, 500, ""],
+  ])("asks for transactions with %s", async (_case, range, categoriesStatus, dates) => {
+    const asked: string[] = [];
+    server.use(
+      http.get("*/api/customers/:customerId/spending/categories", () =>
+        categoriesStatus ? HttpResponse.json({}, { status: categoriesStatus }) : HttpResponse.json(specCategories),
+      ),
+      http.get("*/api/customers/:customerId/transactions", ({ request }) => {
+        asked.push(new URL(request.url).search);
+        return HttpResponse.json(specTransactions);
+      }),
+    );
+    await makeQueryClient().fetchQuery(
+      dashboardQueries.transactions({ range, limit: 20, offset: 0, sortBy: "date_desc" }),
+    );
+    expect(asked).toEqual([`?limit=20&offset=0&sortBy=date_desc${dates}`]);
   });
 
   it("surfaces a failure once, without retrying by itself", async () => {
