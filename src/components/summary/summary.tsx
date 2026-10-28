@@ -1,5 +1,6 @@
 import { ArrowDown, ArrowUp, Info, Minus, Wallet, WarningCircle } from "@phosphor-icons/react/ssr";
 import { type ReactNode, Suspense } from "react";
+import { BankCards } from "@/components/brand/bank-cards";
 import { Icon } from "@/components/icon";
 import { SummaryCard, type SummaryIcons } from "./summary-card";
 import { SummarySkeleton } from "./summary-skeleton";
@@ -18,7 +19,7 @@ const ICONS: SummaryIcons = {
 export function SpendingSummary(): ReactNode {
   return (
     <Suspense fallback={<SummarySkeleton />}>
-      <SummaryCard icons={ICONS} />
+      <SummaryCard icons={ICONS} illustration={<BankCards />} />
     </Suspense>
   );
 }
