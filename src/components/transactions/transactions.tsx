@@ -1,4 +1,4 @@
-import { CalendarBlank, CaretDown, WarningCircle, XSquare } from "@phosphor-icons/react/ssr";
+import { CalendarBlank, CaretDown, CaretLeft, CaretRight, WarningCircle, XSquare } from "@phosphor-icons/react/ssr";
 import { type ReactNode, Suspense } from "react";
 import { Icon } from "@/components/icon";
 import { CustomRange } from "@/components/period/custom-range";
@@ -16,6 +16,8 @@ async function TransactionsForThisVisit(): Promise<ReactNode> {
     <TransactionList
       problem={PROBLEM}
       removeIcon={REMOVE}
+      previousIcon={<Icon glyph={CaretLeft} size={16} />}
+      nextIcon={<Icon glyph={CaretRight} size={16} />}
       filters={
         <TransactionFilters
           caretIcon={<CaretDown size={16} weight="bold" aria-hidden focusable={false} />}
