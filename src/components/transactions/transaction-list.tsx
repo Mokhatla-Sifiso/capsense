@@ -10,7 +10,7 @@ import { transactionRequest } from "@/lib/url-state/dashboard-params";
 import { useDashboardParams } from "@/lib/url-state/use-dashboard-params";
 import type { Transaction, Transactions } from "@/schemas/api";
 import { Pager } from "./pager";
-import { FilterLabels, useClearFilters } from "./transaction-filters";
+import { FilterLabels, RemovedCategoryNote, useClearFilters } from "./transaction-filters";
 import { SkeletonRows, TRANSACTION_CARD, TransactionsHeading } from "./transaction-skeleton";
 
 interface TransactionListProps {
@@ -19,6 +19,7 @@ interface TransactionListProps {
   removeIcon: ReactNode;
   previousIcon: ReactNode;
   nextIcon: ReactNode;
+  infoIcon: ReactNode;
 }
 
 interface RowProps {
@@ -155,6 +156,7 @@ export function TransactionList({
   removeIcon,
   previousIcon,
   nextIcon,
+  infoIcon,
 }: TransactionListProps): ReactNode {
   const [params, setParams] = useDashboardParams();
   const transactions = useQuery(dashboardQueries.transactions(transactionRequest(params)));
@@ -289,6 +291,7 @@ export function TransactionList({
         {filters}
       </div>
       <FilterLabels removeIcon={removeIcon} />
+      <RemovedCategoryNote infoIcon={infoIcon} />
       {body()}
     </section>
   );
