@@ -29,7 +29,12 @@ export function PeriodChoice({ checkIcon, caretIcon, calendarIcon }: PeriodChoic
   const group = useId();
   const options = periodOptions(filters.data?.dateRangePresets);
   const custom = customRange(params);
-  const selected = custom ? "" : params.period;
+  const answered = useQuery({
+    ...dashboardQueries.summary(params.period),
+    enabled: !custom,
+    select: (summary) => summary.period,
+  });
+  const selected = custom ? "" : (answered.data ?? params.period);
   const customDates = custom && `${formatDay(custom.startDate)} – ${formatDay(custom.endDate)}`;
 
   function choose(period: Period): void {
