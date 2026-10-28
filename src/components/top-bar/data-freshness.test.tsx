@@ -16,11 +16,17 @@ function GoalsSection() {
   return null;
 }
 
+function PeriodOptions() {
+  useQuery(dashboardQueries.filters());
+  return null;
+}
+
 function renderLine(today = "2024-09-16", client: QueryClient = makeQueryClient()) {
   render(
     <QueryClientProvider client={client}>
       <ProfileSection />
       <GoalsSection />
+      <PeriodOptions />
       <DataFreshness today={today} />
     </QueryClientProvider>,
   );
@@ -72,5 +78,11 @@ describe("DataFreshness", () => {
     server.resetHandlers();
     await act(() => client.refetchQueries({ queryKey: dashboardKeys.goals() }));
     expect(screen.getByText("Data as of 16 Sep 2024 · Updated 16:05")).toBeInTheDocument();
+  });
+
+  it("doesn't count the period options as a section, because the spec's list stands in for them", async () => {
+    server.use(http.get("*/api/customers/:customerId/filters", () => HttpResponse.json({}, { status: 500 })));
+    renderLine();
+    expect(await screen.findByText("Data as of 16 Sep 2024 · Updated 15:00")).toBeInTheDocument();
   });
 });

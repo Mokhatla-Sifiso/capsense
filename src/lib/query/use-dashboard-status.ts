@@ -1,4 +1,4 @@
-import { type QueryClient, useQueryClient } from "@tanstack/react-query";
+import { type Query, type QueryClient, useQueryClient } from "@tanstack/react-query";
 import { useMemo, useSyncExternalStore } from "react";
 import { dashboardKeys } from "./dashboard-queries";
 
@@ -6,11 +6,15 @@ export function couldNotRefresh(sections: number): string {
   return sections === 1 ? "1 section couldn't refresh" : `${sections} sections couldn't refresh`;
 }
 
-export function failedSectionCount(client: QueryClient): number {
+function activeSections(client: QueryClient): Query[] {
   return client
     .getQueryCache()
     .findAll({ queryKey: dashboardKeys.all, type: "active" })
-    .filter((section) => section.state.status === "error").length;
+    .filter((query) => query.queryKey[1] !== "filters");
+}
+
+export function failedSectionCount(client: QueryClient): number {
+  return activeSections(client).filter((section) => section.state.status === "error").length;
 }
 
 export interface DashboardStatus {
@@ -20,7 +24,7 @@ export interface DashboardStatus {
 }
 
 function readStatus(client: QueryClient): string {
-  const sections = client.getQueryCache().findAll({ queryKey: dashboardKeys.all, type: "active" });
+  const sections = activeSections(client);
   const fetching = sections.some((section) => section.state.fetchStatus === "fetching");
   const failedSections = sections.filter((section) => section.state.status === "error").length;
   const everyLoaded = sections.length > 0 && sections.every((section) => section.state.dataUpdatedAt > 0);
