@@ -52,11 +52,18 @@ export const categorySpendSchema = z.object({
   icon: z.string(),
 });
 
-export const categoriesSchema = z.object({
-  dateRange: z.object({ startDate: isoDay, endDate: isoDay }),
-  totalAmount: z.number(),
-  categories: listOf(categorySpendSchema),
-});
+export const categoriesSchema = z
+  .object({
+    dateRange: z.catch(z.optional(z.object({ startDate: isoDay, endDate: isoDay })), undefined),
+    totalAmount: z.number(),
+    categories: listOf(categorySpendSchema),
+  })
+  .check(
+    z.refine(
+      ({ dateRange }) => !dateRange || dateRange.startDate <= dateRange.endDate,
+      "The date range starts after it ends",
+    ),
+  );
 
 export const monthlyTrendSchema = z.object({
   month: z.string().check(z.regex(/^\d{4}-\d{2}$/)),
