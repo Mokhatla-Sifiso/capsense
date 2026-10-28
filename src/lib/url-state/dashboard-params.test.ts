@@ -52,6 +52,14 @@ describe("turning the address bar into API requests", () => {
     expect(categoryRange(load("startDate=2024-09-16&endDate=2024-09-01"))).toEqual({ period: "30d" });
   });
 
+  it("asks for 90 days everywhere, from the first page, after Last 90 days is chosen", () => {
+    const params = load("sort=amount_desc&period=90d");
+    const ninetyDays = { startDate: "2024-06-19", endDate: "2024-09-16" };
+    expect(params.period).toBe("90d");
+    expect(categoryRange(params)).toEqual({ period: "90d" });
+    expect(transactionParams(params, ninetyDays)).toMatchObject({ offset: 0, ...ninetyDays });
+  });
+
   it("pages transactions 20 at a time", () => {
     expect(transactionParams(load("page=3&sort=amount_asc"), undefined)).toEqual({
       limit: 20,

@@ -41,6 +41,7 @@ test("Light applies at once, survives a reload, and System hands back to the dev
 test("on System, a change to the device setting applies without a reload", async ({ page }) => {
   await page.emulateMedia({ colorScheme: "light" });
   await page.goto("/");
+  await expect(page.getByText(/Updated \d{2}:\d{2}/)).toBeVisible();
   const navigations: string[] = [];
   page.on("framenavigated", (frame) => navigations.push(frame.url()));
 
