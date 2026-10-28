@@ -34,11 +34,13 @@ export const summarySchema = z.object({
   totalSpent: z.number(),
   transactionCount: count,
   averageTransaction: z.number(),
-  topCategory: z.string(),
-  comparedToPrevious: z.object({
-    spentChange: z.number(),
-    transactionChange: z.number(),
-  }),
+  topCategory: z.nullish(z.string()),
+  comparedToPrevious: z.nullish(
+    z.object({
+      spentChange: z.optional(z.number()),
+      transactionChange: z.optional(z.number()),
+    }),
+  ),
 });
 
 export const categorySpendSchema = z.object({

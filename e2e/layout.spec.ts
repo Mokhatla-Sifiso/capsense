@@ -3,6 +3,7 @@ import { type Page, expect, test } from "@playwright/test";
 const SECTIONS = ["Spending summary", "Spending by category", "Monthly trends", "Spending goals", "Transactions"];
 
 async function boxes(page: Page) {
+  await expect(page.getByText(/Updated \d{2}:\d{2}/)).toBeVisible();
   const found: Record<string, { left: number; right: number; top: number }> = {};
   for (const name of SECTIONS) {
     const box = await page.getByRole("region", { name }).boundingBox();
