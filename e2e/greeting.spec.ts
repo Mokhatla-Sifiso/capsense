@@ -42,6 +42,7 @@ test.describe("greeting", () => {
     await page.goto("/");
     await expect(page.getByText("Couldn't load profile")).toBeVisible();
     await expect(page.getByText("Good morning", { exact: true })).toBeVisible();
+    await expect(page.getByRole("region", { name: "Transactions" })).not.toHaveAttribute("aria-busy", "true");
 
     page.on("request", (request) => {
       if (request.url().includes("/api/") && !request.url().includes("/profile")) otherCalls.push(request.url());
