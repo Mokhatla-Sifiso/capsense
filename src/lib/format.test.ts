@@ -1,4 +1,4 @@
-import { formatCount, formatCurrency, formatDay, formatPercent } from "./format";
+import { formatCount, formatCurrency, formatDay, formatLongDay, formatPercent } from "./format";
 
 const NBSP = " ";
 const readable = (text: string) => text.replaceAll(NBSP, "·");
@@ -50,5 +50,15 @@ describe("formatDay", () => {
     ["2024-12-31", "31 Dec 2024"],
   ])("shows %s as %s, the same in every browser", (isoDay, expected) => {
     expect(formatDay(isoDay)).toBe(expected);
+  });
+});
+
+describe("formatLongDay", () => {
+  it.each([
+    ["2024-09-16", "Monday, 16 September 2024"],
+    ["2024-03-31", "Sunday, 31 March 2024"],
+    ["2023-01-05", "Thursday, 5 January 2023"],
+  ])("shows %s as %s", (isoDay, expected) => {
+    expect(formatLongDay(isoDay)).toBe(expected);
   });
 });

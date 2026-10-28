@@ -1,5 +1,6 @@
 import { headers } from "next/headers";
 import { type ReactNode, Suspense } from "react";
+import { AboutDialog } from "@/components/about/about-dialog";
 import { Brand } from "@/components/brand/brand";
 import { ThemeControl } from "@/components/theme/theme-control";
 import { parseServerEnv } from "@/lib/env";
@@ -27,6 +28,7 @@ export function TopBar(): ReactNode {
       <Brand placement="top-bar" />
       <div className="col-start-2 row-start-1 flex items-center gap-2">
         <RefreshButton />
+        <AboutDialog opener="help" />
       </div>
       <div className="col-span-2 row-start-2 md:col-span-1 lg:col-start-1 lg:row-start-1">
         <Suspense fallback={<p className="h-[1.2em] w-60 animate-pulse rounded-6 bg-skeleton text-greeting" />}>
