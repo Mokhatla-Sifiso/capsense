@@ -59,6 +59,13 @@ describe("API schemas reject data the screens can't trust", () => {
     expect(categoriesSchema.safeParse(backwards).success).toBe(false);
   });
 
+  it("keeps a transaction with a date that isn't real, with the date left empty", () => {
+    const [first] = specTransactions.transactions;
+    const parsed = transactionsSchema.parse({ ...specTransactions, transactions: [{ ...first, date: "bad" }] });
+    expect(parsed.transactions[0]?.date).toBe("");
+    expect(parsed.transactions[0]?.merchant).toBe("Pick n Pay");
+  });
+
   it("rejects a list that isn't a list", () => {
     expect(transactionsSchema.safeParse({ ...specTransactions, transactions: "none" }).success).toBe(false);
   });
