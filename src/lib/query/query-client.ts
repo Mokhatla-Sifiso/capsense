@@ -8,6 +8,7 @@ export function makeQueryClient(): QueryClient {
         refetchOnWindowFocus: false,
         refetchOnReconnect: false,
         retry: false,
+        retryOnMount: false,
       },
     },
   });
