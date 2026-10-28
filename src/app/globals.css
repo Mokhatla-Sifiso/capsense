@@ -58,6 +58,10 @@
   --color-danger-border: light-dark(#f3c7c7, #5b2a2a);
   --color-chip-glyph: #ffffff;
   --color-logo-patch: light-dark(transparent, #ffffff);
+  --color-bank-card-front: #0b1f4d;
+  --color-bank-card-back: #e9ecf1;
+  --color-bank-card-chip: #b9c0cc;
+  --color-bank-card-patch: #ffffff;
   --color-scrim: rgb(58 58 58 / 0.5);
   --color-category-groceries: #cc5656;
   --color-category-entertainment: #348983;

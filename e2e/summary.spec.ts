@@ -92,3 +92,18 @@ for (const colorScheme of ["light", "dark"] as const) {
     expect(results.violations).toEqual([]);
   });
 }
+
+for (const [width, shown] of [
+  [360, false],
+  [768, true],
+  [1280, true],
+] as const) {
+  test(`the bank-card picture is ${shown ? "shown" : "hidden"} at ${width} px and never read out`, async ({ page }) => {
+    await page.setViewportSize({ width, height: 900 });
+    await page.goto("/");
+    const picture = summaryCard(page).locator("img[src='/brand/capitec-logo.svg']");
+    await expect(valueOf(page, "Spent")).toBeVisible();
+    await expect(picture).toBeVisible({ visible: shown });
+    expect(await summaryCard(page).ariaSnapshot()).not.toMatch(/4821|Capitec/i);
+  });
+}

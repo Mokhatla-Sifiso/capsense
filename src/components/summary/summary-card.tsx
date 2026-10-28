@@ -21,6 +21,7 @@ export interface SummaryIcons {
 
 interface SummaryCardProps {
   icons: SummaryIcons;
+  illustration?: ReactNode;
 }
 
 interface FiguresProps {
@@ -28,6 +29,7 @@ interface FiguresProps {
   currency: string;
   filters: Filters | undefined;
   icons: SummaryIcons;
+  illustration: ReactNode;
 }
 
 const NOTHING = "—";
@@ -63,7 +65,7 @@ function SpentChange({ change, icons }: { change: ChangeStatement; icons: Summar
   );
 }
 
-function Figures({ summary, currency, filters, icons }: FiguresProps): ReactNode {
+function Figures({ summary, currency, filters, icons, illustration }: FiguresProps): ReactNode {
   const empty = summary.transactionCount === 0;
   const spentChange = empty ? null : changeStatement(summary.comparedToPrevious?.spentChange);
   const countChange = empty ? null : changeStatement(summary.comparedToPrevious?.transactionChange);
@@ -73,6 +75,7 @@ function Figures({ summary, currency, filters, icons }: FiguresProps): ReactNode
       aria-label="Spending summary"
       className={`relative overflow-hidden rounded-hero bg-spend px-5 pt-5.5 pb-5 text-spend-fg shadow-card md:px-7 md:pt-7 md:pb-6 ${SUMMARY_HEIGHT}`}
     >
+      {illustration}
       <span
         aria-hidden
         className="absolute top-5.5 right-5 grid size-12 place-items-center rounded-hero-glyph bg-spend-fg text-spend md:top-7 md:right-7"
@@ -115,7 +118,7 @@ function Figures({ summary, currency, filters, icons }: FiguresProps): ReactNode
   );
 }
 
-export function SummaryCard({ icons }: SummaryCardProps): ReactNode {
+export function SummaryCard({ icons, illustration }: SummaryCardProps): ReactNode {
   const [params] = useDashboardParams();
   const custom = customRange(params) !== null;
   const summary = useQuery({ ...dashboardQueries.summary(params.period), enabled: !custom });
@@ -159,5 +162,13 @@ export function SummaryCard({ icons }: SummaryCardProps): ReactNode {
     );
   }
 
-  return <Figures summary={summary.data} currency={profile.data.currency} filters={filters.data} icons={icons} />;
+  return (
+    <Figures
+      summary={summary.data}
+      currency={profile.data.currency}
+      filters={filters.data}
+      icons={icons}
+      illustration={illustration}
+    />
+  );
 }
