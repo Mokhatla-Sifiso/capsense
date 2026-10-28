@@ -1,5 +1,6 @@
 import { AboutDialog } from "@/components/about/about-dialog";
 import { DashboardLayout } from "@/components/layout/dashboard-layout";
+import { PeriodControl } from "@/components/period/period-control";
 import { ThemeRow } from "@/components/theme/theme-control";
 import { Rail } from "@/components/layout/rail";
 import { TopBar } from "@/components/top-bar/top-bar";
@@ -32,7 +33,12 @@ export default function Home() {
     <DashboardLayout
       rail={<Rail learnMore={<AboutDialog opener="learn-more" />} />}
       topBar={<TopBar />}
-      heading={<h1 className="text-h1 font-bold">Spending insights</h1>}
+      heading={
+        <div className="flex flex-col gap-3 md:flex-row md:flex-wrap md:items-center md:justify-between">
+          <h1 className="text-h1 font-bold">Spending insights</h1>
+          <PeriodControl />
+        </div>
+      }
       summary={<Placeholder title="Spending summary" className="h-74.5 rounded-hero" />}
       categories={
         <Placeholder title="Spending by category" headingId="categories-heading" className="h-149 rounded-card" />
