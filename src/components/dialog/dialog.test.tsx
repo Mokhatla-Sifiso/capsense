@@ -43,3 +43,27 @@ describe("Dialog", () => {
     expect(screen.getByRole("button", { name: "Help" })).toHaveFocus();
   });
 });
+
+describe("Dialog options", () => {
+  it("leaves out the close button when no close icon is given", async () => {
+    render(
+      <Dialog title="Custom range" trigger="Custom range" triggerClassName="">
+        <p>Dates</p>
+      </Dialog>,
+    );
+    await userEvent.click(screen.getByRole("button", { name: "Custom range" }));
+    expect(screen.getByRole("dialog", { name: "Custom range" })).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Close" })).not.toBeInTheDocument();
+  });
+
+  it("tells its owner each time it opens", async () => {
+    const onOpen = vi.fn();
+    render(
+      <Dialog title="Custom range" trigger="Custom range" triggerClassName="" onOpen={onOpen}>
+        <p>Dates</p>
+      </Dialog>,
+    );
+    await userEvent.click(screen.getByRole("button", { name: "Custom range" }));
+    expect(onOpen).toHaveBeenCalledTimes(1);
+  });
+});
