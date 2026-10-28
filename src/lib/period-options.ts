@@ -25,3 +25,8 @@ export function periodOptions(presets: readonly Preset[] = []): readonly PeriodO
   const known = presets.filter((preset): preset is PeriodOption => isPeriod(preset.value));
   return known.length > 0 ? known : SPEC_PERIOD_OPTIONS;
 }
+
+export function periodLabel(presets: readonly Preset[] | undefined, period: Period): string {
+  const option = [...periodOptions(presets), ...SPEC_PERIOD_OPTIONS].find((candidate) => candidate.value === period);
+  return option?.label ?? period;
+}
