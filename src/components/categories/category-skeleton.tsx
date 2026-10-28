@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 
+export const CATEGORY_HINT = "select one to filter transactions";
 export const CATEGORY_CARD = "rounded-card bg-card p-card shadow-card";
 export const CATEGORY_HEADER = "flex flex-col items-start gap-3 md:flex-row md:justify-between md:gap-4";
 export const CATEGORY_ROWS = "mt-card-gap grid gap-2.5 xl:grid-cols-2";
@@ -19,8 +20,9 @@ export function CategorySkeleton(): ReactNode {
       <div className={CATEGORY_HEADER}>
         <div>
           <CategoriesHeading />
-          <p aria-hidden className="mt-1 w-44 animate-pulse rounded-6 bg-skeleton text-sm">
-            {"\u00a0"}
+          <p aria-hidden className="mt-1 text-sm text-muted-foreground">
+            <span className="inline-block w-44 animate-pulse rounded-6 bg-skeleton align-top">{"\u00a0"}</span> ·{" "}
+            {CATEGORY_HINT}
           </p>
         </div>
         <p aria-hidden className="w-36 animate-pulse rounded-10 bg-skeleton px-3 py-1.5 text-control">
