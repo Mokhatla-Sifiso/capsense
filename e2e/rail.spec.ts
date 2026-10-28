@@ -24,7 +24,7 @@ test.describe("side rail", () => {
     await page.goto("/");
     await page.evaluate(() => window.scrollTo(0, document.documentElement.scrollHeight));
     await expect(page.getByRole("navigation", { name: "On this page" })).toBeInViewport();
-    await expect(page.getByText("About this demo")).toBeInViewport();
+    await expect(page.getByRole("button", { name: "Learn more" })).toBeInViewport();
   });
 
   test("the rail scrolls with the page when the screen is too short for it", async ({ page }) => {
