@@ -6,6 +6,9 @@ const aboutDialog = (page: Page) => page.getByRole("dialog", { name: "About this
 test("Help opens the window with focus inside, without a request, and Escape hands focus back", async ({ page }) => {
   await page.goto("/");
   await expect(page.getByText(/Updated \d{2}:\d{2}/)).toBeVisible();
+  for (const name of ["Spending summary", "Spending by category", "Transactions"]) {
+    await expect(page.getByRole("region", { name })).not.toHaveAttribute("aria-busy", "true");
+  }
   const address = page.url();
   const historyLength = await page.evaluate(() => history.length);
   const requests: string[] = [];

@@ -33,6 +33,14 @@ export interface TransactionParams {
   endDate?: string;
 }
 
+export interface TransactionRequest {
+  range: CategoryRange;
+  limit: number;
+  offset: number;
+  sortBy: SortOrder;
+  category?: string;
+}
+
 type QueryValues = Record<string, string | number | undefined>;
 
 function withQuery(path: string, values: QueryValues): string {
