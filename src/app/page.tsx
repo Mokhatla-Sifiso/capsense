@@ -1,4 +1,5 @@
 import { AboutDialog } from "@/components/about/about-dialog";
+import { SpendingByCategory } from "@/components/categories/categories";
 import { DashboardLayout } from "@/components/layout/dashboard-layout";
 import { PeriodControl } from "@/components/period/period-control";
 import { SpendingSummary } from "@/components/summary/summary";
@@ -41,9 +42,7 @@ export default function Home() {
         </div>
       }
       summary={<SpendingSummary />}
-      categories={
-        <Placeholder title="Spending by category" headingId="categories-heading" className="h-149 rounded-card" />
-      }
+      categories={<SpendingByCategory />}
       trends={<Placeholder title="Monthly trends" headingId="trends-heading" className="h-149 rounded-card" />}
       goals={<Placeholder title="Spending goals" headingId="goals-heading" className="h-94.5 rounded-card" />}
       transactions={<Placeholder title="Transactions" headingId="transactions-heading" className="h-87 rounded-card" />}
