@@ -88,12 +88,17 @@ export const transactionSchema = z.object({
 
 export const transactionsSchema = z.object({
   transactions: listOf(transactionSchema),
-  pagination: z.object({
-    total: count,
-    limit: count,
-    offset: count,
-    hasMore: z.boolean(),
-  }),
+  pagination: z.catch(
+    z.optional(
+      z.object({
+        total: count,
+        limit: count,
+        offset: count,
+        hasMore: z.boolean(),
+      }),
+    ),
+    undefined,
+  ),
 });
 
 export const goalSchema = z.object({
