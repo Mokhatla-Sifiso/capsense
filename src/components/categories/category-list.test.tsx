@@ -3,7 +3,7 @@ import { QueryClientProvider } from "@tanstack/react-query";
 import { render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { HttpResponse, http } from "msw";
-import { withNuqsTestingAdapter } from "nuqs/adapters/testing";
+import { type OnUrlUpdateFunction, withNuqsTestingAdapter } from "nuqs/adapters/testing";
 import { makeQueryClient } from "@/lib/query/query-client";
 import { server } from "@/test/msw";
 import { specCategories } from "@/test/spec-samples";
@@ -16,8 +16,8 @@ function answerCategories(body: object) {
   server.use(http.get(CATEGORIES_PATH, () => HttpResponse.json(body)));
 }
 
-function renderList(searchParams = "") {
-  const NuqsAdapter = withNuqsTestingAdapter({ searchParams });
+function renderList(searchParams = "", onUrlUpdate: OnUrlUpdateFunction = vi.fn()) {
+  const NuqsAdapter = withNuqsTestingAdapter({ searchParams, onUrlUpdate });
   render(
     <QueryClientProvider client={makeQueryClient()}>
       <NuqsAdapter>
@@ -54,7 +54,9 @@ describe("CategoryList", () => {
       "Shopping: R 450,80, 10,6% of spending, 6 transactions",
     ]);
     expect(readable(within(section()).getByText(/ total$/).textContent)).toBe("R 4 250,75 total");
-    expect(within(section()).getByText("16 Aug 2024 – 16 Sep 2024")).toBeInTheDocument();
+    expect(
+      within(section()).getByText("16 Aug 2024 – 16 Sep 2024 · select one to filter transactions"),
+    ).toBeInTheDocument();
   });
 
   it("shows the rounded share on the ring and the exact share on the phone line, both hidden from screen readers", async () => {
@@ -122,7 +124,7 @@ describe("CategoryList", () => {
     answerCategories({ ...specCategories, dateRange: { startDate: "2024-09-16", endDate: "2024-09-16" } });
     renderList();
     await rows();
-    expect(within(section()).getByText("16 Sep 2024")).toBeInTheDocument();
+    expect(within(section()).getByText("16 Sep 2024 · select one to filter transactions")).toBeInTheDocument();
   });
 
   it("hides the caption but keeps the rows when the date range is missing or not a real date", async () => {
@@ -149,6 +151,63 @@ describe("CategoryList", () => {
     await userEvent.click(within(section()).getByRole("button", { name: "Retry" }));
     expect(await rows()).toHaveLength(6);
     expect(calls).toBe(2);
+  });
+
+  it("makes each row a toggle that starts unselected", async () => {
+    renderList();
+    await rows();
+    const toggles = within(section()).getAllByRole("button");
+    expect(toggles).toHaveLength(6);
+    for (const toggle of toggles) expect(toggle).toHaveAttribute("aria-pressed", "false");
+  });
+
+  it("selects the category in the address, back on page 1, as a new Back step", async () => {
+    const onUrlUpdate = vi.fn<OnUrlUpdateFunction>();
+    renderList("?page=3&sort=amount_desc", onUrlUpdate);
+    await rows();
+    const groceries = within(section()).getByRole("button", { name: /^Groceries:/ });
+    await userEvent.click(groceries);
+    const update = onUrlUpdate.mock.calls[0]?.[0];
+    expect(update?.queryString).toBe("?sort=amount_desc&category=Groceries");
+    expect(update?.options.history).toBe("push");
+    expect(groceries).toHaveAttribute("aria-pressed", "true");
+    expect(groceries).toHaveFocus();
+  });
+
+  it("switches to another category as a new Back step", async () => {
+    const onUrlUpdate = vi.fn<OnUrlUpdateFunction>();
+    renderList("?category=Groceries", onUrlUpdate);
+    await rows();
+    expect(within(section()).getByRole("button", { name: /^Groceries:/ })).toHaveAttribute("aria-pressed", "true");
+    await userEvent.click(within(section()).getByRole("button", { name: /^Dining:/ }));
+    const update = onUrlUpdate.mock.calls[0]?.[0];
+    expect(update?.queryString).toBe("?category=Dining");
+    expect(update?.options.history).toBe("push");
+  });
+
+  it("clears the selected category without adding a Back step", async () => {
+    const onUrlUpdate = vi.fn<OnUrlUpdateFunction>();
+    renderList("?category=Groceries&page=2", onUrlUpdate);
+    await rows();
+    const groceries = within(section()).getByRole("button", { name: /^Groceries:/ });
+    await userEvent.click(groceries);
+    const update = onUrlUpdate.mock.calls[0]?.[0];
+    expect(update?.queryString).toBe("");
+    expect(update?.options.history).toBe("replace");
+    expect(groceries).toHaveAttribute("aria-pressed", "false");
+  });
+
+  it("toggles with Enter and Space", async () => {
+    const onUrlUpdate = vi.fn<OnUrlUpdateFunction>();
+    renderList("", onUrlUpdate);
+    await rows();
+    within(section())
+      .getByRole("button", { name: /^Dining:/ })
+      .focus();
+    await userEvent.keyboard("{Enter}");
+    expect(onUrlUpdate.mock.calls.at(-1)?.[0].queryString).toBe("?category=Dining");
+    await userEvent.keyboard(" ");
+    expect(onUrlUpdate.mock.calls.at(-1)?.[0].queryString).toBe("");
   });
 
   it("asks for the custom dates when they are on", async () => {
