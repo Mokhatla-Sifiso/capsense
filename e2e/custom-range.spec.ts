@@ -39,7 +39,7 @@ test("a valid range reloads the categories for those dates without a Back step",
   await expect(summary(page)).toHaveText("Summary is available for preset periods only");
   await expect(page.getByRole("radiogroup", { name: "Period" }).locator("input:checked")).toHaveCount(0);
   expect(asked.at(-1)).toBe("?startDate=2024-09-01&endDate=2024-09-10");
-  await expect.poll(() => new URL(page.url()).search).toBe("?startDate=2024-09-01&endDate=2024-09-10");
+  await expect.poll(() => new URL(page.url()).search).toBe("?period=90d&startDate=2024-09-01&endDate=2024-09-10");
   expect(await page.evaluate(() => history.length)).toBe(steps);
 });
 
