@@ -2,7 +2,6 @@
 
 import { useQuery } from "@tanstack/react-query";
 import { type ReactNode, useId } from "react";
-import { formatDay } from "@/lib/format";
 import { isPeriod, periodOptions } from "@/lib/period-options";
 import { dashboardQueries } from "@/lib/query/dashboard-queries";
 import { customRange } from "@/lib/url-state/dashboard-params";
@@ -13,17 +12,15 @@ import { PERIOD_ROW, PresetSkeleton } from "./period-skeleton";
 interface PeriodChoiceProps {
   checkIcon: ReactNode;
   caretIcon: ReactNode;
-  calendarIcon: ReactNode;
+  customRangeOpener: ReactNode;
 }
 
 const SEGMENT =
   "flex min-h-11 cursor-pointer items-center gap-1.5 rounded-pill px-4 text-control whitespace-nowrap transition-colors lg:min-h-9 has-[input:focus-visible]:outline-2 has-[input:focus-visible]:outline-offset-2 has-[input:focus-visible]:outline-ring";
 const SELECTED = "bg-spend font-bold text-spend-fg dark:bg-primary dark:text-primary-foreground";
 const UNSELECTED = "font-semibold text-foreground hover:bg-soft";
-const CUSTOM_BUTTON =
-  "flex min-h-12 w-full items-center justify-center gap-2 rounded-pill px-5 font-semibold whitespace-nowrap shadow-card transition-colors md:w-auto lg:min-h-11";
 
-export function PeriodChoice({ checkIcon, caretIcon, calendarIcon }: PeriodChoiceProps): ReactNode {
+export function PeriodChoice({ checkIcon, caretIcon, customRangeOpener }: PeriodChoiceProps): ReactNode {
   const [params, setParams] = useDashboardParams();
   const filters = useQuery(dashboardQueries.filters());
   const group = useId();
@@ -35,7 +32,6 @@ export function PeriodChoice({ checkIcon, caretIcon, calendarIcon }: PeriodChoic
     select: (summary) => summary.period,
   });
   const selected = custom ? "" : (answered.data ?? params.period);
-  const customDates = custom && `${formatDay(custom.startDate)} – ${formatDay(custom.endDate)}`;
 
   function choose(period: Period): void {
     void setParams({ period, startDate: null, endDate: null, page: null });
@@ -91,14 +87,7 @@ export function PeriodChoice({ checkIcon, caretIcon, calendarIcon }: PeriodChoic
         </>
       )}
 
-      <button
-        type="button"
-        aria-label={customDates ? `Custom range: ${customDates}` : undefined}
-        className={`${CUSTOM_BUTTON} ${custom ? "bg-primary text-primary-foreground" : "bg-card text-primary"}`}
-      >
-        {calendarIcon}
-        {customDates ? `Custom: ${customDates}` : "Custom range"}
-      </button>
+      {customRangeOpener}
     </div>
   );
 }

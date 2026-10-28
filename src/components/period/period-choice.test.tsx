@@ -13,7 +13,7 @@ function renderChoice(searchParams = "", onUrlUpdate: OnUrlUpdateFunction = vi.f
   render(
     <QueryClientProvider client={makeQueryClient()}>
       <NuqsAdapter>
-        <PeriodChoice checkIcon={<svg data-testid="check" />} caretIcon={null} calendarIcon={null} />
+        <PeriodChoice checkIcon={<svg data-testid="check" />} caretIcon={null} customRangeOpener={null} />
       </NuqsAdapter>
     </QueryClientProvider>,
   );
@@ -72,13 +72,11 @@ describe("PeriodChoice", () => {
     expect(onUrlUpdate.mock.calls[0]?.[0].queryString).toBe("?period=7d");
   });
 
-  it("selects no period and names the dates on the button while custom dates are on", async () => {
+  it("selects no period while custom dates are on", async () => {
     renderChoice("?startDate=2024-09-01&endDate=2024-09-16");
     const group = await radios();
     expect(within(group).queryByRole("radio", { checked: true })).not.toBeInTheDocument();
     expect(screen.getByRole("combobox", { name: "Period" })).toHaveValue("");
-    const button = screen.getByRole("button", { name: "Custom range: 1 Sep 2024 – 16 Sep 2024" });
-    expect(button).toHaveTextContent("Custom: 1 Sep 2024 – 16 Sep 2024");
   });
 
   it("uses the spec's options, without an error, when the filters endpoint fails", async () => {
