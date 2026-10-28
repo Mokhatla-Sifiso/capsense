@@ -1,7 +1,7 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
-import type { ReactNode } from "react";
+import { type ReactNode, useEffect, useState } from "react";
 import { formatDay } from "@/lib/format";
 import { dashboardQueries } from "@/lib/query/dashboard-queries";
 import { customRange } from "@/lib/url-state/dashboard-params";
@@ -48,8 +48,6 @@ export function TransactionFilters({ caretIcon, datesOpener }: TransactionFilter
   const [params, setParams] = useDashboardParams();
   const filters = useQuery(dashboardQueries.filters());
   const categories = filters.data?.categories ?? [];
-  const names = categories.map((category) => category.name);
-  if (params.category && !names.includes(params.category)) names.push(params.category);
 
   return (
     <div role="group" aria-label="Transaction filters" className="grid gap-3 md:flex md:flex-wrap md:justify-end">
@@ -62,7 +60,7 @@ export function TransactionFilters({ caretIcon, datesOpener }: TransactionFilter
             className={SELECT}
           >
             <option value="">All categories</option>
-            {names.map((name) => (
+            {categories.map(({ name }) => (
               <option key={name} value={name}>
                 {name}
               </option>
@@ -140,5 +138,31 @@ export function FilterLabels({ removeIcon }: FilterLabelsProps): ReactNode {
         Clear filters
       </button>
     </div>
+  );
+}
+
+export function RemovedCategoryNote({ infoIcon }: { infoIcon: ReactNode }): ReactNode {
+  const [params, setParams] = useDashboardParams();
+  const filters = useQuery(dashboardQueries.filters());
+  const [removed, setRemoved] = useState<string | null>(null);
+  const known = filters.data?.categories.map((category) => category.name);
+  const stale = known && params.category && !known.includes(params.category) ? params.category : null;
+
+  if (stale && stale !== removed) setRemoved(stale);
+  if (!stale && removed && params.category && params.category !== removed) setRemoved(null);
+
+  useEffect(() => {
+    if (stale) void setParams({ category: null, page: null });
+  }, [stale, setParams]);
+  if (!removed) return null;
+
+  return (
+    <p
+      role="status"
+      className="mt-4 flex items-center gap-3 rounded-panel bg-warning-surface px-4 py-3 font-semibold text-warning-text"
+    >
+      {infoIcon}
+      {`\u201c${removed}\u201d is no longer available, so all categories are shown`}
+    </p>
   );
 }
