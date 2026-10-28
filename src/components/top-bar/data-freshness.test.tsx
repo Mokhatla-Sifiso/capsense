@@ -66,6 +66,23 @@ describe("DataFreshness", () => {
     expect(screen.queryByText(/Updated/)).not.toBeInTheDocument();
   });
 
+  it("hides the time while a section is still waiting to ask for its data", async () => {
+    function WaitingSection() {
+      useQuery({ ...dashboardQueries.goals(), enabled: false });
+      return null;
+    }
+    render(
+      <QueryClientProvider client={makeQueryClient()}>
+        <ProfileSection />
+        <WaitingSection />
+        <DataFreshness today="2024-09-16" />
+      </QueryClientProvider>,
+    );
+    await screen.findByText("Data as of 16 Sep 2024");
+    await act(() => new Promise((resolve) => setTimeout(resolve, 20)));
+    expect(screen.queryByText(/Updated/)).not.toBeInTheDocument();
+  });
+
   it("keeps the previous time and counts the sections that failed to refresh, then moves on when they recover", async () => {
     const client = renderLine();
     await screen.findByText("Data as of 16 Sep 2024 · Updated 15:00");

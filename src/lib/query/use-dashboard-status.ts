@@ -6,15 +6,15 @@ export function couldNotRefresh(sections: number): string {
   return sections === 1 ? "1 section couldn't refresh" : `${sections} sections couldn't refresh`;
 }
 
-function activeSections(client: QueryClient): Query[] {
+function shownSections(client: QueryClient): Query[] {
   return client
     .getQueryCache()
-    .findAll({ queryKey: dashboardKeys.all, type: "active" })
-    .filter((query) => query.queryKey[1] !== "filters");
+    .findAll({ queryKey: dashboardKeys.all })
+    .filter((query) => query.getObserversCount() > 0 && query.queryKey[1] !== "filters");
 }
 
 export function failedSectionCount(client: QueryClient): number {
-  return activeSections(client).filter((section) => section.state.status === "error").length;
+  return shownSections(client).filter((section) => section.state.status === "error").length;
 }
 
 export interface DashboardStatus {
@@ -24,7 +24,7 @@ export interface DashboardStatus {
 }
 
 function readStatus(client: QueryClient): string {
-  const sections = activeSections(client);
+  const sections = shownSections(client);
   const fetching = sections.some((section) => section.state.fetchStatus === "fetching");
   const failedSections = sections.filter((section) => section.state.status === "error").length;
   const everyLoaded = sections.length > 0 && sections.every((section) => section.state.dataUpdatedAt > 0);
