@@ -5,6 +5,7 @@ import { HttpResponse, http } from "msw";
 import { type OnUrlUpdateFunction, withNuqsTestingAdapter } from "nuqs/adapters/testing";
 import { makeQueryClient } from "@/lib/query/query-client";
 import { server } from "@/test/msw";
+import { specSummary } from "@/test/spec-samples";
 import { PeriodChoice } from "./period-choice";
 
 function renderChoice(searchParams = "", onUrlUpdate: OnUrlUpdateFunction = vi.fn()) {
@@ -38,6 +39,20 @@ describe("PeriodChoice", () => {
   it("selects the period from the address", async () => {
     renderChoice("?period=1y");
     expect(within(await radios()).getByRole("radio", { name: "Last year" })).toBeChecked();
+  });
+
+  it("selects the period the summary answered with when it differs from the one asked for", async () => {
+    server.use(
+      http.get("*/api/customers/:customerId/spending/summary", () =>
+        HttpResponse.json({ ...specSummary, period: "7d" }),
+      ),
+    );
+    const onUrlUpdate = vi.fn<OnUrlUpdateFunction>();
+    renderChoice("", onUrlUpdate);
+    const group = await radios();
+    expect(await within(group).findByRole("radio", { name: "Last 7 days" })).toBeChecked();
+    expect(screen.getByRole("combobox", { name: "Period" })).toHaveValue("7d");
+    expect(onUrlUpdate).not.toHaveBeenCalled();
   });
 
   it("replaces the address, clears custom dates and goes back to page 1 when a period is chosen", async () => {

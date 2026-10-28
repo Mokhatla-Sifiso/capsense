@@ -12,7 +12,12 @@ import {
 
 export const specHandlers = [
   http.get("*/api/customers/:customerId/profile", () => HttpResponse.json(specProfile)),
-  http.get("*/api/customers/:customerId/spending/summary", () => HttpResponse.json(specSummary)),
+  http.get("*/api/customers/:customerId/spending/summary", ({ request }) =>
+    HttpResponse.json({
+      ...specSummary,
+      period: new URL(request.url).searchParams.get("period") ?? specSummary.period,
+    }),
+  ),
   http.get("*/api/customers/:customerId/spending/categories", () => HttpResponse.json(specCategories)),
   http.get("*/api/customers/:customerId/spending/trends", () => HttpResponse.json(specTrends)),
   http.get("*/api/customers/:customerId/transactions", () => HttpResponse.json(specTransactions)),
