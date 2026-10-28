@@ -59,6 +59,8 @@ const SORTERS: Record<SortOrder, (a: LedgerEntry, b: LedgerEntry) => number> = {
 };
 const WARNING_AT_PERCENT = 80;
 
+type TransactionPage = Transactions & { pagination: NonNullable<Transactions["pagination"]> };
+
 export class SpendingRepository {
   constructor(private readonly data: SpendingData) {}
 
@@ -149,7 +151,7 @@ export class SpendingRepository {
     };
   }
 
-  transactions(query: TransactionQuery): Transactions {
+  transactions(query: TransactionQuery): TransactionPage {
     const matching = this.data.ledger
       .filter((entry) => query.category === null || entry.category === query.category)
       .filter((entry) => query.startDate === null || entry.day >= query.startDate)
