@@ -3,7 +3,8 @@
 import { useQuery } from "@tanstack/react-query";
 import { type ReactNode, useEffect, useRef, useState } from "react";
 import { SectionError } from "@/components/states/section-error";
-import { WarningStrip } from "@/components/states/warning-strip";
+import { StillLoading } from "@/components/states/still-loading";
+import { WarningStrip, refreshProblem } from "@/components/states/warning-strip";
 import { categoryAppearance } from "@/lib/category-appearance";
 import { formatCurrency } from "@/lib/format";
 import { dashboardQueries } from "@/lib/query/dashboard-queries";
@@ -193,7 +194,14 @@ export function TransactionList({
   }
 
   function body(): ReactNode {
-    if (loading) return <SkeletonRows />;
+    if (loading) {
+      return (
+        <>
+          <SkeletonRows />
+          <StillLoading pending />
+        </>
+      );
+    }
     if (!view || !profile.data) {
       return <SectionError block="transactions" icon={problem} onRetry={retry} className="mt-card-gap" />;
     }
@@ -273,6 +281,13 @@ export function TransactionList({
       </div>
       <FilterLabels removeIcon={removeIcon} />
       <RemovedCategoryNote infoIcon={infoIcon} />
+      {transactions.isRefetchError && (
+        <WarningStrip
+          icon={problem}
+          message={refreshProblem("transactions")}
+          onRetry={() => void transactions.refetch()}
+        />
+      )}
       {body()}
     </section>
   );

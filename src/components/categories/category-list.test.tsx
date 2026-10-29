@@ -1,6 +1,6 @@
 import { Tag } from "@phosphor-icons/react/ssr";
 import { QueryClientProvider } from "@tanstack/react-query";
-import { render, screen, within } from "@testing-library/react";
+import { act, render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { HttpResponse, http } from "msw";
 import { type OnUrlUpdateFunction, withNuqsTestingAdapter } from "nuqs/adapters/testing";
@@ -17,14 +17,16 @@ function answerCategories(body: object) {
 }
 
 function renderList(searchParams = "", onUrlUpdate: OnUrlUpdateFunction = vi.fn()) {
+  const client = makeQueryClient();
   const NuqsAdapter = withNuqsTestingAdapter({ searchParams, onUrlUpdate });
   render(
-    <QueryClientProvider client={makeQueryClient()}>
+    <QueryClientProvider client={client}>
       <NuqsAdapter>
         <CategoryList problem={null} />
       </NuqsAdapter>
     </QueryClientProvider>,
   );
+  return client;
 }
 
 const readable = (text: string | null) => (text ?? "").replace(/ /g, " ");
@@ -221,5 +223,25 @@ describe("CategoryList", () => {
     renderList("?startDate=2024-09-01&endDate=2024-09-16");
     await rows();
     expect(asked).toEqual(["?startDate=2024-09-01&endDate=2024-09-16"]);
+  });
+});
+
+describe("refresh failure", () => {
+  it("keeps the earlier categories when a refresh fails, and Retry asks for them again", async () => {
+    const client = renderList();
+    await screen.findByText("Groceries");
+    let calls = 0;
+    server.use(
+      http.get(CATEGORIES_PATH, () => {
+        calls += 1;
+        return calls === 1 ? HttpResponse.json({}, { status: 500 }) : HttpResponse.json(specCategories);
+      }),
+    );
+    await act(() => client.refetchQueries());
+    expect(await screen.findByText("Couldn't refresh categories. Showing earlier data.")).toBeInTheDocument();
+    expect(screen.getByText("Groceries")).toBeInTheDocument();
+    await userEvent.click(screen.getByRole("button", { name: "Retry" }));
+    await waitFor(() => expect(screen.queryByText(/^Couldn't refresh/)).not.toBeInTheDocument());
+    expect(calls).toBe(2);
   });
 });
