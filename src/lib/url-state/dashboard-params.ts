@@ -7,6 +7,10 @@ export const PAGE_SIZE = 20;
 export const MONTH_OPTIONS = [3, 6, 12, 24] as const;
 export type MonthOption = (typeof MONTH_OPTIONS)[number];
 
+export function isMonthOption(value: number): value is MonthOption {
+  return (MONTH_OPTIONS as readonly number[]).includes(value);
+}
+
 const isoDay = z.iso.date();
 
 const parseAsDay = createParser({

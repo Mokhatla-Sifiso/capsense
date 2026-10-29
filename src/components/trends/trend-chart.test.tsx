@@ -2,7 +2,7 @@ import { QueryClientProvider } from "@tanstack/react-query";
 import { render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { HttpResponse, http } from "msw";
-import { withNuqsTestingAdapter } from "nuqs/adapters/testing";
+import { type OnUrlUpdateFunction, withNuqsTestingAdapter } from "nuqs/adapters/testing";
 import { makeQueryClient } from "@/lib/query/query-client";
 import { server } from "@/test/msw";
 import { specTrends } from "@/test/spec-samples";
@@ -31,12 +31,12 @@ function answerTrends(trends: object[]) {
   server.use(http.get(TRENDS_PATH, () => HttpResponse.json({ trends })));
 }
 
-function renderChart(searchParams = "") {
-  const NuqsAdapter = withNuqsTestingAdapter({ searchParams });
+function renderChart(searchParams = "", onUrlUpdate?: OnUrlUpdateFunction) {
+  const NuqsAdapter = withNuqsTestingAdapter({ searchParams, onUrlUpdate, hasMemory: true });
   render(
     <QueryClientProvider client={makeQueryClient()}>
       <NuqsAdapter>
-        <TrendChart problem={null} />
+        <TrendChart problem={null} caretIcon={null} />
       </NuqsAdapter>
     </QueryClientProvider>,
   );
@@ -182,6 +182,88 @@ describe("TrendChart", () => {
     );
     renderChart();
     await chart();
+    expect(asked).toEqual(["12"]);
+  });
+});
+
+describe("TrendChart months", () => {
+  const note = () => screen.queryByText(/^Showing the \d+ months? available/);
+  const monthsSelect = () => screen.getByRole("combobox", { name: "Months" });
+
+  function answerByMonths(asked: string[]) {
+    server.use(
+      http.get(TRENDS_PATH, ({ request }) => {
+        const months = new URL(request.url).searchParams.get("months") ?? "";
+        asked.push(months);
+        return HttpResponse.json(months === "24" ? { trends: [month("2023-12"), ...specTrends.trends] } : specTrends);
+      }),
+    );
+  }
+
+  it("offers exactly 3, 6, 12 and 24 months, with 12 chosen when nothing is in the address", async () => {
+    renderChart();
+    await chart();
+    const options = within(monthsSelect()).getAllByRole("option");
+    expect(options.map((option) => option.textContent)).toEqual(["3 months", "6 months", "12 months", "24 months"]);
+    expect(monthsSelect()).toHaveValue("12");
+  });
+
+  it("asks for 24 months when chosen, replacing the address entry instead of adding a Back step", async () => {
+    const asked: string[] = [];
+    answerByMonths(asked);
+    const onUrlUpdate = vi.fn<OnUrlUpdateFunction>();
+    renderChart("", onUrlUpdate);
+    await chart();
+    await userEvent.selectOptions(monthsSelect(), "24");
+    expect(await columns()).toHaveLength(7);
+    expect(asked).toEqual(["12", "24"]);
+    expect(onUrlUpdate).toHaveBeenCalledTimes(1);
+    expect(onUrlUpdate.mock.calls[0]?.[0].queryString).toBe("?months=24");
+    expect(onUrlUpdate.mock.calls[0]?.[0].options.history).toBe("replace");
+  });
+
+  it("selects the latest month again after the months change", async () => {
+    answerByMonths([]);
+    renderChart();
+    await userEvent.click((await columns())[2] as HTMLElement);
+    expect(strip()).toMatch(/^March 2024/);
+    await userEvent.selectOptions(monthsSelect(), "24");
+    expect(await columns()).toHaveLength(7);
+    expect(strip()).toMatch(/^June 2024/);
+  });
+
+  it("notes when fewer months come back than were asked for", async () => {
+    renderChart();
+    await chart();
+    expect(note()).toHaveTextContent("Showing the 6 months available of the 12 requested.");
+  });
+
+  it("has no note when as many months come back as were asked for", async () => {
+    renderChart("?months=6");
+    await chart();
+    expect(note()).not.toBeInTheDocument();
+  });
+
+  it("says month, not months, when only 1 comes back", async () => {
+    answerTrends([month("2024-06")]);
+    renderChart("?months=3");
+    await chart();
+    expect(note()).toHaveTextContent("Showing the 1 month available of the 3 requested.");
+  });
+
+  it("has no note when there are no months", async () => {
+    answerTrends([]);
+    renderChart();
+    expect(await screen.findByText("No monthly spending to show")).toBeInTheDocument();
+    expect(note()).not.toBeInTheDocument();
+  });
+
+  it("falls back to 12 months for a number of months that isn't offered", async () => {
+    const asked: string[] = [];
+    answerByMonths(asked);
+    renderChart("?months=7");
+    await chart();
+    expect(monthsSelect()).toHaveValue("12");
     expect(asked).toEqual(["12"]);
   });
 });
