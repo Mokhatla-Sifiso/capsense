@@ -5,12 +5,23 @@ const firstRow = (page: Page) => section(page).locator("tbody tr").first().locat
 const address = (page: Page) => new URL(page.url()).searchParams;
 const scrollY = (page: Page) => page.evaluate(() => Math.round(window.scrollY));
 
+async function settledScroll(page: Page): Promise<number> {
+  let last = -1;
+  let current = await scrollY(page);
+  while (current !== last) {
+    last = current;
+    await page.waitForTimeout(150);
+    current = await scrollY(page);
+  }
+  return current;
+}
+
 async function drillDown(page: Page) {
   await page.goto("/?period=1y");
   await expect(firstRow(page)).toBeVisible();
   await page.mouse.wheel(0, 300);
   await expect.poll(() => scrollY(page)).toBeGreaterThan(0);
-  const before = await scrollY(page);
+  const before = await settledScroll(page);
   await page
     .getByRole("region", { name: "Spending by category" })
     .getByRole("button", { name: /^Dining:/ })
@@ -31,7 +42,7 @@ test("Back goes to before the drill-down, Forward returns to Dining page 2 in pl
   const before = await drillDown(page);
   await page.mouse.wheel(0, 900);
   await expect.poll(() => scrollY(page)).toBeGreaterThan(before);
-  const deep = await scrollY(page);
+  const deep = await settledScroll(page);
   const deepRow = await firstRow(page).innerText();
 
   await page.goBack();
