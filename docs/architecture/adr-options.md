@@ -1,6 +1,6 @@
-# G3 Options Briefs (input to ADRs)
+# Options Briefs (input to ADRs)
 
-Owner: Muzi (decides) · Prepared: 2026-10-21 · Status: **Decided 2026-10-21** (approve recs) → see adr-001…007, nfr.md · Versions are npm latest on 2026-10-21. Exact pins are set at B1 (each ≥ 2 weeks old).
+Decisions: adr-001…007, nfr.md · Versions are npm latest on 2026-10-21. Exact pins are set at B1 (each ≥ 2 weeks old).
 
 **Constraints in force:** front-end role (MR-05) · production-grade (MR-01) · one runnable Dockerfile (MR-02) · spec is fixed and read-only · ~48 h of build · keep scroll position and filters on navigation (F-02/F-03) · WCAG 2.1 AA · no PII in logs or URLs (R-02).
 **Coupling:** ADR-001 drives the options for ADR-003 and ADR-006. Decide 001 first.

@@ -1,6 +1,6 @@
 # Capitec Design Language (evidence)
 
-Owner: `ui-designer` · Captured 2026-10-22 from the live site (computed CSS, built-in browser) and the App Store screenshots · Status: **Draft, needs Muzi approval** · Supersedes the D-01 colour guesses in `brand-sources.md`
+Captured 2026-10-22 from the live site (computed CSS, built-in browser) and the App Store screenshots · Supersedes the D-01 colour guesses in `brand-sources.md`
 
 ## 1. Foundations, measured
 
