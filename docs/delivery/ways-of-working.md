@@ -1,6 +1,6 @@
 # Ways of Working: CapSense
 
-Owner: `scrum-master` · Status: **Draft, pending Muzi approval** · Sources: S1–S6 below
+Sources: S1–S6 below
 
 ## 1. Work item hierarchy (Azure DevOps Scrum)
 

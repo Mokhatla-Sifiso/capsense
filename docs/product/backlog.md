@@ -1,6 +1,6 @@
 # Backlog: CapSense
 
-Mirror of Azure DevOps `Capitec - CapSense` as of 2026-10-22; ADO is the system of record for state.
+As of 2026-10-22.
 
 | ADO ID | Title                                      | Epic    | Sprint   | State     | Effort (h) | Business Value |
 | ------ | ------------------------------------------ | ------- | -------- | --------- | ---------- | -------------- |
@@ -32,7 +32,7 @@ Mirror of Azure DevOps `Capitec - CapSense` as of 2026-10-22; ADO is the system 
 
 Business Value scores are provisional PO estimates (2026-10-20).
 
-## 2. Added 2026-10-22 (Muzi 2026-10-22; not yet in ADO: SM to create and add IDs; cut order per R-07)
+## 2. Added 2026-10-22 (cut order per R-07)
 
 | ADO ID     | Title                             | Parent                     | MoSCoW | Traces                | State |
 | ---------- | --------------------------------- | -------------------------- | ------ | --------------------- | ----- |

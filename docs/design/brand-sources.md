@@ -2,9 +2,7 @@
 
 | Item         | Value                                                                                                                                                                                                        |
 | ------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| Owner        | `functional-analyst`                                                                                                                                                                                         |
 | Work item    | ADO PBI #25 · Task "Gather and cite public Capitec brand sources (AC-1)" · Dependency D-01                                                                                                                   |
-| Status       | **Draft, 2026-10-21.** Not QA-verified. Tokens not approved (Muzi approves D-01)                                                                                                                             |
 | Tags         | **Verified** = official Capitec source read first-hand · **Reported** = third party · **Inference** = FA reasoning                                                                                           |
 | Access limit | `capitecbank.co.za` returned a bot-protection challenge / HTTP 403 on 2026-10-21. It was **not bypassed**. No official brand guideline, CSS or font file could be read, so **no colour or font is Verified** |
 
@@ -48,10 +46,6 @@
 | DS-02 | Typeface                        | Open sans-serif substitute (choice is Muzi's ADR)                               |
 | DS-03 | Secondary palette               | Derive from B-01/B-02 vs adopt `#0084BB` (Reported only)                        |
 | DS-04 | Red as brand vs warning colour  | Brand red collides with error/over-budget states and Groceries `#FF6B6B` (I-06) |
-
-Post-G5 errata 2026-10-21: G5 N16, Q-01–Q-04 renumbered DS-01–DS-04 (ID collision with QA Q-xx); status of each in `tokens.md` §7
-
-Errata 2026-10-22 (Muzi 2026-10-22):
 
 | #    | Item                                                   | Change                                                                                                                       |
 | ---- | ------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------- |

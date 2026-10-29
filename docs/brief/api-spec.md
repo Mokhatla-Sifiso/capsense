@@ -1,7 +1,5 @@
 # Customer Spending Insights Dashboard API Endpoints
 
-> Source: provided by Capitec as the brief's only artefact (received 2026-10-20). Fields and values are unchanged; only array items were collapsed onto single lines for readability. Do not edit; propose changes in a separate doc.
-
 ## 1. Customer Profile
 
 ```
