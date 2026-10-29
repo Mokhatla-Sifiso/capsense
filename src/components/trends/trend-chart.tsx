@@ -7,12 +7,20 @@ import { formatCurrency, formatMonth, formatShortMonth, formatWholeCurrency } fr
 import { dashboardQueries } from "@/lib/query/dashboard-queries";
 import { type MonthSlot, labelEvery, monthSlots, niceMax, showsYear } from "@/lib/trend-chart";
 import { useElementWidth } from "@/lib/use-element-width";
+import type { MonthOption } from "@/lib/url-state/dashboard-params";
 import { useDashboardParams } from "@/lib/url-state/use-dashboard-params";
 import type { MonthlyTrend } from "@/schemas/api";
+import { MonthsChoice } from "./months-choice";
 import { BUBBLE_SPACE, PLOT_HEIGHT, TREND_CARD, TrendBars, TrendsHeading } from "./trend-skeleton";
 
 interface TrendChartProps {
   problem: ReactNode;
+  caretIcon: ReactNode;
+}
+
+interface Choice {
+  months: MonthOption;
+  month: string;
 }
 
 interface ChartProps {
@@ -32,6 +40,10 @@ function columnName(trend: MonthlyTrend, currency: string): string {
   const average =
     trend.transactionCount === 0 ? "no average" : `average ${formatCurrency(trend.averageTransaction, currency)}`;
   return `${formatMonth(trend.month)}: ${formatCurrency(trend.totalSpent, currency)}, ${transactionsLabel(trend.transactionCount)}, ${average}`;
+}
+
+function fewerMonthsNote(shown: number, requested: number): string {
+  return `Showing the ${shown} ${shown === 1 ? "month" : "months"} available of the ${requested} requested.`;
 }
 
 function Bubble({
@@ -196,11 +208,11 @@ function Chart({ slots, selected, currency, onSelect }: ChartProps): ReactNode {
   );
 }
 
-export function TrendChart({ problem }: TrendChartProps): ReactNode {
+export function TrendChart({ problem, caretIcon }: TrendChartProps): ReactNode {
   const [params] = useDashboardParams();
   const trends = useQuery(dashboardQueries.trends(params.months));
   const profile = useQuery(dashboardQueries.profile());
-  const [chosen, setChosen] = useState<string | null>(null);
+  const [chosen, setChosen] = useState<Choice | null>(null);
 
   function body(): ReactNode {
     if (trends.isPending || profile.isPending) return <TrendBars />;
@@ -227,19 +239,27 @@ export function TrendChart({ problem }: TrendChartProps): ReactNode {
     const months = slots.flatMap((slot) => (slot.trend ? [slot.trend] : []));
     const latest = months.at(-1);
     if (!latest) return <p className="mt-card-gap text-muted-foreground">No monthly spending to show</p>;
-    const selected = months.find((trend) => trend.month === chosen) ?? latest;
+    const selected = months.find((trend) => chosen?.months === params.months && trend.month === chosen.month) ?? latest;
     const currency = profile.data.currency;
     const average = selected.transactionCount === 0 ? NOTHING : formatCurrency(selected.averageTransaction, currency);
 
     return (
       <>
-        <Chart slots={slots} selected={selected.month} currency={currency} onSelect={setChosen} />
+        <Chart
+          slots={slots}
+          selected={selected.month}
+          currency={currency}
+          onSelect={(month) => setChosen({ months: params.months, month })}
+        />
         <p className="mt-5 flex flex-wrap items-center justify-between gap-x-3 gap-y-1 rounded-icon-button bg-row px-3.5 py-3 text-control">
           <span className="font-bold">{formatMonth(selected.month)}</span>
           <span className="text-muted-foreground">
             {transactionsLabel(selected.transactionCount)} · avg {average}
           </span>
         </p>
+        {months.length < params.months && (
+          <p className="mt-5 text-sm text-muted-foreground">{fewerMonthsNote(months.length, params.months)}</p>
+        )}
       </>
     );
   }
@@ -250,7 +270,7 @@ export function TrendChart({ problem }: TrendChartProps): ReactNode {
       aria-busy={trends.isPending || profile.isPending || undefined}
       className={TREND_CARD}
     >
-      <TrendsHeading />
+      <TrendsHeading control={<MonthsChoice caretIcon={caretIcon} />} />
       {body()}
     </section>
   );
