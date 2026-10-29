@@ -20,6 +20,8 @@ import { BUBBLE_SPACE, PLOT_HEIGHT, TREND_CARD, TrendBars, TrendsHeading } from 
 interface TrendChartProps {
   problem: ReactNode;
   caretIcon: ReactNode;
+  previousIcon: ReactNode;
+  nextIcon: ReactNode;
 }
 
 interface Choice {
@@ -39,6 +41,8 @@ const CAPSULE_WIDTH = 26;
 const BUBBLE_HEIGHT = 52;
 const BUBBLE_PADDING = 12;
 const NOTHING = "—";
+const STEP =
+  "grid size-11 shrink-0 cursor-pointer place-items-center rounded-12 text-foreground hover:bg-track disabled:cursor-default disabled:opacity-40 disabled:hover:bg-transparent";
 
 function columnName(trend: MonthlyTrend, currency: string): string {
   const average =
@@ -212,12 +216,13 @@ function Chart({ slots, selected, currency, onSelect }: ChartProps): ReactNode {
   );
 }
 
-export function TrendChart({ problem, caretIcon }: TrendChartProps): ReactNode {
+export function TrendChart({ problem, caretIcon, previousIcon, nextIcon }: TrendChartProps): ReactNode {
   const [params] = useDashboardParams();
   const trends = useQuery(dashboardQueries.trends(params.months));
   const profile = useQuery(dashboardQueries.profile());
   const [chosen, setChosen] = useState<Choice | null>(null);
   const [tableOpen, setTableOpen] = useState(false);
+  const [announcement, setAnnouncement] = useState("");
 
   function body(): ReactNode {
     if (trends.isPending || profile.isPending) {
@@ -252,6 +257,13 @@ export function TrendChart({ problem, caretIcon }: TrendChartProps): ReactNode {
     const selected = months.find((trend) => chosen?.months === params.months && trend.month === chosen.month) ?? latest;
     const currency = profile.data.currency;
     const average = selected.transactionCount === 0 ? NOTHING : formatCurrency(selected.averageTransaction, currency);
+    const position = months.indexOf(selected);
+    const previous = months[position - 1];
+    const next = months[position + 1];
+    const step = (target: MonthlyTrend): void => {
+      setChosen({ months: params.months, month: target.month });
+      setAnnouncement(columnName(target, currency));
+    };
 
     return (
       <>
@@ -262,11 +274,34 @@ export function TrendChart({ problem, caretIcon }: TrendChartProps): ReactNode {
           currency={currency}
           onSelect={(month) => setChosen({ months: params.months, month })}
         />
-        <p className="mt-5 flex flex-wrap items-center justify-between gap-x-3 gap-y-1 rounded-icon-button bg-row px-3.5 py-3 text-control">
-          <span className="font-bold">{formatMonth(selected.month)}</span>
-          <span className="text-muted-foreground">
-            {transactionsLabel(selected.transactionCount)} · avg {average}
-          </span>
+        <div className="mt-5 flex items-center gap-1 rounded-icon-button bg-row p-0.5 text-control">
+          <button
+            type="button"
+            aria-label="Previous month"
+            disabled={!previous}
+            onClick={() => previous && step(previous)}
+            className={STEP}
+          >
+            {previousIcon}
+          </button>
+          <p className="flex flex-1 flex-wrap items-center justify-between gap-x-3 gap-y-1 px-1.5 py-2.5">
+            <span className="font-bold">{formatMonth(selected.month)}</span>
+            <span className="text-muted-foreground">
+              {transactionsLabel(selected.transactionCount)} · avg {average}
+            </span>
+          </p>
+          <button
+            type="button"
+            aria-label="Next month"
+            disabled={!next}
+            onClick={() => next && step(next)}
+            className={STEP}
+          >
+            {nextIcon}
+          </button>
+        </div>
+        <p role="status" className="sr-only">
+          {announcement}
         </p>
         {months.length < params.months && (
           <p className="mt-5 text-sm text-muted-foreground">{fewerMonthsNote(months.length, params.months)}</p>
