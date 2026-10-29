@@ -20,3 +20,14 @@
 | Font         | Nunito Sans only, self-hosted via `next/font/local`, weights 400/600/700. Replaces the system font stack (A-20)                                    |
 | Consequences | + One icon set; no runtime font request to a third party. − shadcn components diverge from upstream; font files committed and licence kept in repo |
 | Trace        | I-18, R-07; FR-37–FR-41                                                                                                                            |
+
+## Amendment 2026-10-29 (Muzi)
+
+| Field        | Value                                                                                                                                                                |
+| ------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Status       | **Accepted** · Muzi · 2026-10-29                                                                                                                                     |
+| Change       | shadcn/ui and Radix are not used. Every control is plain HTML (native `select`, `dialog`, buttons and radio groups) styled with Tailwind CSS 4 and the design tokens |
+| Removed      | `radix-ui`, `class-variance-authority` and the shadcn/ui setup (`components.json`, `src/components/ui`)                                                              |
+| Why          | The native elements already give the keyboard and screen-reader behaviour the screens need, and they keep page JavaScript within the 250 kB budget (NFR-P2)          |
+| Consequences | + Fewer dependencies and no copied component code. − Focus, dialog and select styling is the app's own                                                               |
+| Trace        | NFR-P2; FR-28                                                                                                                                                        |
