@@ -107,8 +107,8 @@ export const goalSchema = z.object({
   monthlyBudget: z.number(),
   currentSpent: z.number(),
   percentageUsed: z.number(),
-  daysRemaining: count,
-  status: z.string(),
+  daysRemaining: z.int(),
+  status: z.catch(z.optional(z.string()), undefined),
 });
 
 export const goalsSchema = z.object({ goals: listOf(goalSchema) });
