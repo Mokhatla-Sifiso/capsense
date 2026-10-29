@@ -2,6 +2,7 @@
 
 import { useQuery } from "@tanstack/react-query";
 import { type KeyboardEvent, type ReactNode, useLayoutEffect, useRef, useState } from "react";
+import { SectionError } from "@/components/states/section-error";
 import { transactionsLabel } from "@/lib/category-rows";
 import { formatCurrency, formatMonth, formatShortMonth, formatWholeCurrency } from "@/lib/format";
 import { dashboardQueries } from "@/lib/query/dashboard-queries";
@@ -223,19 +224,7 @@ export function TrendChart({ problem, caretIcon }: TrendChartProps): ReactNode {
         void trends.refetch();
         if (profile.isError) void profile.refetch();
       };
-      return (
-        <div className="mt-card-gap flex items-center gap-3 rounded-panel border border-danger-border p-4 md:p-5">
-          <span className="text-danger-text">{problem}</span>
-          <p className="flex-1 font-semibold text-danger-text">Couldn&apos;t load trends</p>
-          <button
-            type="button"
-            onClick={retry}
-            className="min-h-11 rounded-pill border border-primary px-5 font-semibold text-primary"
-          >
-            Retry
-          </button>
-        </div>
-      );
+      return <SectionError block="trends" icon={problem} onRetry={retry} className="mt-card-gap" />;
     }
     const slots = monthSlots(trends.data.trends);
     const months = slots.flatMap((slot) => (slot.trend ? [slot.trend] : []));

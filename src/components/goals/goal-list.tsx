@@ -2,6 +2,7 @@
 
 import { useQuery } from "@tanstack/react-query";
 import { type ReactNode, useId } from "react";
+import { SectionError } from "@/components/states/section-error";
 import { formatCurrency } from "@/lib/format";
 import {
   type StatusTone,
@@ -162,19 +163,7 @@ export function GoalList({ monthDays, icons }: GoalListProps): ReactNode {
         void goals.refetch();
         if (profile.isError) void profile.refetch();
       };
-      return (
-        <div className="mt-card-gap flex items-center gap-3 rounded-panel border border-danger-border p-4 md:p-5">
-          <span className="text-danger-text">{icons.problem}</span>
-          <p className="flex-1 font-semibold text-danger-text">Couldn&apos;t load goals</p>
-          <button
-            type="button"
-            onClick={retry}
-            className="min-h-11 rounded-pill border border-primary px-5 font-semibold text-primary"
-          >
-            Retry
-          </button>
-        </div>
-      );
+      return <SectionError block="goals" icon={icons.problem} onRetry={retry} className="mt-card-gap" />;
     }
     const list = goals.data.goals;
     if (list.length === 0) return <p className="mt-card-gap text-muted-foreground">No spending goals yet</p>;

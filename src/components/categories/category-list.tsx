@@ -2,6 +2,7 @@
 
 import { useQuery } from "@tanstack/react-query";
 import type { ReactNode } from "react";
+import { SectionError } from "@/components/states/section-error";
 import { categoryAppearance } from "@/lib/category-appearance";
 import { byAmount, rangeCaption, transactionsLabel, wholeShare } from "@/lib/category-rows";
 import { formatCurrency, formatPercent } from "@/lib/format";
@@ -110,17 +111,7 @@ export function CategoryList({ problem }: CategoryListProps): ReactNode {
     return (
       <section aria-labelledby="categories-heading" className={CATEGORY_CARD}>
         <CategoriesHeading />
-        <div className="mt-card-gap flex items-center gap-3 rounded-panel border border-danger-border p-4 md:p-5">
-          <span className="text-danger-text">{problem}</span>
-          <p className="flex-1 font-semibold text-danger-text">Couldn&apos;t load categories</p>
-          <button
-            type="button"
-            onClick={retry}
-            className="min-h-11 rounded-pill border border-primary px-5 font-semibold text-primary"
-          >
-            Retry
-          </button>
-        </div>
+        <SectionError block="categories" icon={problem} onRetry={retry} className="mt-card-gap" />
       </section>
     );
   }

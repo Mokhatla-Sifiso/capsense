@@ -2,6 +2,7 @@
 
 import { useQuery } from "@tanstack/react-query";
 import type { ReactNode } from "react";
+import { SectionError } from "@/components/states/section-error";
 import { categoryAppearance } from "@/lib/category-appearance";
 import { type ChangeStatement, type Direction, changeStatement } from "@/lib/change-statement";
 import { formatCount, formatCurrency } from "@/lib/format";
@@ -157,19 +158,8 @@ export function SummaryCard({ icons, illustration }: SummaryCardProps): ReactNod
       if (profile.isError) void profile.refetch();
     };
     return (
-      <section
-        aria-label="Spending summary"
-        className="flex items-center gap-3 rounded-panel border border-danger-border bg-card p-4 md:p-5"
-      >
-        <span className="text-danger-text">{icons.problem}</span>
-        <p className="flex-1 font-semibold text-danger-text">Couldn&apos;t load summary</p>
-        <button
-          type="button"
-          onClick={retry}
-          className="min-h-11 rounded-pill border border-primary px-5 font-semibold text-primary"
-        >
-          Retry
-        </button>
+      <section aria-label="Spending summary">
+        <SectionError block="summary" icon={icons.problem} onRetry={retry} className="bg-card" />
       </section>
     );
   }
