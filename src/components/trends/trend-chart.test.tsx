@@ -37,7 +37,7 @@ function renderChart(searchParams = "", onUrlUpdate?: OnUrlUpdateFunction) {
   render(
     <QueryClientProvider client={client}>
       <NuqsAdapter>
-        <TrendChart problem={null} caretIcon={null} />
+        <TrendChart problem={null} caretIcon={null} previousIcon={null} nextIcon={null} />
       </NuqsAdapter>
     </QueryClientProvider>,
   );
@@ -364,5 +364,37 @@ describe("refresh failure", () => {
     await userEvent.click(screen.getByRole("button", { name: "Retry" }));
     await waitFor(() => expect(screen.queryByText(/^Couldn't refresh/)).not.toBeInTheDocument());
     expect(calls).toBe(2);
+  });
+});
+
+describe("TrendChart month buttons", () => {
+  const previousMonth = () => screen.getByRole("button", { name: "Previous month" });
+  const nextMonth = () => screen.getByRole("button", { name: "Next month" });
+
+  it("moves to the previous month, says which month it is, and stops at the first", async () => {
+    renderChart();
+    const all = await columns();
+    expect(nextMonth()).toBeDisabled();
+    await userEvent.click(previousMonth());
+    expect(all[4]).toHaveAttribute("aria-pressed", "true");
+    expect(strip()).toBe("May 202444 transactions · avg R 90,46");
+    expect(readable(screen.getByRole("status").textContent)).toBe(
+      "May 2024: R 3 980,30, 44 transactions, average R 90,46",
+    );
+    expect(previousMonth()).toHaveFocus();
+    for (let step = 0; step < 4; step += 1) await userEvent.click(previousMonth());
+    expect(all[0]).toHaveAttribute("aria-pressed", "true");
+    expect(previousMonth()).toBeDisabled();
+    await userEvent.click(nextMonth());
+    expect(all[1]).toHaveAttribute("aria-pressed", "true");
+  });
+
+  it("skips a missing month", async () => {
+    answerTrends([month("2024-01"), month("2024-03")]);
+    renderChart();
+    const both = await columns();
+    await userEvent.click(previousMonth());
+    expect(both[0]).toHaveAttribute("aria-pressed", "true");
+    expect(previousMonth()).toBeDisabled();
   });
 });
