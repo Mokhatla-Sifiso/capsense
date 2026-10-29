@@ -187,3 +187,36 @@ test("on phones the months select and data table button are at least 44 px tall"
     expect((await control.boundingBox())?.height).toBeGreaterThanOrEqual(44);
   }
 });
+
+async function labelsFit(page: Page) {
+  return chart(page).evaluate((group) => {
+    const row = group.parentElement?.nextElementSibling;
+    if (!row) return "no label row";
+    const edges = row.getBoundingClientRect();
+    const labels = [...row.querySelectorAll<HTMLElement>(":scope > span > span")]
+      .filter((label) => getComputedStyle(label).visibility !== "hidden")
+      .map((label) => ({ text: label.textContent, box: label.getBoundingClientRect() }));
+    const outside = labels.filter(({ box }) => box.left < edges.left - 0.5 || box.right > edges.right + 0.5);
+    const touching = labels.flatMap((a, index) =>
+      labels
+        .slice(index + 1)
+        .filter((b) => a.box.right + 2 > b.box.left && b.box.right + 2 > a.box.left)
+        .map((b) => `${a.text}|${b.text}`),
+    );
+    return [...outside.map(({ text }) => `${text} outside`), ...touching].join(", ") || "fits";
+  });
+}
+
+test("on a laptop the selected month's label stays inside the chart and clear of its neighbours", async ({ page }) => {
+  await page.setViewportSize({ width: 1280, height: 900 });
+  await page.route(TRENDS, (route) => route.fulfill({ json: SPEC }));
+  await page.goto("/");
+  await column(page, "January 2024").click();
+  expect(await labelsFit(page)).toBe("fits");
+  await page.unroute(TRENDS);
+  await page.goto("/?months=24");
+  await expect(chart(page).getByRole("button")).toHaveCount(21);
+  expect(await labelsFit(page)).toBe("fits");
+  await column(page, "March 2023").click();
+  expect(await labelsFit(page)).toBe("fits");
+});

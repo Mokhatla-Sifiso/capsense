@@ -6,13 +6,14 @@ import { SectionError } from "@/components/states/section-error";
 import { StillLoading } from "@/components/states/still-loading";
 import { WarningStrip, refreshProblem } from "@/components/states/warning-strip";
 import { transactionsLabel } from "@/lib/category-rows";
-import { formatCurrency, formatMonth, formatShortMonth, formatWholeCurrency } from "@/lib/format";
+import { formatCurrency, formatMonth, formatWholeCurrency } from "@/lib/format";
 import { dashboardQueries } from "@/lib/query/dashboard-queries";
-import { type MonthSlot, labelEvery, monthSlots, niceMax, showsYear } from "@/lib/trend-chart";
+import { type MonthSlot, labelEvery, monthSlots, niceMax } from "@/lib/trend-chart";
 import { useElementWidth } from "@/lib/use-element-width";
 import type { MonthOption } from "@/lib/url-state/dashboard-params";
 import { useDashboardParams } from "@/lib/url-state/use-dashboard-params";
 import type { MonthlyTrend } from "@/schemas/api";
+import { MonthLabels } from "./month-labels";
 import { MonthsChoice } from "./months-choice";
 import { TrendTable } from "./trend-table";
 import { BUBBLE_SPACE, PLOT_HEIGHT, TREND_CARD, TrendBars, TrendsHeading } from "./trend-skeleton";
@@ -194,24 +195,7 @@ function Chart({ slots, selected, currency, onSelect }: ChartProps): ReactNode {
           )}
         </div>
       </div>
-      <div aria-hidden className="mt-2 flex">
-        {slots.map((slot, index) => (
-          <span key={slot.month} className="flex min-w-0 flex-1 justify-center">
-            {index === selectedIndex ? (
-              <span className="rounded-pill bg-bar-selected px-2.5 py-0.5 text-xs font-bold whitespace-nowrap text-bar-selected-fg">
-                {formatShortMonth(slot.month, showsYear(slots, index))}
-              </span>
-            ) : (
-              index % every === 0 &&
-              Math.abs(index - selectedIndex) >= every && (
-                <span className="py-0.5 text-xs font-semibold whitespace-nowrap text-muted-foreground">
-                  {formatShortMonth(slot.month, showsYear(slots, index))}
-                </span>
-              )
-            )}
-          </span>
-        ))}
-      </div>
+      <MonthLabels slots={slots} selectedIndex={selectedIndex} every={every} width={width} />
     </div>
   );
 }
