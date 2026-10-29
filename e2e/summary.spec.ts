@@ -1,5 +1,5 @@
-import AxeBuilder from "@axe-core/playwright";
 import { type Page, expect, test } from "@playwright/test";
+import { expectNoAxeIssues } from "./axe";
 
 const SPEC_SUMMARY = {
   period: "30d",
@@ -103,13 +103,12 @@ test("if the summary fails, only this card shows an error, and Retry brings it b
 });
 
 for (const colorScheme of ["light", "dark"] as const) {
-  test(`the card passes the accessibility scan in ${colorScheme} mode`, async ({ page }) => {
+  test(`the card passes the accessibility scan in ${colorScheme} mode`, async ({ page }, testInfo) => {
     await answerWithSpecSample(page);
     await page.emulateMedia({ colorScheme });
     await page.goto("/");
     await expect(valueOf(page, "Spent")).toBeVisible();
-    const results = await new AxeBuilder({ page }).withTags(["wcag2a", "wcag2aa", "wcag21aa", "wcag22aa"]).analyze();
-    expect(results.violations).toEqual([]);
+    await expectNoAxeIssues(page, testInfo);
   });
 }
 

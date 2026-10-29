@@ -1,5 +1,5 @@
-import AxeBuilder from "@axe-core/playwright";
 import { type Page, expect, test } from "@playwright/test";
+import { expectNoAxeIssues } from "./axe";
 
 const opener = (page: Page) => page.getByRole("button", { name: /^Custom range/ });
 const dialog = (page: Page) => page.getByRole("dialog", { name: "Custom range" });
@@ -92,12 +92,11 @@ test("on a phone the two dates are stacked", async ({ page }) => {
 });
 
 for (const colorScheme of ["light", "dark"] as const) {
-  test(`the window with an error passes the accessibility scan in ${colorScheme} mode`, async ({ page }) => {
+  test(`the window with an error passes the accessibility scan in ${colorScheme} mode`, async ({ page }, testInfo) => {
     await page.emulateMedia({ colorScheme });
     await page.goto("/");
     await chooseDates(page, "2024-09-10", "2024-09-01");
     await expect(dialog(page).getByRole("alert")).toBeVisible();
-    const results = await new AxeBuilder({ page }).withTags(["wcag2a", "wcag2aa", "wcag21aa", "wcag22aa"]).analyze();
-    expect(results.violations).toEqual([]);
+    await expectNoAxeIssues(page, testInfo);
   });
 }

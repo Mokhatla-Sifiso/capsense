@@ -1,5 +1,5 @@
-import AxeBuilder from "@axe-core/playwright";
 import { type Page, expect, test } from "@playwright/test";
+import { expectNoAxeIssues } from "./axe";
 
 const SECTIONS = [
   { region: "Spending summary", block: "summary", empty: "No spending in this period" },
@@ -140,7 +140,9 @@ test("a section that fails to refresh keeps its data, says so, and Retry brings 
 });
 
 for (const colorScheme of ["light", "dark"] as const) {
-  test(`an error panel and a refresh strip pass the accessibility scan in ${colorScheme} mode`, async ({ page }) => {
+  test(`an error panel and a refresh strip pass the accessibility scan in ${colorScheme} mode`, async ({
+    page,
+  }, testInfo) => {
     await page.emulateMedia({ colorScheme });
     await page.route("**/spending/categories?*", (route) => route.fulfill({ status: 500, json: {} }));
     await page.goto("/");
@@ -149,7 +151,6 @@ for (const colorScheme of ["light", "dark"] as const) {
     await page.route("**/api/customers/*/goals", (route) => route.fulfill({ status: 500, json: {} }));
     await page.getByRole("button", { name: "Refresh data" }).click();
     await expect(region(page, "Spending goals")).toContainText("Couldn't refresh goals");
-    const results = await new AxeBuilder({ page }).withTags(["wcag2a", "wcag2aa", "wcag21aa", "wcag22aa"]).analyze();
-    expect(results.violations).toEqual([]);
+    await expectNoAxeIssues(page, testInfo);
   });
 }
