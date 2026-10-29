@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import { MAIN_ID, SkipLink } from "./skip-link";
 
 interface DashboardLayoutProps {
   rail: ReactNode;
@@ -25,6 +26,7 @@ export function DashboardLayout({
 }: DashboardLayoutProps): ReactNode {
   return (
     <div className="min-h-screen bg-window lg:bg-frame">
+      <SkipLink />
       <div className="mx-auto grid min-h-screen w-full max-w-content lg:grid-cols-[var(--spacing-rail)_minmax(0,1fr)] lg:grid-rows-[auto_1fr]">
         <div className="hidden lg:row-span-2 lg:block">{rail}</div>
 
@@ -33,8 +35,9 @@ export function DashboardLayout({
         </header>
 
         <main
-          id="main"
-          className="min-w-0 px-gutter pt-5 pb-[calc(var(--spacing-gutter)+1rem)] md:pt-gutter lg:mr-4 lg:mb-4 lg:rounded-window lg:bg-window"
+          id={MAIN_ID}
+          tabIndex={-1}
+          className="min-w-0 px-gutter pt-5 pb-[calc(var(--spacing-gutter)+1rem)] outline-none md:pt-gutter lg:mr-4 lg:mb-4 lg:rounded-window lg:bg-window"
         >
           {heading}
           <div className="mt-grid grid gap-grid lg:grid-cols-[minmax(0,1.55fr)_minmax(0,1fr)] xl:grid-cols-[minmax(0,1.7fr)_minmax(0,1fr)]">
