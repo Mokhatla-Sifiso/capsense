@@ -119,6 +119,7 @@ export class SpendingRepository {
   }
 
   trends(months: number): Trends {
+    if (this.data.ledger.length === 0) return { trends: [] };
     const all = monthsBetween(this.data.customer.joinDate, this.data.today).map((month) => {
       const { cents, count } = this.totals(this.data.ledger.filter((entry) => entry.day.startsWith(month)));
       return {

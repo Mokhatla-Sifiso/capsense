@@ -66,7 +66,7 @@ export const categoriesSchema = z
   );
 
 export const monthlyTrendSchema = z.object({
-  month: z.string().check(z.regex(/^\d{4}-\d{2}$/)),
+  month: z.string().check(z.regex(/^\d{4}-(0[1-9]|1[0-2])$/)),
   totalSpent: z.number(),
   transactionCount: count,
   averageTransaction: z.number(),
