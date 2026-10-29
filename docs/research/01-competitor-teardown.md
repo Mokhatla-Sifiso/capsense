@@ -4,7 +4,6 @@
 **Client:** Capitec Bank. Take-home project for the Software Engineer: Front-End role, framed as an independent consultant engagement.
 **Submission requirements:** GitHub link · production-grade · runnable Dockerfile · README covering build, run and test.
 **Date:** 2026-10-20
-**Status:** Research complete. Not yet reviewed.
 
 ---
 

@@ -18,7 +18,6 @@
 | ------------- | ------------------------------------------------------------------------------------------------------------------------------ |
 | Tool          | Azure DevOps (Scrum process)                                                                                                   |
 | Org / project | `mokhatlamzwakhe` / `Capitec - CapSense`                                                                                       |
-| Owner         | `scrum-master`                                                                                                                 |
 | Rule          | Repo docs hold content; ADO tracks work and links to doc paths                                                                 |
 | Figma         | Design file `jvmhOq4HEYaZQvdTHhpdm4`: https://www.figma.com/design/jvmhOq4HEYaZQvdTHhpdm4/Untitled (Designer writes here only) |
 
@@ -56,7 +55,7 @@ G goal · SM success measure · BR business requirement · RULE business rule ·
 
 ## Standards (all roles)
 
-1. One page per document at most: 1 rendered A4 page (≈ 60 table rows) for decision documents. Reference tables (field map, FRs, test cases, traceability matrix, design tokens, screen spec) are exempt but must be tables only. Tables, not prose. No narrative. (Approved by Muzi 2026-10-21.)
+1. One page per document at most: 1 rendered A4 page (≈ 60 table rows) for decision documents. Reference tables (field map, FRs, test cases, traceability matrix, design tokens, screen spec) are exempt but must be tables only. Tables, not prose. No narrative.
 2. Everything traces: G → BR → FR → TC.
 3. No guessing. Unknowns become A-xx in the RAID log until Muzi confirms them.
 4. Evidence is tagged Verified, Reported or Inference.
