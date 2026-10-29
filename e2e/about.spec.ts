@@ -1,5 +1,5 @@
-import AxeBuilder from "@axe-core/playwright";
 import { type Page, expect, test } from "@playwright/test";
+import { expectNoAxeIssues } from "./axe";
 
 const aboutDialog = (page: Page) => page.getByRole("dialog", { name: "About this demo" });
 
@@ -55,12 +55,11 @@ test("on a 320 px phone the window fits, and its content scrolls inside it", asy
 });
 
 for (const colorScheme of ["light", "dark"] as const) {
-  test(`the open window passes the accessibility scan in ${colorScheme} mode`, async ({ page }) => {
+  test(`the open window passes the accessibility scan in ${colorScheme} mode`, async ({ page }, testInfo) => {
     await page.emulateMedia({ colorScheme });
     await page.goto("/");
     await page.getByRole("button", { name: "Help" }).click();
     await expect(aboutDialog(page)).toBeVisible();
-    const results = await new AxeBuilder({ page }).withTags(["wcag2a", "wcag2aa", "wcag21aa", "wcag22aa"]).analyze();
-    expect(results.violations).toEqual([]);
+    await expectNoAxeIssues(page, testInfo);
   });
 }

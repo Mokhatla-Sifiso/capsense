@@ -1,5 +1,5 @@
-import AxeBuilder from "@axe-core/playwright";
 import { type Page, expect, test } from "@playwright/test";
+import { expectNoAxeIssues } from "./axe";
 
 const GOALS = "**/api/customers/*/goals";
 const ENTERTAINMENT = {
@@ -113,7 +113,7 @@ test("on a tablet the two goals sit side by side, and on a laptop they are stack
 });
 
 for (const colorScheme of ["light", "dark"] as const) {
-  test(`the goals pass the accessibility scan in ${colorScheme} mode`, async ({ page }) => {
+  test(`the goals pass the accessibility scan in ${colorScheme} mode`, async ({ page }, testInfo) => {
     await page.emulateMedia({ colorScheme });
     await answer(page, [
       ENTERTAINMENT,
@@ -122,7 +122,6 @@ for (const colorScheme of ["light", "dark"] as const) {
     ]);
     await page.goto("/");
     await expect(section(page).getByRole("article")).toHaveCount(3);
-    const results = await new AxeBuilder({ page }).withTags(["wcag2a", "wcag2aa", "wcag21aa", "wcag22aa"]).analyze();
-    expect(results.violations).toEqual([]);
+    await expectNoAxeIssues(page, testInfo);
   });
 }

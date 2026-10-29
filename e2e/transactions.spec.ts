@@ -1,5 +1,5 @@
-import AxeBuilder from "@axe-core/playwright";
 import { type Page, expect, test } from "@playwright/test";
+import { expectNoAxeIssues } from "./axe";
 
 const TRANSACTIONS = "**/api/customers/*/transactions?*";
 const SAMPLE = {
@@ -151,11 +151,10 @@ test("if the transactions fail, only this section shows an error, and Retry brin
 });
 
 for (const colorScheme of ["light", "dark"] as const) {
-  test(`the transactions pass the accessibility scan in ${colorScheme} mode`, async ({ page }) => {
+  test(`the transactions pass the accessibility scan in ${colorScheme} mode`, async ({ page }, testInfo) => {
     await page.emulateMedia({ colorScheme });
     await page.goto("/");
     await expect(visibleRows(page).first()).toBeVisible();
-    const results = await new AxeBuilder({ page }).withTags(["wcag2a", "wcag2aa", "wcag21aa", "wcag22aa"]).analyze();
-    expect(results.violations).toEqual([]);
+    await expectNoAxeIssues(page, testInfo);
   });
 }

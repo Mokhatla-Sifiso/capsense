@@ -1,5 +1,5 @@
-import AxeBuilder from "@axe-core/playwright";
 import { type Page, expect, test } from "@playwright/test";
+import { expectNoAxeIssues } from "./axe";
 
 const CATEGORIES = "**/api/customers/*/spending/categories?*";
 const section = (page: Page) => page.getByRole("region", { name: "Spending by category" });
@@ -55,12 +55,11 @@ test("if the categories fail, only this card shows an error, and Retry brings th
 });
 
 for (const colorScheme of ["light", "dark"] as const) {
-  test(`the list passes the accessibility scan in ${colorScheme} mode`, async ({ page }) => {
+  test(`the list passes the accessibility scan in ${colorScheme} mode`, async ({ page }, testInfo) => {
     await page.emulateMedia({ colorScheme });
     await page.goto("/");
     await expect(section(page).getByRole("listitem").first()).toBeVisible();
-    const results = await new AxeBuilder({ page }).withTags(["wcag2a", "wcag2aa", "wcag21aa", "wcag22aa"]).analyze();
-    expect(results.violations).toEqual([]);
+    await expectNoAxeIssues(page, testInfo);
   });
 }
 
@@ -116,9 +115,8 @@ test("with the keyboard, Enter and Space toggle a row", async ({ page }) => {
   await expect.poll(() => address(page).get("category")).toBe("Shopping");
 });
 
-test("a selected row passes the accessibility scan", async ({ page }) => {
+test("a selected row passes the accessibility scan", async ({ page }, testInfo) => {
   await page.goto("/?category=Groceries");
   await expect(row(page, "Groceries")).toHaveAttribute("aria-pressed", "true");
-  const results = await new AxeBuilder({ page }).withTags(["wcag2a", "wcag2aa", "wcag21aa", "wcag22aa"]).analyze();
-  expect(results.violations).toEqual([]);
+  await expectNoAxeIssues(page, testInfo);
 });

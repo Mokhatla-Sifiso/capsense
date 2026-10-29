@@ -80,7 +80,7 @@ jobs:
           exit 1
       - run: pnpm test:e2e
       - uses: actions/upload-artifact@v7
-        if: failure()
+        if: always()
         with:
           name: playwright-report
           path: playwright-report

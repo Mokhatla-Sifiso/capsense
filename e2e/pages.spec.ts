@@ -1,5 +1,5 @@
-import AxeBuilder from "@axe-core/playwright";
 import { type Page, expect, test } from "@playwright/test";
+import { expectNoAxeIssues } from "./axe";
 
 const TRANSACTIONS = "**/api/customers/*/transactions?*";
 const section = (page: Page) => page.getByRole("region", { name: "Transactions" });
@@ -94,14 +94,15 @@ test("on a phone Previous and Next sit side by side across the full width", asyn
 });
 
 for (const colorScheme of ["light", "dark"] as const) {
-  test(`the pages pass the accessibility scan in ${colorScheme} mode, with a failed page showing`, async ({ page }) => {
+  test(`the pages pass the accessibility scan in ${colorScheme} mode, with a failed page showing`, async ({
+    page,
+  }, testInfo) => {
     await page.emulateMedia({ colorScheme });
     await serveBigList(page, 20);
     await page.goto("/");
     await expect.poll(() => merchants(page)).toHaveLength(20);
     await pages(page).getByRole("button", { name: "Next" }).click();
     await expect(section(page).getByText("Couldn't load page 2. Still showing page 1.")).toBeVisible();
-    const results = await new AxeBuilder({ page }).withTags(["wcag2a", "wcag2aa", "wcag21aa", "wcag22aa"]).analyze();
-    expect(results.violations).toEqual([]);
+    await expectNoAxeIssues(page, testInfo);
   });
 }
