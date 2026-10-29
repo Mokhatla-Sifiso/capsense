@@ -267,3 +267,80 @@ describe("TrendChart months", () => {
     expect(asked).toEqual(["12"]);
   });
 });
+
+describe("TrendChart data table", () => {
+  const toggle = () => screen.getByRole("button", { name: /data table$/ });
+  const table = () => screen.getByRole("table", { hidden: true });
+  const rows = () =>
+    within(table())
+      .getAllByRole("row", { hidden: true })
+      .map((row) => readable(row.textContent));
+
+  it("keeps the table collapsed until Show data table is chosen", async () => {
+    renderChart();
+    await chart();
+    expect(toggle()).toHaveTextContent("Show data table");
+    expect(toggle()).toHaveAttribute("aria-expanded", "false");
+    expect(table()).not.toBeVisible();
+    await userEvent.click(toggle());
+    expect(toggle()).toHaveTextContent("Hide data table");
+    expect(toggle()).toHaveAttribute("aria-expanded", "true");
+    expect(toggle()).toHaveAttribute("aria-controls", table().id);
+    expect(table()).toBeVisible();
+  });
+
+  it("lists every month with what was spent, the count and the average", async () => {
+    renderChart();
+    await chart();
+    await userEvent.click(toggle());
+    expect(screen.getByRole("table", { name: "Monthly spending" })).toBeInTheDocument();
+    expect(rows()).toEqual([
+      "MonthSpentCountAverage",
+      "January 2024R 3 890,2542R 92,62",
+      "February 2024R 4 150,8038R 109,23",
+      "March 2024R 3 750,6045R 83,35",
+      "April 2024R 4 200,4539R 107,70",
+      "May 2024R 3 980,3044R 90,46",
+      "June 2024R 4 250,7547R 90,44",
+    ]);
+    expect(screen.getByRole("rowheader", { name: "June 2024" })).toBeInTheDocument();
+  });
+
+  it("shows a dash for the average of a month without transactions, and leaves out gaps", async () => {
+    answerTrends([month("2024-03", 0, 0), month("2024-05", 100, 1)]);
+    renderChart();
+    await chart();
+    await userEvent.click(toggle());
+    expect(rows().slice(1)).toEqual(["March 2024R 0,000—", "May 2024R 100,001R 100,00"]);
+  });
+
+  it("stays open with the new months after the months change", async () => {
+    server.use(
+      http.get(TRENDS_PATH, ({ request }) =>
+        HttpResponse.json(
+          new URL(request.url).searchParams.get("months") === "3"
+            ? { trends: specTrends.trends.slice(-3) }
+            : specTrends,
+        ),
+      ),
+    );
+    renderChart();
+    await chart();
+    await userEvent.click(toggle());
+    await userEvent.selectOptions(screen.getByRole("combobox", { name: "Months" }), "3");
+    expect(await columns()).toHaveLength(3);
+    expect(toggle()).toHaveAttribute("aria-expanded", "true");
+    expect(
+      rows()
+        .slice(1)
+        .map((row) => row.split("R")[0]),
+    ).toEqual(["April 2024", "May 2024", "June 2024"]);
+  });
+
+  it("has no table when there are no months", async () => {
+    answerTrends([]);
+    renderChart();
+    expect(await screen.findByText("No monthly spending to show")).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: /data table$/ })).not.toBeInTheDocument();
+  });
+});

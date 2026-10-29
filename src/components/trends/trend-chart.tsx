@@ -11,6 +11,7 @@ import type { MonthOption } from "@/lib/url-state/dashboard-params";
 import { useDashboardParams } from "@/lib/url-state/use-dashboard-params";
 import type { MonthlyTrend } from "@/schemas/api";
 import { MonthsChoice } from "./months-choice";
+import { TrendTable } from "./trend-table";
 import { BUBBLE_SPACE, PLOT_HEIGHT, TREND_CARD, TrendBars, TrendsHeading } from "./trend-skeleton";
 
 interface TrendChartProps {
@@ -213,6 +214,7 @@ export function TrendChart({ problem, caretIcon }: TrendChartProps): ReactNode {
   const trends = useQuery(dashboardQueries.trends(params.months));
   const profile = useQuery(dashboardQueries.profile());
   const [chosen, setChosen] = useState<Choice | null>(null);
+  const [tableOpen, setTableOpen] = useState(false);
 
   function body(): ReactNode {
     if (trends.isPending || profile.isPending) return <TrendBars />;
@@ -260,6 +262,12 @@ export function TrendChart({ problem, caretIcon }: TrendChartProps): ReactNode {
         {months.length < params.months && (
           <p className="mt-5 text-sm text-muted-foreground">{fewerMonthsNote(months.length, params.months)}</p>
         )}
+        <TrendTable
+          trends={months}
+          currency={currency}
+          open={tableOpen}
+          onToggle={() => setTableOpen((open) => !open)}
+        />
       </>
     );
   }
