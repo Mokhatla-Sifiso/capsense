@@ -15,6 +15,7 @@ export default function Home() {
   return (
     <>
       <ReloadAtTop />
+      <button type="button" className="fixed right-2 bottom-2 size-11 rounded-pill bg-primary" />
       <DashboardLayout
         rail={<Rail learnMore={<AboutDialog opener="learn-more" />} />}
         topBar={<TopBar />}
