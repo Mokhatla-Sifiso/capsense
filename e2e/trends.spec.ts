@@ -1,5 +1,5 @@
-import AxeBuilder from "@axe-core/playwright";
 import { type Page, expect, test } from "@playwright/test";
+import { expectNoAxeIssues } from "./axe";
 
 const TRENDS = "**/api/customers/*/spending/trends?*";
 const SPEC = {
@@ -109,12 +109,11 @@ test("if the trends fail, only this card shows an error, and Retry brings them b
 });
 
 for (const colorScheme of ["light", "dark"] as const) {
-  test(`the chart passes the accessibility scan in ${colorScheme} mode`, async ({ page }) => {
+  test(`the chart passes the accessibility scan in ${colorScheme} mode`, async ({ page }, testInfo) => {
     await page.emulateMedia({ colorScheme });
     await page.goto("/");
     await expect(chart(page)).toBeVisible();
-    const results = await new AxeBuilder({ page }).withTags(["wcag2a", "wcag2aa", "wcag21aa", "wcag22aa"]).analyze();
-    expect(results.violations).toEqual([]);
+    await expectNoAxeIssues(page, testInfo);
   });
 }
 
@@ -171,13 +170,12 @@ test("Show data table shows every month with what was spent, the count and the a
 });
 
 for (const colorScheme of ["light", "dark"] as const) {
-  test(`the open data table passes the accessibility scan in ${colorScheme} mode`, async ({ page }) => {
+  test(`the open data table passes the accessibility scan in ${colorScheme} mode`, async ({ page }, testInfo) => {
     await page.emulateMedia({ colorScheme });
     await page.goto("/?months=24");
     await section(page).getByRole("button", { name: "Show data table" }).click();
     await expect(section(page).getByRole("table")).toBeVisible();
-    const results = await new AxeBuilder({ page }).withTags(["wcag2a", "wcag2aa", "wcag21aa", "wcag22aa"]).analyze();
-    expect(results.violations).toEqual([]);
+    await expectNoAxeIssues(page, testInfo);
   });
 }
 

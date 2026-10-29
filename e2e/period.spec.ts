@@ -1,5 +1,5 @@
-import AxeBuilder from "@axe-core/playwright";
 import { type Page, expect, test } from "@playwright/test";
+import { expectNoAxeIssues } from "./axe";
 
 const periodRadios = (page: Page) => page.getByRole("radiogroup", { name: "Period" });
 
@@ -73,12 +73,11 @@ test("when the filters endpoint fails, the spec's four periods show without an e
 for (const colorScheme of ["light", "dark"] as const) {
   test(`the period control passes the accessibility scan in ${colorScheme} mode, with custom dates on`, async ({
     page,
-  }) => {
+  }, testInfo) => {
     await page.emulateMedia({ colorScheme });
     await page.setViewportSize({ width: 1280, height: 800 });
     await page.goto("/?startDate=2024-09-01&endDate=2024-09-16");
     await expect(page.getByRole("button", { name: /^Custom range: / })).toBeVisible();
-    const results = await new AxeBuilder({ page }).withTags(["wcag2a", "wcag2aa", "wcag21aa", "wcag22aa"]).analyze();
-    expect(results.violations).toEqual([]);
+    await expectNoAxeIssues(page, testInfo);
   });
 }

@@ -1,5 +1,5 @@
-import AxeBuilder from "@axe-core/playwright";
 import { type Page, expect, test } from "@playwright/test";
+import { expectNoAxeIssues } from "./axe";
 
 const section = (page: Page) => page.getByRole("region", { name: "Transactions" });
 const filters = (page: Page) => section(page).getByRole("group", { name: "Transaction filters" });
@@ -109,11 +109,12 @@ test("on a phone the choices are stacked full width", async ({ page }) => {
 });
 
 for (const colorScheme of ["light", "dark"] as const) {
-  test(`the filters pass the accessibility scan in ${colorScheme} mode, with filters set`, async ({ page }) => {
+  test(`the filters pass the accessibility scan in ${colorScheme} mode, with filters set`, async ({
+    page,
+  }, testInfo) => {
     await page.emulateMedia({ colorScheme });
     await page.goto("/?category=Groceries&startDate=2024-09-01&endDate=2024-09-10");
     await expect(section(page).locator("tbody tr").first()).toBeVisible();
-    const results = await new AxeBuilder({ page }).withTags(["wcag2a", "wcag2aa", "wcag21aa", "wcag22aa"]).analyze();
-    expect(results.violations).toEqual([]);
+    await expectNoAxeIssues(page, testInfo);
   });
 }
