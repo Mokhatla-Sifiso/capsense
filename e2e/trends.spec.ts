@@ -23,7 +23,7 @@ test("with 6 months there are 6 columns, January to June, and June is selected w
   await expect(chart(page).getByRole("button")).toHaveCount(6);
   await expect(column(page, "June 2024")).toHaveAttribute("aria-pressed", "true");
   await expect(section(page).locator("svg text", { hasText: /^R\s4\s250,75$/ })).toBeVisible();
-  await expect(section(page).getByText("June 2024", { exact: true }).last()).toBeVisible();
+  await expect(section(page).locator("p > span", { hasText: /^June 2024$/ })).toBeVisible();
 });
 
 test("selecting March shows March 2024 · R 3 750,60 · 45 transactions · avg R 83,35", async ({ page }) => {
