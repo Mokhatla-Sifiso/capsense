@@ -3,6 +3,8 @@
 import { useQuery } from "@tanstack/react-query";
 import { type KeyboardEvent, type ReactNode, useLayoutEffect, useRef, useState } from "react";
 import { SectionError } from "@/components/states/section-error";
+import { StillLoading } from "@/components/states/still-loading";
+import { WarningStrip, refreshProblem } from "@/components/states/warning-strip";
 import { transactionsLabel } from "@/lib/category-rows";
 import { formatCurrency, formatMonth, formatShortMonth, formatWholeCurrency } from "@/lib/format";
 import { dashboardQueries } from "@/lib/query/dashboard-queries";
@@ -218,7 +220,14 @@ export function TrendChart({ problem, caretIcon }: TrendChartProps): ReactNode {
   const [tableOpen, setTableOpen] = useState(false);
 
   function body(): ReactNode {
-    if (trends.isPending || profile.isPending) return <TrendBars />;
+    if (trends.isPending || profile.isPending) {
+      return (
+        <>
+          <TrendBars />
+          <StillLoading pending />
+        </>
+      );
+    }
     if (!trends.data || !profile.data) {
       const retry = (): void => {
         void trends.refetch();
@@ -226,16 +235,27 @@ export function TrendChart({ problem, caretIcon }: TrendChartProps): ReactNode {
       };
       return <SectionError block="trends" icon={problem} onRetry={retry} className="mt-card-gap" />;
     }
+    const refreshFailed = trends.isRefetchError && (
+      <WarningStrip icon={problem} message={refreshProblem("trends")} onRetry={() => void trends.refetch()} />
+    );
     const slots = monthSlots(trends.data.trends);
     const months = slots.flatMap((slot) => (slot.trend ? [slot.trend] : []));
     const latest = months.at(-1);
-    if (!latest) return <p className="mt-card-gap text-muted-foreground">No monthly spending to show</p>;
+    if (!latest) {
+      return (
+        <>
+          {refreshFailed}
+          <p className="mt-card-gap text-muted-foreground">No monthly spending to show</p>
+        </>
+      );
+    }
     const selected = months.find((trend) => chosen?.months === params.months && trend.month === chosen.month) ?? latest;
     const currency = profile.data.currency;
     const average = selected.transactionCount === 0 ? NOTHING : formatCurrency(selected.averageTransaction, currency);
 
     return (
       <>
+        {refreshFailed}
         <Chart
           slots={slots}
           selected={selected.month}

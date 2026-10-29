@@ -1,5 +1,5 @@
 import { QueryClientProvider } from "@tanstack/react-query";
-import { render, screen, within } from "@testing-library/react";
+import { act, render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { HttpResponse, http } from "msw";
 import { withNuqsTestingAdapter } from "nuqs/adapters/testing";
@@ -17,9 +17,10 @@ function answerTransactions(rows: object[]) {
 }
 
 function renderList(searchParams = "") {
+  const client = makeQueryClient();
   const NuqsAdapter = withNuqsTestingAdapter({ searchParams, hasMemory: true });
   render(
-    <QueryClientProvider client={makeQueryClient()}>
+    <QueryClientProvider client={client}>
       <NuqsAdapter>
         <TransactionList
           problem={null}
@@ -32,6 +33,7 @@ function renderList(searchParams = "") {
       </NuqsAdapter>
     </QueryClientProvider>,
   );
+  return client;
 }
 
 const readable = (text: string | null) => (text ?? "").replace(/ /g, " ").replace(/\s+/g, " ").trim();
@@ -256,5 +258,25 @@ describe("TransactionList", () => {
     renderList();
     await table();
     expect(asked).toEqual(["?limit=20&offset=0&sortBy=date_desc"]);
+  });
+});
+
+describe("refresh failure", () => {
+  it("keeps the earlier transactions when a refresh fails, and Retry asks for them again", async () => {
+    const client = renderList();
+    await screen.findAllByText("Pick n Pay");
+    let calls = 0;
+    server.use(
+      http.get(TRANSACTIONS_PATH, () => {
+        calls += 1;
+        return calls === 1 ? HttpResponse.json({}, { status: 500 }) : HttpResponse.json(specTransactions);
+      }),
+    );
+    await act(() => client.refetchQueries());
+    expect(await screen.findByText("Couldn't refresh transactions. Showing earlier data.")).toBeInTheDocument();
+    expect(screen.getAllByText("Pick n Pay")[0]).toBeInTheDocument();
+    await userEvent.click(screen.getByRole("button", { name: "Retry" }));
+    await waitFor(() => expect(screen.queryByText(/^Couldn't refresh/)).not.toBeInTheDocument());
+    expect(calls).toBe(2);
   });
 });
