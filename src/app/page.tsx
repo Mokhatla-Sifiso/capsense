@@ -1,5 +1,6 @@
 import { AboutDialog } from "@/components/about/about-dialog";
 import { SpendingByCategory } from "@/components/categories/categories";
+import { SpendingGoals } from "@/components/goals/goals";
 import { DashboardLayout } from "@/components/layout/dashboard-layout";
 import { ReloadAtTop } from "@/components/layout/reload-at-top";
 import { PeriodControl } from "@/components/period/period-control";
@@ -9,29 +10,6 @@ import { MonthlyTrends } from "@/components/trends/trends";
 import { Rail } from "@/components/layout/rail";
 import { TopBar } from "@/components/top-bar/top-bar";
 import { TransactionsSection } from "@/components/transactions/transactions";
-import { cn } from "@/lib/utils";
-
-interface PlaceholderProps {
-  title: string;
-  headingId?: string;
-  className: string;
-}
-
-function Placeholder({ title, headingId, className }: PlaceholderProps) {
-  return (
-    <section
-      aria-label={headingId ? undefined : title}
-      aria-labelledby={headingId}
-      className={cn("bg-card p-card shadow-card", className)}
-    >
-      {headingId && (
-        <h2 id={headingId} tabIndex={-1} className="text-h2 font-bold">
-          {title}
-        </h2>
-      )}
-    </section>
-  );
-}
 
 export default function Home() {
   return (
@@ -49,7 +27,7 @@ export default function Home() {
         summary={<SpendingSummary />}
         categories={<SpendingByCategory />}
         trends={<MonthlyTrends />}
-        goals={<Placeholder title="Spending goals" headingId="goals-heading" className="h-94.5 rounded-card" />}
+        goals={<SpendingGoals />}
         transactions={<TransactionsSection />}
         themeRow={<ThemeRow />}
       />
