@@ -144,7 +144,7 @@ There must be no high or critical security advisories.
 | Product      | [Problem definition](docs/product/problem-definition.md) · [Backlog](docs/product/backlog.md)                                                                                                                                                          |
 | Requirements | [Business](docs/requirements/business-requirements.md) · [Functional](docs/requirements/functional-requirements.md) · [API to screen field map](docs/requirements/api-ui-field-map.md) · [Data quality](docs/requirements/data-quality.md)             |
 | Design       | [Screen spec](docs/design/screen-spec.md) · [Design tokens](docs/design/tokens.md) · [Figma handoff](docs/design/figma-handoff.md) · [Capitec design language](docs/design/capitec-design-language.md) · [Brand sources](docs/design/brand-sources.md) |
-| Quality      | [Test strategy](docs/quality/test-strategy.md) · [Test cases](docs/quality/test-cases.md) · [Gate checks](docs/quality/gate-checks)                                                                                                                    |
+| Quality      | [Test strategy](docs/quality/test-strategy.md) · [Test cases](docs/quality/test-cases.md)                                                                                                                                                              |
 | Delivery     | [Charter](docs/delivery/charter.md) · [Sprint plan](docs/delivery/sprint-plan.md) · [Ways of working](docs/delivery/ways-of-working.md) · [RAID log](docs/delivery/raid-log.md)                                                                        |
 
 Work is tracked in Azure DevOps (project "Capitec - CapSense"), and every pull request names its work item with
