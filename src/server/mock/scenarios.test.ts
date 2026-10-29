@@ -23,6 +23,7 @@ describe("empty data", () => {
     expect(empty.summary("30d").totalSpent).toBe(0);
     expect(empty.categories(empty.windowFor("30d")).categories).toEqual([]);
     expect(empty.goals().goals).toEqual([]);
+    expect(empty.trends(12).trends).toEqual([]);
     expect(
       empty.transactions({ limit: 20, offset: 0, sortBy: "date_desc", category: null, startDate: null, endDate: null }),
     ).toEqual({ transactions: [], pagination: { total: 0, limit: 20, offset: 0, hasMore: false } });

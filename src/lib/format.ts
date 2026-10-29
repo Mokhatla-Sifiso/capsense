@@ -62,3 +62,22 @@ export function formatLongDay(isoDay: string): string {
   const weekday = WEEKDAYS[new Date(`${isoDay}T00:00:00Z`).getUTCDay()];
   return `${weekday}, ${day} ${month} ${year}`;
 }
+
+export function formatWholeCurrency(amount: number, currency: string): string {
+  const format = new Intl.NumberFormat(LOCALE, {
+    style: "currency",
+    currency,
+    currencyDisplay: currency === HOME_CURRENCY ? "symbol" : "code",
+    maximumFractionDigits: 0,
+  });
+  return keepOnOneLine(format.format(amount));
+}
+
+export function formatMonth(isoMonth: string): string {
+  return `${MONTHS[Number(isoMonth.slice(5, 7)) - 1]} ${isoMonth.slice(0, 4)}`;
+}
+
+export function formatShortMonth(isoMonth: string, withYear: boolean): string {
+  const month = SHORT_MONTHS[Number(isoMonth.slice(5, 7)) - 1];
+  return withYear ? `${month} ${isoMonth.slice(2, 4)}` : `${month}`;
+}

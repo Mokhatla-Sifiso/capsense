@@ -1,4 +1,13 @@
-import { formatCount, formatCurrency, formatDay, formatLongDay, formatPercent } from "./format";
+import {
+  formatCount,
+  formatCurrency,
+  formatDay,
+  formatLongDay,
+  formatMonth,
+  formatPercent,
+  formatShortMonth,
+  formatWholeCurrency,
+} from "./format";
 
 const NBSP = " ";
 const readable = (text: string) => text.replaceAll(NBSP, "·");
@@ -60,5 +69,21 @@ describe("formatLongDay", () => {
     ["2023-01-05", "Thursday, 5 January 2023"],
   ])("shows %s as %s", (isoDay, expected) => {
     expect(formatLongDay(isoDay)).toBe(expected);
+  });
+});
+
+describe("month and axis formats", () => {
+  it("writes a month in full", () => {
+    expect(formatMonth("2024-06")).toBe("June 2024");
+  });
+
+  it("writes a short month, with the year when asked", () => {
+    expect(formatShortMonth("2024-01", false)).toBe("Jan");
+    expect(formatShortMonth("2023-10", true)).toBe("Oct 23");
+  });
+
+  it("writes whole rands for the guide lines", () => {
+    expect(readable(formatWholeCurrency(5000, "ZAR"))).toBe("R·5·000");
+    expect(readable(formatWholeCurrency(0, "ZAR"))).toBe("R·0");
   });
 });
