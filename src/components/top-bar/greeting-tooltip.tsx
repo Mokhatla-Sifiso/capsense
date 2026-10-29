@@ -27,7 +27,7 @@ export function GreetingTooltip({ greeting, description }: GreetingTooltipProps)
         aria-describedby={tooltipId}
         onFocus={() => setOpen(true)}
         onBlur={() => setOpen(false)}
-        className="rounded-6"
+        className="rounded-6 py-1.5 lg:py-0"
       >
         {greeting}
       </span>
