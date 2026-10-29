@@ -2,6 +2,8 @@
 
 import { useQuery } from "@tanstack/react-query";
 import { type ReactNode, useEffect, useRef, useState } from "react";
+import { SectionError } from "@/components/states/section-error";
+import { WarningStrip } from "@/components/states/warning-strip";
 import { categoryAppearance } from "@/lib/category-appearance";
 import { formatCurrency } from "@/lib/format";
 import { dashboardQueries } from "@/lib/query/dashboard-queries";
@@ -193,19 +195,7 @@ export function TransactionList({
   function body(): ReactNode {
     if (loading) return <SkeletonRows />;
     if (!view || !profile.data) {
-      return (
-        <div className="mt-card-gap flex items-center gap-3 rounded-panel border border-danger-border p-4 md:p-5">
-          <span className="text-danger-text">{problem}</span>
-          <p className="flex-1 font-semibold text-danger-text">Couldn&apos;t load transactions</p>
-          <button
-            type="button"
-            onClick={retry}
-            className="min-h-11 rounded-pill border border-primary px-5 font-semibold text-primary"
-          >
-            Retry
-          </button>
-        </div>
-      );
+      return <SectionError block="transactions" icon={problem} onRetry={retry} className="mt-card-gap" />;
     }
     const rows = uniqueById(view.transactions);
     const pagination = view.pagination;
@@ -243,20 +233,11 @@ export function TransactionList({
           </p>
         )}
         {pageFailed && (
-          <div
-            role="status"
-            className="mt-card-gap flex items-center gap-3 rounded-panel bg-warning-surface px-4 py-3 text-warning-text"
-          >
-            {problem}
-            <p className="flex-1 font-semibold">{`Couldn't load page ${params.page}. Still showing page ${shown.page}.`}</p>
-            <button
-              type="button"
-              onClick={retry}
-              className="min-h-11 font-semibold text-primary underline underline-offset-2"
-            >
-              Retry
-            </button>
-          </div>
+          <WarningStrip
+            icon={problem}
+            message={`Couldn't load page ${params.page}. Still showing page ${shown.page}.`}
+            onRetry={retry}
+          />
         )}
         <div aria-busy={loadingPage || undefined}>
           <Rows rows={rows} currency={profile.data.currency} />
