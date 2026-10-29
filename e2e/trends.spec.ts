@@ -117,3 +117,75 @@ for (const colorScheme of ["light", "dark"] as const) {
     expect(results.violations).toEqual([]);
   });
 }
+
+const monthsSelect = (page: Page) => section(page).getByRole("combobox", { name: "Months" });
+const asked = (page: Page) => {
+  const months: string[] = [];
+  page.on("request", (request) => {
+    if (request.url().includes("/spending/trends?"))
+      months.push(new URL(request.url()).searchParams.get("months") ?? "");
+  });
+  return months;
+};
+
+test("with nothing chosen 12 months are asked for, and choosing 24 asks again without adding a Back step", async ({
+  page,
+}) => {
+  const months = asked(page);
+  await page.goto("/");
+  await expect(chart(page)).toBeVisible();
+  await expect(monthsSelect(page)).toHaveValue("12");
+  const entries = await page.evaluate(() => history.length);
+  await monthsSelect(page).selectOption("24");
+  await expect(page).toHaveURL(/[?&]months=24\b/);
+  await expect(section(page)).toContainText("Showing the 21 months available of the 24 requested.");
+  expect(months).toEqual(["12", "24"]);
+  expect(await page.evaluate(() => history.length)).toBe(entries);
+});
+
+test("a chosen 6 months is still chosen after a reload, with 6 columns", async ({ page }) => {
+  await page.goto("/");
+  await monthsSelect(page).selectOption("6");
+  await expect(chart(page).getByRole("button")).toHaveCount(6);
+  await page.reload();
+  await expect(monthsSelect(page)).toHaveValue("6");
+  await expect(chart(page).getByRole("button")).toHaveCount(6);
+  await expect(section(page)).not.toContainText("months available");
+});
+
+test("6 months returned for 12 asked for shows the note", async ({ page }) => {
+  await page.route(TRENDS, (route) => route.fulfill({ json: SPEC }));
+  await page.goto("/");
+  await expect(section(page).getByText("Showing the 6 months available of the 12 requested.")).toBeVisible();
+});
+
+test("Show data table shows every month with what was spent, the count and the average", async ({ page }) => {
+  await page.route(TRENDS, (route) => route.fulfill({ json: SPEC }));
+  await page.goto("/");
+  const table = section(page).getByRole("table", { name: "Monthly spending" });
+  await expect(table).toBeHidden();
+  await section(page).getByRole("button", { name: "Show data table" }).click();
+  await expect(table.getByRole("row")).toHaveCount(7);
+  await expect(table.getByRole("row").nth(3)).toHaveText(/^March 2024\s*R\s3\s750,60\s*45\s*R\s83,35$/);
+  await expect(section(page).getByRole("button", { name: "Hide data table" })).toHaveAttribute("aria-expanded", "true");
+});
+
+for (const colorScheme of ["light", "dark"] as const) {
+  test(`the open data table passes the accessibility scan in ${colorScheme} mode`, async ({ page }) => {
+    await page.emulateMedia({ colorScheme });
+    await page.goto("/?months=24");
+    await section(page).getByRole("button", { name: "Show data table" }).click();
+    await expect(section(page).getByRole("table")).toBeVisible();
+    const results = await new AxeBuilder({ page }).withTags(["wcag2a", "wcag2aa", "wcag21aa", "wcag22aa"]).analyze();
+    expect(results.violations).toEqual([]);
+  });
+}
+
+test("on phones the months select and data table button are at least 44 px tall", async ({ page }) => {
+  await page.setViewportSize({ width: 360, height: 800 });
+  await page.goto("/");
+  await expect(chart(page)).toBeVisible();
+  for (const control of [monthsSelect(page), section(page).getByRole("button", { name: "Show data table" })]) {
+    expect((await control.boundingBox())?.height).toBeGreaterThanOrEqual(44);
+  }
+});
