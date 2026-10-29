@@ -1,8 +1,8 @@
 # Problem Definition: CapSense
 
-| Owner           | Status                         | Date       | ADO                                                                       | Inputs                                                                                                                                 |
-| --------------- | ------------------------------ | ---------- | ------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------- |
-| `product-owner` | **Signed off 2026-10-21 (G2)** | 2026-10-21 | PBI #16 (AC-1…AC-6); Build PBIs B1–B11 under Epic #29 (provisional, A-08) | `brief/brief.md`, `brief/api-spec.md`, `research/02-discovery-summary.md` (F-xx, BM-xx, GAP-xx; signed off G1), `delivery/raid-log.md` |
+| Date       | ADO                                                                       | Inputs                                                                                                                                 |
+| ---------- | ------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------- |
+| 2026-10-21 | PBI #16 (AC-1…AC-6); Build PBIs B1–B11 under Epic #29 (provisional, A-08) | `brief/brief.md`, `brief/api-spec.md`, `research/02-discovery-summary.md` (F-xx, BM-xx, GAP-xx; signed off G1), `delivery/raid-log.md` |
 
 ## 1. Problem (AC-1)
 
@@ -80,7 +80,3 @@
 | ID    | Decision                                                                                                                 | Owner | Ref         |
 | ----- | ------------------------------------------------------------------------------------------------------------------------ | ----- | ----------- |
 | OD-01 | Merchant filter: decided 2026-10-21, non-goal for primary scope (NG-02); `merchant` param = labelled extension candidate | Muzi  | I-10 closed |
-
-Post-G2 errata 2026-10-21: N3, N10–N13, SM-05 (history decision), G-02
-
-Post-G2 errata 2026-10-22 (Muzi 2026-10-22): G-01 wording; SM-05 Refresh and rail links +0 history; NG-08 Won't list

@@ -1,10 +1,10 @@
 # Design Handoff (canvas v34)
 
-| Owner                           | Source of truth                                                                                                                                                              | Status                              | Superseded                                                                                                                            |
-| ------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------- |
-| `ui-designer` · Muzi 2026-10-23 | Canvas v34 · master `Main.dc.html` (one component, props `bp` S/M/L/XL · `mode` light/dark · `scenario` populated/loading/error/empty/custom/edge; tokens in `renderVals()`) | Rebuilt for G5 B9 (Muzi 2026-10-23) | Figma `jvmhOq4HEYaZQvdTHhpdm4` (nodes `12:2`, `14:2`, `15:2`): superseded by the canvas (R-06, Figma MCP limit). Do not build from it |
+| Source of truth                                                                                                                                                              | Superseded                                                                                                      |
+| ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------- |
+| Canvas v34 · master `Main.dc.html` (one component, props `bp` S/M/L/XL · `mode` light/dark · `scenario` populated/loading/error/empty/custom/edge; tokens in `renderVals()`) | Figma `jvmhOq4HEYaZQvdTHhpdm4` (nodes `12:2`, `14:2`, `15:2`): superseded by the canvas (R-06, Figma MCP limit) |
 
-Screenshots = `shots/<name>.png` exported from canvas v34 (session scratchpad; not in repo, see DQ-07). `All screens` = the 10 Screens + Dark boards.
+Screenshots = `assets/shots/<name>.png` exported from canvas v34. `All screens` = the 10 Screens + Dark boards.
 
 ## 1. Boards (`canvas.json`)
 
@@ -128,6 +128,6 @@ Shot codes in §3 = prefix of the §2 file names (e.g. B4-06 = B4-06-topbar-1280
 | DQ-04  | C-10 "Back to first page"                                                                                      | Closed 2026-10-23: designed on `StateMicro1280` (shots B10-06)             |
 | DQ-05  | C-08 removed-category note                                                                                     | Closed 2026-10-23: designed on `StateMicro360/1280` (shots B8-07, B10-06)  |
 | DQ-06  | State boards light only (N32): dark states needed?                                                             | Muzi                                                                       |
-| DQ-07  | Screenshots sit in session scratchpad; repo location?                                                          | Muzi                                                                       |
+| DQ-07  | Where the screenshots are kept                                                                                 | Closed: `docs/design/assets/shots/`                                        |
 | UXQ-08 | Region heights not in SS: heights follow content                                                               | Open                                                                       |
 | UXQ-10 | FR-22 31-day example vs 30-day Sep 2024; canvas "12 days left", "Projected R 2 755,56" (edge) per sample (N38) | Open, FA errata                                                            |

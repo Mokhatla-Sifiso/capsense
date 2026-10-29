@@ -1,11 +1,10 @@
 # 02 Discovery Summary
 
-| Item               | Value                                                                                                                                                        |
-| ------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| Owner · Date · PBI | `business-analyst` · 2026-10-21 · ADO #14 (G1 Discovery); rework for G1 QA-B1, QA-N1–N9                                                                      |
-| Archive            | `01-competitor-teardown.md` (full evidence, unchanged)                                                                                                       |
-| Tags · API?        | **V** Verified (primary source) · **R** Reported (secondary) · **I** Inference · API? = read-only spec supports it: yes / yes (derived) / partial / no / n/a |
-| B-IDs              | B1–B11 are the provisional build PBIs in Azure DevOps under Epic #29, provisional until G6 (RAID A-08)                                                       |
+| Item        | Value                                                                                                                                                        |
+| ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Archive     | `01-competitor-teardown.md` (full evidence, unchanged)                                                                                                       |
+| Tags · API? | **V** Verified (primary source) · **R** Reported (secondary) · **I** Inference · API? = read-only spec supports it: yes / yes (derived) / partial / no / n/a |
+| B-IDs       | B1–B11 are the provisional build PBIs in Azure DevOps under Epic #29, provisional until G6 (RAID A-08)                                                       |
 
 ## Frictions (500 most recent ZA iOS reviews, 2024-06 to 2026-10: 53 insight-related, 7 about tracking; Google Play not sampled; signals, not statistics)
 
@@ -68,5 +67,3 @@
 | 14    | `docs/brief/api-spec.md` (internal, provided by Capitec)                                                                                                                                                   |
 | 15    | https://www.w3.org/WAI/WCAG21/Understanding/non-text-contrast.html                                                                                                                                         |
 | 01    | `docs/research/01-competitor-teardown.md` (internal archive; used where no external URL was recorded)                                                                                                      |
-
-Post-G1 errata 2026-10-21: N11, N12 (non-blocking), I-10
