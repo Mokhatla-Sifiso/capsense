@@ -5,6 +5,7 @@ import { ReloadAtTop } from "@/components/layout/reload-at-top";
 import { PeriodControl } from "@/components/period/period-control";
 import { SpendingSummary } from "@/components/summary/summary";
 import { ThemeRow } from "@/components/theme/theme-control";
+import { MonthlyTrends } from "@/components/trends/trends";
 import { Rail } from "@/components/layout/rail";
 import { TopBar } from "@/components/top-bar/top-bar";
 import { TransactionsSection } from "@/components/transactions/transactions";
@@ -47,7 +48,7 @@ export default function Home() {
         }
         summary={<SpendingSummary />}
         categories={<SpendingByCategory />}
-        trends={<Placeholder title="Monthly trends" headingId="trends-heading" className="h-149 rounded-card" />}
+        trends={<MonthlyTrends />}
         goals={<Placeholder title="Spending goals" headingId="goals-heading" className="h-94.5 rounded-card" />}
         transactions={<TransactionsSection />}
         themeRow={<ThemeRow />}
