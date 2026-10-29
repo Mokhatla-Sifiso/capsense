@@ -14,7 +14,7 @@ export function CategoriesHeading(): ReactNode {
   );
 }
 
-export function CategorySkeleton(): ReactNode {
+export function CategorySkeleton({ children }: { children?: ReactNode }): ReactNode {
   return (
     <section aria-labelledby="categories-heading" aria-busy="true" className={CATEGORY_CARD}>
       <div className={CATEGORY_HEADER}>
@@ -34,6 +34,7 @@ export function CategorySkeleton(): ReactNode {
           <div key={index} className={`${CATEGORY_ROW} animate-pulse bg-skeleton`} />
         ))}
       </div>
+      {children}
     </section>
   );
 }

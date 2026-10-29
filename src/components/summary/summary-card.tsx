@@ -3,6 +3,8 @@
 import { useQuery } from "@tanstack/react-query";
 import type { ReactNode } from "react";
 import { SectionError } from "@/components/states/section-error";
+import { StillLoading } from "@/components/states/still-loading";
+import { WarningStrip, refreshProblem } from "@/components/states/warning-strip";
 import { categoryAppearance } from "@/lib/category-appearance";
 import { type ChangeStatement, type Direction, changeStatement } from "@/lib/change-statement";
 import { formatCount, formatCurrency } from "@/lib/format";
@@ -150,7 +152,14 @@ export function SummaryCard({ icons, illustration }: SummaryCardProps): ReactNod
     );
   }
 
-  if (summary.isPending || profile.isPending) return <SummarySkeleton />;
+  if (summary.isPending || profile.isPending) {
+    return (
+      <div>
+        <SummarySkeleton />
+        <StillLoading pending />
+      </div>
+    );
+  }
 
   if (!summary.data || !profile.data) {
     const retry = (): void => {
@@ -165,12 +174,17 @@ export function SummaryCard({ icons, illustration }: SummaryCardProps): ReactNod
   }
 
   return (
-    <Figures
-      summary={summary.data}
-      currency={profile.data.currency}
-      filters={filters.data}
-      icons={icons}
-      illustration={illustration}
-    />
+    <div>
+      <Figures
+        summary={summary.data}
+        currency={profile.data.currency}
+        filters={filters.data}
+        icons={icons}
+        illustration={illustration}
+      />
+      {summary.isRefetchError && (
+        <WarningStrip icon={icons.problem} message={refreshProblem("summary")} onRetry={() => void summary.refetch()} />
+      )}
+    </div>
   );
 }

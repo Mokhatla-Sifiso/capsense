@@ -2,6 +2,7 @@
 
 import { useQuery } from "@tanstack/react-query";
 import type { ReactNode } from "react";
+import { StillLoading } from "@/components/states/still-loading";
 import { CUSTOMER_ID } from "@/lib/api/spending-api";
 import { type DayPart, firstName, greetingText, profileSummary } from "@/lib/greeting";
 import { dashboardQueries } from "@/lib/query/dashboard-queries";
@@ -40,6 +41,8 @@ export function ProfileGreeting({ dayPart, today, children }: ProfileGreetingPro
       </p>
 
       {children}
+
+      {loading && <StillLoading pending />}
 
       {problem && (
         <p className="mt-1 text-sm">

@@ -3,6 +3,8 @@
 import { useQuery } from "@tanstack/react-query";
 import { type ReactNode, useId } from "react";
 import { SectionError } from "@/components/states/section-error";
+import { StillLoading } from "@/components/states/still-loading";
+import { WarningStrip, refreshProblem } from "@/components/states/warning-strip";
 import { formatCurrency } from "@/lib/format";
 import {
   type StatusTone,
@@ -155,6 +157,7 @@ export function GoalList({ monthDays, icons }: GoalListProps): ReactNode {
         <>
           <span aria-hidden className="mt-2 block h-4 w-40 animate-pulse rounded-6 bg-skeleton" />
           <GoalBars />
+          <StillLoading pending />
         </>
       );
     }
@@ -165,13 +168,24 @@ export function GoalList({ monthDays, icons }: GoalListProps): ReactNode {
       };
       return <SectionError block="goals" icon={icons.problem} onRetry={retry} className="mt-card-gap" />;
     }
+    const refreshFailed = goals.isRefetchError && (
+      <WarningStrip icon={icons.problem} message={refreshProblem("goals")} onRetry={() => void goals.refetch()} />
+    );
     const list = goals.data.goals;
-    if (list.length === 0) return <p className="mt-card-gap text-muted-foreground">No spending goals yet</p>;
+    if (list.length === 0) {
+      return (
+        <>
+          {refreshFailed}
+          <p className="mt-card-gap text-muted-foreground">No spending goals yet</p>
+        </>
+      );
+    }
     const shared = sharedDaysLeft(list);
 
     return (
       <>
         <p className="mt-1 text-sm text-muted-foreground">{shared ? `This month · ${shared}` : "This month"}</p>
+        {refreshFailed}
         <ul className={GOAL_LIST}>
           {list.map((goal, index) => (
             <li key={`${goal.id}-${index}`} className={GOAL_ITEM}>

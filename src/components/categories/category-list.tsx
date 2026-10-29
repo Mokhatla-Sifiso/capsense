@@ -3,6 +3,8 @@
 import { useQuery } from "@tanstack/react-query";
 import type { ReactNode } from "react";
 import { SectionError } from "@/components/states/section-error";
+import { StillLoading } from "@/components/states/still-loading";
+import { WarningStrip, refreshProblem } from "@/components/states/warning-strip";
 import { categoryAppearance } from "@/lib/category-appearance";
 import { byAmount, rangeCaption, transactionsLabel, wholeShare } from "@/lib/category-rows";
 import { formatCurrency, formatPercent } from "@/lib/format";
@@ -101,7 +103,13 @@ export function CategoryList({ problem }: CategoryListProps): ReactNode {
   const categories = useQuery(dashboardQueries.categories(categoryRange(params)));
   const profile = useQuery(dashboardQueries.profile());
 
-  if (categories.isPending || profile.isPending) return <CategorySkeleton />;
+  if (categories.isPending || profile.isPending) {
+    return (
+      <CategorySkeleton>
+        <StillLoading pending />
+      </CategorySkeleton>
+    );
+  }
 
   if (!categories.data || !profile.data) {
     const retry = (): void => {
@@ -116,6 +124,9 @@ export function CategoryList({ problem }: CategoryListProps): ReactNode {
     );
   }
 
+  const refreshFailed = categories.isRefetchError && (
+    <WarningStrip icon={problem} message={refreshProblem("categories")} onRetry={() => void categories.refetch()} />
+  );
   const { totalAmount, dateRange } = categories.data;
   const rows = byAmount(categories.data.categories);
   const currency = profile.data.currency;
@@ -124,6 +135,7 @@ export function CategoryList({ problem }: CategoryListProps): ReactNode {
     return (
       <section aria-labelledby="categories-heading" className={CATEGORY_CARD}>
         <CategoriesHeading />
+        {refreshFailed}
         <p className="mt-3 text-muted-foreground">No category spending in this period</p>
       </section>
     );
@@ -147,6 +159,7 @@ export function CategoryList({ problem }: CategoryListProps): ReactNode {
           {formatCurrency(totalAmount, currency)} total
         </p>
       </div>
+      {refreshFailed}
       <ul className={CATEGORY_ROWS}>
         {rows.map((category, index) => (
           <CategoryRow

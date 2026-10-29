@@ -1,5 +1,5 @@
 import { QueryClientProvider } from "@tanstack/react-query";
-import { render, screen, within } from "@testing-library/react";
+import { act, render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { HttpResponse, http } from "msw";
 import { withNuqsTestingAdapter } from "nuqs/adapters/testing";
@@ -22,14 +22,16 @@ function answerSummary(body: object) {
 }
 
 function renderCard(searchParams = "") {
+  const client = makeQueryClient();
   const NuqsAdapter = withNuqsTestingAdapter({ searchParams });
   render(
-    <QueryClientProvider client={makeQueryClient()}>
+    <QueryClientProvider client={client}>
       <NuqsAdapter>
         <SummaryCard icons={ICONS} />
       </NuqsAdapter>
     </QueryClientProvider>,
   );
+  return client;
 }
 
 const card = () => screen.findByRole("region", { name: "Spending summary" });
@@ -96,6 +98,26 @@ describe("SummaryCard", () => {
     const panel = await screen.findByText("Couldn't load summary");
     await userEvent.click(within(panel.closest("section") as HTMLElement).getByRole("button", { name: "Retry" }));
     expect(await screen.findByText("R 4 250,75")).toBeInTheDocument();
+    expect(calls).toBe(2);
+  });
+});
+
+describe("refresh failure", () => {
+  it("keeps the earlier summary when a refresh fails, and Retry asks for them again", async () => {
+    const client = renderCard();
+    await screen.findByText("R 4 250,75");
+    let calls = 0;
+    server.use(
+      http.get(SUMMARY_PATH, () => {
+        calls += 1;
+        return calls === 1 ? HttpResponse.json({}, { status: 500 }) : HttpResponse.json(specSummary);
+      }),
+    );
+    await act(() => client.refetchQueries());
+    expect(await screen.findByText("Couldn't refresh summary. Showing earlier data.")).toBeInTheDocument();
+    expect(screen.getByText("R 4 250,75")).toBeInTheDocument();
+    await userEvent.click(screen.getByRole("button", { name: "Retry" }));
+    await waitFor(() => expect(screen.queryByText(/^Couldn't refresh/)).not.toBeInTheDocument());
     expect(calls).toBe(2);
   });
 });

@@ -116,7 +116,7 @@ test("invalid values in the address fall back to the defaults and keep the rest"
 
 test("a category that's no longer available is cleared, with a note", async ({ page }) => {
   await page.goto("/?category=Pets");
-  await expect(section(page).getByRole("status")).toHaveText(
+  await expect(section(page).getByRole("status").filter({ hasText: "no longer available" })).toHaveText(
     "“Pets” is no longer available, so all categories are shown",
   );
   await expect.poll(() => address(page).get("category")).toBeNull();
