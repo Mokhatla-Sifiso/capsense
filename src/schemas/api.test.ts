@@ -94,9 +94,19 @@ describe("one bad item in a list is left out and the rest still show", () => {
 
   it("drops a goal with a missing field", () => {
     const [first] = specGoals.goals;
-    const { status: _status, ...withoutStatus } = { ...first };
-    const parsed = goalsSchema.parse({ goals: [withoutStatus, first] });
+    const { monthlyBudget: _monthlyBudget, ...withoutBudget } = { ...first };
+    const parsed = goalsSchema.parse({ goals: [withoutBudget, first] });
     expect(parsed.goals).toEqual([first]);
+  });
+
+  it("keeps a goal without a status, and one with negative days remaining", () => {
+    const [first] = specGoals.goals;
+    const { status: _status, ...withoutStatus } = { ...first };
+    const parsed = goalsSchema.parse({ goals: [withoutStatus, { ...first, id: "goal_late", daysRemaining: -1 }] });
+    expect(parsed.goals).toEqual([
+      { ...withoutStatus, status: undefined },
+      { ...first, id: "goal_late", daysRemaining: -1 },
+    ]);
   });
 
   it("keeps an empty list when every item is bad", () => {
