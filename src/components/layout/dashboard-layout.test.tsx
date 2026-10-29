@@ -1,4 +1,5 @@
 import { render, screen } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import { DashboardLayout } from "./dashboard-layout";
 
 const region = (name: string) => <section aria-label={name} />;
@@ -36,5 +37,16 @@ describe("DashboardLayout", () => {
     renderLayout();
     const rail = screen.getByRole("navigation", { name: "On this page" });
     expect(rail.compareDocumentPosition(screen.getByRole("banner"))).toBe(Node.DOCUMENT_POSITION_FOLLOWING);
+  });
+
+  it("starts with a skip link that moves focus to the main content without changing the address", async () => {
+    renderLayout();
+    const address = window.location.href;
+    await userEvent.tab();
+    const skip = screen.getByRole("link", { name: "Skip to main content" });
+    expect(skip).toHaveFocus();
+    await userEvent.keyboard("{Enter}");
+    expect(screen.getByRole("main")).toHaveFocus();
+    expect(window.location.href).toBe(address);
   });
 });
